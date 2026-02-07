@@ -1,0 +1,81 @@
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import './RegisterForm.css';
+
+interface RegisterFormProps {
+  onSwitchToLogin: () => void;
+  onSuccess: () => void;
+}
+
+const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { register, loading, error } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await register(email, password, confirmPassword);
+      onSuccess();
+    } catch (err) {
+      // 错误处理已在useAuth中处理
+    }
+  };
+
+  return (
+    <div className="auth-form-container">
+      <h2 className="auth-form-title">用户注册</h2>
+      {error && <div className="auth-error">{error}</div>}
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="form-group">
+          <label htmlFor="email">邮箱地址</label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+            className="auth-input"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="password">密码</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+            className="auth-input"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="confirmPassword">确认密码</label>
+          <input
+            type="password"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            disabled={loading}
+            className="auth-input"
+          />
+        </div>
+        <button type="submit" disabled={loading} className="auth-button">
+          {loading ? '注册中...' : '注册'}
+        </button>
+      </form>
+      <p className="auth-switch-text">
+        已有账户？{' '}
+        <button onClick={onSwitchToLogin} className="auth-switch-link" disabled={loading}>
+          立即登录
+        </button>
+      </p>
+    </div>
+  );
+};
+
+export default RegisterForm;

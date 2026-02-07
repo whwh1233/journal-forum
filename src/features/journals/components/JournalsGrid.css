@@ -1,0 +1,79 @@
+.journals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--spacing-xl);
+  animation: fadeInUp var(--transition-slow) ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading,
+.error,
+.no-results {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  font-family: var(--font-body);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-border);
+  margin: var(--spacing-xl) 0;
+}
+
+.loading {
+  color: var(--color-primary);
+  font-weight: 500;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.error {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.05);
+  border-color: rgba(220, 53, 69, 0.3);
+  font-weight: 500;
+}
+
+.no-results {
+  font-style: italic;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .journals-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .journals-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .loading,
+  .error,
+  .no-results {
+    padding: var(--spacing-xl);
+    font-size: 1rem;
+  }
+}

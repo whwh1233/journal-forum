@@ -1,0 +1,124 @@
+/* Modern Clean Header */
+.header {
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-6) 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .header {
+    background: rgba(10, 10, 10, 0.8);
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+}
+
+/* Main Title */
+.logo {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
+  margin: 0;
+  background: linear-gradient(135deg, var(--blue-600) 0%, var(--indigo-600) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tagline */
+.tagline {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Auth Button */
+.auth-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-out);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-button:hover {
+  background: var(--blue-700);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-50%) translateY(-1px);
+}
+
+.auth-button:active {
+  transform: translateY(-50%);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    padding: var(--space-5) 0;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .tagline {
+    font-size: 0.85rem;
+  }
+
+  .auth-button {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    margin-top: var(--space-3);
+    font-size: 0.85rem;
+  }
+
+  .auth-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .auth-button:active {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: var(--space-4) 0;
+  }
+
+  .logo {
+    font-size: 1.75rem;
+  }
+
+  .tagline {
+    font-size: 0.8rem;
+  }
+}
