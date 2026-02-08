@@ -8,7 +8,11 @@ const dbPath = path.join(__dirname, '..', 'database.json');
 // 默认数据结构
 const defaultData = {
   journals: [],
-  users: []
+  users: [],
+  comments: [],
+  favorites: [],
+  follows: [],
+  migrated: {}
 };
 
 let db = null;
@@ -28,6 +32,16 @@ const connectDB = async () => {
       db.data = defaultData;
       await db.write();
     }
+
+    // 确保所有必需的数组存在
+    if (!db.data.comments) db.data.comments = [];
+    if (!db.data.favorites) db.data.favorites = [];
+    if (!db.data.follows) db.data.follows = [];
+    if (!db.data.migrated) db.data.migrated = {};
+
+    // 运行数据迁移
+    const { migrateReviewsToComments } = require('../migrations/migrateComments');
+    await migrateReviewsToComments();
 
     console.log('JSON file database connected successfully');
     console.log(`Database location: ${dbPath}`);

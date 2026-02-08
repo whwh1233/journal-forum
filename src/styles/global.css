@@ -36,6 +36,11 @@
   --color-surface: var(--gray-50);
   --color-border: var(--gray-200);
 
+  /* Header Colors - 稳重商务风 */
+  --color-header-bg: #1e293b;
+  --color-header-text: #ffffff;
+  --color-page-bg: #f8fafc;
+
   /* Typography System */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-display: 'DM Sans', var(--font-sans);
@@ -70,6 +75,34 @@
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
+
+  /* Legacy Variable Aliases (for compatibility) */
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-4);
+  --spacing-lg: var(--space-5);
+  --spacing-xl: var(--space-6);
+  --spacing-2xl: var(--space-8);
+  --spacing-3xl: var(--space-10);
+
+  --color-primary-dark: var(--color-primary);
+  --color-primary-light: var(--gray-600);
+  --color-secondary-dark: var(--color-secondary);
+  --color-background-light: var(--color-surface);
+  --color-background-dark: var(--gray-100);
+  --color-text-light: var(--color-text-muted);
+
+  --font-heading: var(--font-display);
+  --font-body: var(--font-sans);
+
+  --border-radius: var(--radius-md);
+  --border-radius-lg: var(--radius-lg);
+
+  --transition-base: var(--duration-normal);
+  --transition-fast: var(--duration-fast);
+  --transition-slow: var(--duration-slow);
+
+  --color-text-secondary: var(--gray-500);
 }
 
 /* Dark Mode - Clean Dark Theme */
@@ -94,6 +127,11 @@
     --color-background: #0a0a0a;
     --color-surface: var(--gray-50);
     --color-border: var(--gray-200);
+
+    /* Dark Mode Header */
+    --color-header-bg: #0f172a;
+    --color-header-text: #f1f5f9;
+    --color-page-bg: #0a0a0a;
   }
 }
 
@@ -110,7 +148,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--color-text);
-  background: var(--color-background);
+  background: var(--color-page-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;

@@ -25,7 +25,7 @@ export const authService = {
   },
 
   // 用户登录
-  login: async (email: string, password: string): Promise<string> => {
+  login: async (email: string, password: string): Promise<{ token: string; role: string }> => {
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -40,13 +40,14 @@ export const authService = {
     }
 
     const data = await response.json();
-    return data.data.token;
+    return { token: data.data.token, role: data.data.user.role || 'user' };
   },
 
   // 检查认证状态
-  checkAuthStatus: async (): Promise<{ isAuthenticated: boolean; email?: string }> => {
+  checkAuthStatus: async (): Promise<{ isAuthenticated: boolean; email?: string; role?: string }> => {
     const token = localStorage.getItem('authToken');
     const userEmail = localStorage.getItem('userEmail');
+    const userRole = localStorage.getItem('userRole');
 
     if (token && userEmail) {
       try {
@@ -57,7 +58,10 @@ export const authService = {
         });
 
         if (response.ok) {
-          return { isAuthenticated: true, email: userEmail };
+          const data = await response.json();
+          const role = data.data.user.role || userRole || 'user';
+          localStorage.setItem('userRole', role);
+          return { isAuthenticated: true, email: userEmail, role };
         }
       } catch (error) {
         console.error('Auth status check failed:', error);
@@ -71,5 +75,6 @@ export const authService = {
   logout: (): void => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userRole');
   }
 };

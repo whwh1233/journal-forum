@@ -17,7 +17,7 @@ type AuthAction =
   | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'LOGIN_FAILURE'; payload: string }
   | { type: 'LOGOUT' }
-  | { type: 'CHECK_AUTH_STATUS'; payload: { isAuthenticated: boolean; email?: string } };
+  | { type: 'CHECK_AUTH_STATUS'; payload: { isAuthenticated: boolean; email?: string; role?: string } };
 
 // 初始状态
 const initialState: AuthState = {
@@ -48,7 +48,11 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       if (action.payload.isAuthenticated && action.payload.email) {
         return {
           ...state,
-          user: { id: action.payload.email, email: action.payload.email },
+          user: {
+            id: action.payload.email,
+            email: action.payload.email,
+            role: action.payload.role as 'user' | 'admin' || 'user'
+          },
           isAuthenticated: true,
           loading: false
         };
@@ -82,9 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'LOGIN_START' });
-      const token = await authService.login(credentials.email, credentials.password);
-      const user: User = { id: credentials.email, email: credentials.email };
+      const { token, role } = await authService.login(credentials.email, credentials.password);
+      const user: User = { id: credentials.email, email: credentials.email, role: role as 'user' | 'admin' };
       localStorageUtils.saveUser(credentials.email, token);
+      localStorage.setItem('userRole', role);
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error) {
       dispatch({
@@ -105,9 +110,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'LOGIN_START' });
       await authService.register(data.email, data.password);
       // 注册成功后自动登录
-      const token = await authService.login(data.email, data.password);
-      const user: User = { id: data.email, email: data.email };
+      const { token, role } = await authService.login(data.email, data.password);
+      const user: User = { id: data.email, email: data.email, role: role as 'user' | 'admin' };
       localStorageUtils.saveUser(data.email, token);
+      localStorage.setItem('userRole', role);
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
     } catch (error) {
       dispatch({

@@ -1,6 +1,7 @@
 const { getDB } = require('../config/databaseLowdb');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { generateToken } = require('../utils/jwt');
+const { ADMIN_EMAIL, ADMIN_PASSWORD } = require('../config/admin');
 
 // 注册用户
 const registerUser = async (req, res, next) => {
@@ -28,12 +29,17 @@ const registerUser = async (req, res, next) => {
     // 加密密码
     const hashedPassword = await hashPassword(password);
 
+    // 判断是否为管理员
+    const isAdmin = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
     // 创建新用户
     const newUser = {
       id: db.data.users.length + 1, // 简单的自增ID
       email: email.toLowerCase(),
       password: hashedPassword,
       name,
+      role: isAdmin ? 'admin' : 'user',
+      status: 'active',
       createdAt: new Date().toISOString()
     };
 
@@ -51,7 +57,8 @@ const registerUser = async (req, res, next) => {
         user: {
           id: newUser.id,
           email: newUser.email,
-          name: newUser.name
+          name: newUser.name,
+          role: newUser.role
         },
         token
       }
@@ -85,6 +92,14 @@ const loginUser = async (req, res, next) => {
       });
     }
 
+    // 检查用户是否被禁用
+    if (user.status === 'disabled') {
+      return res.status(403).json({
+        success: false,
+        message: '账号已被禁用'
+      });
+    }
+
     // 验证密码
     const isPasswordValid = await comparePassword(password, user.password);
     if (!isPasswordValid) {
@@ -103,7 +118,8 @@ const loginUser = async (req, res, next) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name
+          name: user.name,
+          role: user.role || 'user'
         },
         token
       }
@@ -132,7 +148,8 @@ const getCurrentUser = async (req, res, next) => {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name
+          name: user.name,
+          role: user.role || 'user'
         }
       }
     });

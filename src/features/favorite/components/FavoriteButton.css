@@ -1,0 +1,39 @@
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.favorite-btn:hover:not(:disabled) {
+  border-color: #ffc107;
+  color: #ffc107;
+  background: #fffbf0;
+}
+
+.favorite-btn.favorited {
+  border-color: #ffc107;
+  color: #ffc107;
+  background: #fffbf0;
+}
+
+.favorite-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.favorite-icon {
+  font-size: 1.1rem;
+}
+
+.favorite-text {
+  font-size: 0.875rem;
+}

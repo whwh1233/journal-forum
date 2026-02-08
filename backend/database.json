@@ -6,7 +6,7 @@
       "issn": "1000-1234",
       "category": "computer-science",
       "rating": 4.5,
-      "description": "《计算机科学学报》是中国计算机学会主办的学术期刊，主要刊登计算机科学领域的前沿研究成果，包括人工智能、机器学习、大数据分析等方向。",
+      "description": "《计算机科学学报》是中国计算机学会主办的学术期刊，主要刊登计算机科学领域的前沿研究成果，包括人工智能、机器学习、大数据分析等方向。1312321",
       "reviews": [
         {
           "author": "张教授",
@@ -191,6 +191,203 @@
       "email": "1249156074@qq.com",
       "password": "$2a$12$F4RNKyAzhWu3KUTH.sloqOa1O7MSQbgZ1gIvfSz0wul7wU6azIFxW",
       "createdAt": "2026-02-07T04:41:53.910Z"
+    },
+    {
+      "id": 2,
+      "email": "1@qq.com",
+      "password": "$2a$12$U39E3rKbR9B.MHcdkJ5JW.vK0RIbxqbgmm68TM0ljgfEbd.iFhXXW",
+      "createdAt": "2026-02-07T12:32:01.790Z"
+    },
+    {
+      "id": 3,
+      "email": "wh@qq.com",
+      "password": "$2a$12$K73T6BS.rPbhRDQ4u002ZOBXOh28cZ2y/u/GBLATKNQnAnXk3pCXi",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2026-02-07T12:58:43.155Z"
     }
-  ]
+  ],
+  "comments": [
+    {
+      "id": "1-legacy-0-dkmcb3",
+      "userId": 0,
+      "userName": "张教授",
+      "journalId": 1,
+      "parentId": null,
+      "content": "该期刊在人工智能领域具有很高的学术影响力，审稿严谨，发表的文章质量很高。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.814Z",
+      "isDeleted": false
+    },
+    {
+      "id": "1-legacy-1-jdw0qc",
+      "userId": 0,
+      "userName": "李博士",
+      "journalId": 1,
+      "parentId": null,
+      "content": "投稿周期相对较长，但编辑和审稿人的专业水平很高，对文章质量提升有很大帮助。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "2-legacy-0-4fr4ss",
+      "userId": 0,
+      "userName": "王研究员",
+      "journalId": 2,
+      "parentId": null,
+      "content": "期刊的国际影响力不断提升，审稿流程规范，发表周期合理。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "2-legacy-1-wrzvbe",
+      "userId": 0,
+      "userName": "陈博士",
+      "journalId": 2,
+      "parentId": null,
+      "content": "实验数据要求严格，但对提升研究质量很有帮助。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "3-legacy-0-3ho5ka",
+      "userId": 0,
+      "userName": "刘院士",
+      "journalId": 3,
+      "parentId": null,
+      "content": "国内物理学领域的顶级期刊，发表了许多重要的原创性成果。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "3-legacy-1-p584c2",
+      "userId": 0,
+      "userName": "赵教授",
+      "journalId": 3,
+      "parentId": null,
+      "content": "国际化程度高，与国际知名物理学期刊保持良好合作关系。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "4-legacy-0-4u1lhw",
+      "userId": 0,
+      "userName": "孙教授",
+      "journalId": 4,
+      "parentId": null,
+      "content": "期刊历史悠久，在化学界享有很高的声誉，审稿标准严格。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "4-legacy-1-jyincp",
+      "userId": 0,
+      "userName": "周博士",
+      "journalId": 4,
+      "parentId": null,
+      "content": "发表的文章质量稳定，是化学领域研究人员的重要参考。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "5-legacy-0-b6qrtq",
+      "userId": 0,
+      "userName": "吴教授",
+      "journalId": 5,
+      "parentId": null,
+      "content": "数学领域的权威期刊，发表了许多具有重要影响的理论成果。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "5-legacy-1-n5116b",
+      "userId": 0,
+      "userName": "郑博士",
+      "journalId": 5,
+      "parentId": null,
+      "content": "审稿过程非常严格，但对数学理论的严谨性要求很高。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "6-legacy-0-gd036m",
+      "userId": 0,
+      "userName": "林主任医师",
+      "journalId": 6,
+      "parentId": null,
+      "content": "期刊内容贴近临床实际，对临床医生有很好的指导意义。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "6-legacy-1-isd2kv",
+      "userId": 0,
+      "userName": "黄教授",
+      "journalId": 6,
+      "parentId": null,
+      "content": "临床研究设计严谨，数据分析规范，是临床医学研究的重要平台。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "7-legacy-0-guoyex",
+      "userId": 0,
+      "userName": "杨教授",
+      "journalId": 7,
+      "parentId": null,
+      "content": "该期刊紧跟AI技术前沿，发表了许多创新性的研究成果。",
+      "rating": 5,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "7-legacy-1-heo8w3",
+      "userId": 0,
+      "userName": "徐博士",
+      "journalId": 7,
+      "parentId": null,
+      "content": "国际影响力强，与顶级AI会议保持良好合作关系。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "8-legacy-0-e9bpwi",
+      "userId": 0,
+      "userName": "郭研究员",
+      "journalId": 8,
+      "parentId": null,
+      "content": "期刊关注环境问题的实际解决方案，具有很强的应用价值。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    },
+    {
+      "id": "8-legacy-1-tpqlwd",
+      "userId": 0,
+      "userName": "何博士",
+      "journalId": 8,
+      "parentId": null,
+      "content": "跨学科特色明显，促进了环境科学与其他学科的交叉融合。",
+      "rating": 4,
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "isDeleted": false
+    }
+  ],
+  "favorites": [],
+  "follows": [],
+  "migrated": {
+    "comments": true
+  }
 }

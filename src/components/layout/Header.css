@@ -1,61 +1,62 @@
-/* Modern Clean Header */
+/* Modern Clean Header - 深色稳重商务风 */
 .header {
-  background: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
-  padding: var(--space-6) 0;
+  background: var(--color-header-bg);
+  padding: var(--space-5) 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  .header {
-    background: rgba(10, 10, 10, 0.8);
-  }
+/* Header Container - 左右布局 */
+.header-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.container {
+/* 左侧区域 */
+.header-left {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  position: relative;
+  gap: var(--space-1);
 }
 
 /* Main Title */
 .logo {
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-header-text);
   letter-spacing: -0.02em;
   margin: 0;
-  background: linear-gradient(135deg, var(--blue-600) 0%, var(--indigo-600) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Tagline */
 .tagline {
   font-family: var(--font-sans);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 400;
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.7);
   margin: 0;
 }
 
-/* Auth Button */
+/* 右侧区域 */
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Auth Button - 未登录状态 */
 .auth-button {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--color-accent);
-  color: white;
-  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-header-text);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: var(--space-2) var(--space-5);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -63,62 +64,184 @@
   font-size: 0.9rem;
   font-weight: 500;
   transition: all var(--duration-normal) var(--ease-out);
-  box-shadow: var(--shadow-sm);
 }
 
 .auth-button:hover {
-  background: var(--blue-700);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-50%) translateY(-1px);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .auth-button:active {
-  transform: translateY(-50%);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* User Menu - 已登录状态 */
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* 用户头像 */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--indigo-500) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* 用户邮箱 */
+.user-email {
+  color: var(--color-header-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 个人中心按钮 */
+.dashboard-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-header-text);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.dashboard-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 管理后台按钮 */
+.admin-button {
+  background: linear-gradient(135deg, var(--blue-500) 0%, var(--indigo-500) 100%);
+  color: white;
+  border: none;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-out);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.admin-button:active {
+  transform: translateY(0);
+}
+
+/* 退出按钮 */
+.logout-button {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.logout-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-header-text);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.logout-button:active {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .header {
-    padding: var(--space-5) 0;
+    padding: var(--space-4) 0;
+  }
+
+  .header-container {
+    padding: 0 var(--space-4);
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .header-left {
+    align-items: center;
+    text-align: center;
   }
 
   .logo {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
 
   .tagline {
+    font-size: 0.8rem;
+  }
+
+  .user-menu {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .user-email {
+    max-width: 150px;
     font-size: 0.85rem;
   }
 
-  .auth-button {
-    position: relative;
-    right: auto;
-    top: auto;
-    transform: none;
-    margin-top: var(--space-3);
+  .user-avatar {
+    width: 32px;
+    height: 32px;
     font-size: 0.85rem;
-  }
-
-  .auth-button:hover {
-    transform: translateY(-1px);
-  }
-
-  .auth-button:active {
-    transform: translateY(0);
   }
 }
 
 @media (max-width: 480px) {
   .header {
-    padding: var(--space-4) 0;
+    padding: var(--space-3) 0;
+  }
+
+  .header-container {
+    padding: 0 var(--space-3);
   }
 
   .logo {
-    font-size: 1.75rem;
+    font-size: 1.35rem;
   }
 
   .tagline {
+    font-size: 0.75rem;
+  }
+
+  .auth-button,
+  .logout-button {
     font-size: 0.8rem;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .user-email {
+    display: none;
   }
 }

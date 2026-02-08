@@ -2,6 +2,7 @@ import React from 'react';
 import { Journal } from '@/types';
 import { categoryMap } from '@/services/journalService';
 import StarRating from '@/components/common/StarRating';
+import FavoriteButton from '@/features/favorite/components/FavoriteButton';
 import './JournalCard.css';
 
 interface JournalCardProps {
@@ -38,6 +39,9 @@ const JournalCard: React.FC<JournalCardProps> = ({ journal, onClick }) => {
           <StarRating rating={journal.rating} showText={true} />
         </div>
         <p className="journal-description">{journal.description}</p>
+      </div>
+      <div className="journal-actions">
+        <FavoriteButton journalId={journal.id} />
       </div>
     </article>
   );

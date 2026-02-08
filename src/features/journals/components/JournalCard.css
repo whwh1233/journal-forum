@@ -112,6 +112,14 @@
   overflow: hidden;
 }
 
+/* Actions Section */
+.journal-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
 /* Card Entrance Animation */
 @keyframes fadeInUp {
   from {

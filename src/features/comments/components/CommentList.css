@@ -1,0 +1,71 @@
+.comment-list {
+  margin-top: 2rem;
+}
+
+.comment-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.comment-list-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.comment-list-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comment-list-sort label {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.comment-sort-select {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.comment-sort-select:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.comment-list-form {
+  margin-bottom: 2rem;
+}
+
+.comment-list-loading,
+.comment-list-error,
+.comment-list-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.comment-list-error {
+  color: #dc3545;
+  background: #f8d7da;
+}
+
+.comment-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

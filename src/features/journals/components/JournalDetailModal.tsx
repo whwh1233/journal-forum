@@ -3,6 +3,7 @@ import { Journal } from '@/types';
 import { categoryMap } from '@/services/journalService';
 import StarRating from '@/components/common/StarRating';
 import Modal from '@/components/common/Modal';
+import CommentList from '@/features/comments/components/CommentList';
 import './JournalDetailModal.css';
 
 interface JournalDetailModalProps {
@@ -38,22 +39,7 @@ const JournalDetailModal: React.FC<JournalDetailModalProps> = ({ journal, isOpen
         <div className="journal-detail-description">
           <p>{journal.description}</p>
         </div>
-        {journal.reviews && journal.reviews.length > 0 && (
-          <div className="journal-reviews">
-            <h3 className="reviews-title">用户评价</h3>
-            {journal.reviews.map((review, index) => (
-              <div key={index} className="review-item">
-                <div className="review-header">
-                  <span className="review-author">{review.author}</span>
-                  <span className="review-rating">
-                    <StarRating rating={review.rating} size="small" />
-                  </span>
-                </div>
-                <p className="review-content">{review.content}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <CommentList journalId={journal.id} />
       </div>
     </Modal>
   );

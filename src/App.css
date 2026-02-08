@@ -2,11 +2,26 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--color-page-bg);
 }
 
 .main {
   flex: 1;
   padding: var(--spacing-2xl) 0;
+}
+
+/* 内容区域容器 - 白色卡片背景增强层次感 */
+.main .container {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .main .container {
+    background: var(--gray-100);
+  }
 }
 
 .journals-section h2 {

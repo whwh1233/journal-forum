@@ -128,4 +128,126 @@ const addJournalReview = async (req, res, next) => {
   }
 };
 
-module.exports = { getJournals, getJournalById, addJournalReview };
+// 创建期刊（管理员功能）
+const createJournal = async (req, res, next) => {
+  try {
+    const { title, issn, category, description } = req.body;
+    const db = getDB();
+
+    // 验证输入
+    if (!title || !issn || !category) {
+      return res.status(400).json({
+        success: false,
+        message: '期刊名称、ISSN和分类是必填项'
+      });
+    }
+
+    // 检查ISSN是否已存在
+    const existingJournal = db.data.journals.find(j => j.issn === issn);
+    if (existingJournal) {
+      return res.status(400).json({
+        success: false,
+        message: '该ISSN已存在'
+      });
+    }
+
+    // 创建新期刊
+    const newJournal = {
+      id: db.data.journals.length > 0
+        ? Math.max(...db.data.journals.map(j => j.id)) + 1
+        : 1,
+      title,
+      issn,
+      category,
+      description: description || '',
+      rating: 0,
+      reviews: [],
+      createdAt: new Date().toISOString()
+    };
+
+    db.data.journals.push(newJournal);
+    await db.write();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        journal: newJournal
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 更新期刊（管理员功能）
+const updateJournal = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { title, issn, category, description } = req.body;
+    const db = getDB();
+
+    const journalIndex = db.data.journals.findIndex(j => j.id === Number(id));
+    if (journalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: '期刊未找到'
+      });
+    }
+
+    // 如果修改了ISSN，检查是否与其他期刊冲突
+    if (issn && issn !== db.data.journals[journalIndex].issn) {
+      const existingJournal = db.data.journals.find(j => j.issn === issn && j.id !== Number(id));
+      if (existingJournal) {
+        return res.status(400).json({
+          success: false,
+          message: '该ISSN已存在'
+        });
+      }
+    }
+
+    // 更新期刊信息
+    if (title) db.data.journals[journalIndex].title = title;
+    if (issn) db.data.journals[journalIndex].issn = issn;
+    if (category) db.data.journals[journalIndex].category = category;
+    if (description !== undefined) db.data.journals[journalIndex].description = description;
+
+    await db.write();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        journal: db.data.journals[journalIndex]
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 删除期刊（管理员功能）
+const deleteJournal = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const db = getDB();
+
+    const journalIndex = db.data.journals.findIndex(j => j.id === Number(id));
+    if (journalIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        message: '期刊未找到'
+      });
+    }
+
+    db.data.journals.splice(journalIndex, 1);
+    await db.write();
+
+    res.status(200).json({
+      success: true,
+      message: '期刊删除成功'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
