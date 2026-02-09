@@ -127,6 +127,44 @@
 
 ---
 
+## 最近修复 (2026-02-09)
+
+### Bug修复
+✅ **评论、收藏、关注功能不可用** - 已修复
+
+#### 问题描述
+- 评论发表失败，显示"请先登录"错误
+- 收藏/取消收藏无法操作
+- 关注/取消关注失败
+- 用户资料加载错误
+
+#### 根本原因
+1. **后端端口配置错误**:
+   - `.env` 中 PORT 设置为 8080
+   - 前端期望后端服务运行在 3001
+   - 导致所有 API 请求连接被拒绝
+
+2. **Token 存储密钥不一致**:
+   - `authService` 保存 token 到 `localStorage.getItem('authToken')`
+   - 但 `commentService`, `favoriteService`, `followService`, `userService` 使用 `localStorage.getItem('token')`
+   - 导致 token 无法被正确读取，请求缺少认证信息
+
+#### 修复方案
+- 修改 `backend/.env` 中 PORT 从 8080 → 3001
+- 统一所有服务文件中的 localStorage token 键名：
+  - `src/services/commentService.ts` ✅
+  - `src/services/favoriteService.ts` ✅
+  - `src/services/followService.ts` ✅
+  - `src/services/userService.ts` ✅
+
+#### 验证结果
+- ✅ 后端成功启动在 http://localhost:3001
+- ✅ 前端成功启动在 http://localhost:3000
+- ✅ 所有认证 API 调用现在能正确读取 token
+- ✅ 评论、收藏、关注、用户资料功能已恢复正常
+
+---
+
 ## 近期计划
 - [ ] 添加日志系统
 - [ ] 编写API文档
@@ -136,4 +174,5 @@
 
 ---
 
-*最后更新: 2026-02-08*
+*最后更新: 2026-02-09*
+
