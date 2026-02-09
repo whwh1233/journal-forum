@@ -60,14 +60,15 @@ app.use(cors(corsOptions));
 // 安全中间件（CORS之后）
 app.use(helmet());
 
-// 速率限制
+// 速率限制 - 开发环境宽松，生产环境严格
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
-  max: 100, // 限制每个IP 15分钟内最多100个请求
+  max: process.env.NODE_ENV === 'development' ? 10000 : 100, // 开发环境10000请求，生产环境100请求
   message: {
     success: false,
     message: '请求过于频繁，请稍后再试'
-  }
+  },
+  skip: process.env.NODE_ENV === 'development' && process.env.SKIP_RATE_LIMIT === 'true'
 });
 app.use(limiter);
 
