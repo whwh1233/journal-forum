@@ -28,7 +28,36 @@ const app = express();
 // 设置端口
 const PORT = process.env.PORT || 3001;
 
-// 安全中间件
+// CORS配置 - 必须在helmet之前
+const corsOptions = {
+  origin: function(origin, callback) {
+    // 开发环境：允许所有localhost
+    if (process.env.NODE_ENV === 'development') {
+      // 允许没有origin的请求（如移动应用、桌面应用）和localhost
+      if (!origin || origin.includes('localhost')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // 生产环境：只允许指定域名
+      const allowedOrigins = ['https://your-frontend-domain.com'];
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['X-Total-Count', 'X-Page-Number']
+};
+
+app.use(cors(corsOptions));
+
+// 安全中间件（CORS之后）
 app.use(helmet());
 
 // 速率限制
@@ -41,21 +70,6 @@ const limiter = rateLimit({
   }
 });
 app.use(limiter);
-
-// CORS配置 - 开发环境允许所有localhost端口
-app.use(cors({
-  origin: process.env.NODE_ENV === 'development'
-    ? function(origin, callback) {
-        // 允许所有localhost端口
-        if (!origin || origin.startsWith('http://localhost:')) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
-        }
-      }
-    : 'https://your-frontend-domain.com',
-  credentials: true
-}));
 
 // 解析JSON请求体
 app.use(express.json({ limit: '10mb' }));
