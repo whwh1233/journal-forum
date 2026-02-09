@@ -173,13 +173,28 @@
 前端 → 后端通信:       VITE_API_URL=http://localhost:3001
 ```
 
+#### 第三次修复：评论发表失败
+**错误**: `TypeError: Cannot read properties of undefined (reading 'split')`
+
+**原因**:
+- auth 中间件只从 token 中提取了 `id`
+- 评论控制器需要访问 `req.user.email` 和 `req.user.name`
+- 导致访问 undefined 的 email 属性时崩溃
+
+**修复**:
+- 更新 `backend/middleware/auth.js`
+- 从数据库查询完整用户信息
+- 将 email、name、role、status 等字段附加到 req.user
+
 #### 验证结果
 - ✅ 后端成功启动在 http://localhost:3001
 - ✅ 前端成功启动在 http://localhost:3000
 - ✅ 前端正确连接到后端 3001 端口
 - ✅ 所有认证 API 调用现在能正确读取 token
-- ✅ 评论、收藏、关注、用户资料功能已恢复正常
+- ✅ 评论发表功能已恢复正常（已测试）
+- ✅ 收藏、关注、用户资料功能已恢复正常
 - ✅ 首页可以正常加载期刊列表
+- ✅ 认证后的所有操作都能正常进行
 
 ---
 
