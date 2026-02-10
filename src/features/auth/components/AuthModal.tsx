@@ -27,7 +27,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuccess })
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isLoginMode ? "用户登录" : "用户注册"}>
+    <Modal isOpen={isOpen} onClose={onClose} title={isLoginMode ? "用户登录" : "用户注册"} size="sm">
       {isLoginMode ? (
         <LoginForm
           onSwitchToRegister={handleSwitchToRegister}

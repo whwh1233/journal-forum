@@ -1,73 +1,95 @@
 .profile-edit-page {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  /* 使用 container 类提供的布局，限制最大宽度 */
+  max-width: 700px;
 }
 
 .profile-edit-page h1 {
-  margin-bottom: 2rem;
-  color: #333;
+  margin-bottom: var(--space-6);
+  color: var(--color-text);
+}
+
+.profile-edit-error {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-error);
 }
 
 .edit-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  background: var(--color-background);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
 }
 
 .edit-section h2 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 var(--space-5) 0;
   font-size: 1.25rem;
-  color: #333;
+  color: var(--color-text);
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-5);
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
 }
 
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-family: inherit;
   font-size: 1rem;
+  transition: all var(--duration-fast) var(--ease-out);
+  background: var(--color-background);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: var(--color-btn-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .edit-section button {
-  padding: 0.75rem 2rem;
-  background: #0066cc;
+  padding: var(--space-3) var(--space-6);
+  background: var(--color-btn-primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .edit-section button:hover:not(:disabled) {
-  background: #0052a3;
+  background: var(--color-btn-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.edit-section button:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .edit-section button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .edit-section button:hover:not(:disabled),
+  .edit-section button:active:not(:disabled) {
+    transform: none;
+  }
 }

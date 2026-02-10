@@ -1,0 +1,239 @@
+/* Skeleton Base */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 50%,
+    var(--gray-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Skeleton Text */
+.skeleton-text {
+  height: 1em;
+  width: 100%;
+}
+
+.skeleton-text--sm {
+  height: 0.75em;
+}
+
+.skeleton-text--lg {
+  height: 1.25em;
+}
+
+.skeleton-text--title {
+  height: 1.5em;
+  width: 60%;
+}
+
+/* Skeleton Avatar */
+.skeleton-avatar {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.skeleton-avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.skeleton-avatar--md {
+  width: 48px;
+  height: 48px;
+}
+
+.skeleton-avatar--lg {
+  width: 80px;
+  height: 80px;
+}
+
+.skeleton-avatar--xl {
+  width: 120px;
+  height: 120px;
+}
+
+/* Skeleton Button */
+.skeleton-button {
+  height: 40px;
+  width: 100px;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-button--sm {
+  height: 32px;
+  width: 80px;
+}
+
+.skeleton-button--lg {
+  height: 48px;
+  width: 120px;
+}
+
+/* Skeleton Card */
+.skeleton-card {
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+}
+
+.skeleton-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-card__footer {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+/* Skeleton Image */
+.skeleton-image {
+  border-radius: var(--radius-md);
+  aspect-ratio: 16 / 9;
+  width: 100%;
+}
+
+.skeleton-image--square {
+  aspect-ratio: 1;
+}
+
+/* Skeleton List */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-list-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.skeleton-list-item__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Comment Skeleton */
+.skeleton-comment {
+  padding: var(--space-4);
+  background: var(--color-background);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--gray-200);
+}
+
+.skeleton-comment__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.skeleton-comment__meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.skeleton-comment__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Profile Skeleton */
+.skeleton-profile {
+  display: flex;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.skeleton-profile__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Stats Skeleton */
+.skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+.skeleton-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.skeleton-stat__value {
+  width: 60px;
+  height: 2rem;
+}
+
+.skeleton-stat__label {
+  width: 80px;
+  height: 0.875rem;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: var(--gray-200);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skeleton-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .skeleton-profile {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}

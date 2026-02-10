@@ -1,0 +1,185 @@
+.follow-list-page {
+  /* 使用 container 类提供的布局，限制最大宽度 */
+  max-width: 900px;
+}
+
+.follow-list-header {
+  margin-bottom: var(--space-6);
+}
+
+.follow-list-header h1 {
+  margin: 0 0 var(--space-5) 0;
+  font-size: 1.75rem;
+  color: var(--color-text);
+}
+
+.follow-list-tabs {
+  display: flex;
+  gap: var(--space-4);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.follow-tab {
+  background: none;
+  border: none;
+  padding: var(--space-3) var(--space-5);
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  position: relative;
+}
+
+.follow-tab:hover {
+  color: var(--color-link);
+}
+
+.follow-tab.active {
+  color: var(--color-link);
+  border-bottom-color: var(--color-link);
+}
+
+/* Tab indicator animation */
+.follow-tab::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--color-link);
+  transform: scaleX(0);
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.follow-tab:hover::after {
+  transform: scaleX(0.5);
+}
+
+.follow-tab.active::after {
+  transform: scaleX(1);
+}
+
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.follow-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.follow-list-item:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  border-color: var(--color-link);
+}
+
+.follow-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.follow-user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.follow-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.follow-user-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--indigo-500) 0%, var(--purple-500) 100%);
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.follow-user-details {
+  flex: 1;
+}
+
+.follow-user-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.follow-user-email {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.follow-list-empty,
+.follow-list-loading {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .follow-list-page {
+    padding: var(--space-4);
+  }
+
+  .follow-list-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .follow-list-item {
+    padding: var(--space-3);
+  }
+
+  .follow-user-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .follow-user-name {
+    font-size: 0.9rem;
+  }
+
+  .follow-user-email {
+    font-size: 0.8rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .follow-list-item:hover {
+    transform: none;
+  }
+
+  .follow-tab::after {
+    transition: none;
+  }
+}

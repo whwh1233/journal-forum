@@ -1,39 +1,82 @@
 .favorite-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  color: #666;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
 .favorite-btn:hover:not(:disabled) {
-  border-color: #ffc107;
-  color: #ffc107;
-  background: #fffbf0;
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+  transform: translateY(-1px);
+}
+
+.favorite-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
 }
 
 .favorite-btn.favorited {
-  border-color: #ffc107;
-  color: #ffc107;
-  background: #fffbf0;
+  border-color: var(--color-warning);
+  color: var(--color-warning);
+  background: var(--color-warning-light);
 }
 
 .favorite-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
 .favorite-icon {
   font-size: 1.1rem;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.favorite-btn:hover:not(:disabled) .favorite-icon {
+  transform: scale(1.15);
+}
+
+.favorite-btn.favorited .favorite-icon {
+  animation: favoriteHeartbeat 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes favoriteHeartbeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .favorite-text {
   font-size: 0.875rem;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .favorite-btn:hover:not(:disabled),
+  .favorite-btn:active:not(:disabled) {
+    transform: none;
+  }
+
+  .favorite-btn:hover:not(:disabled) .favorite-icon {
+    transform: none;
+  }
+
+  .favorite-btn.favorited .favorite-icon {
+    animation: none;
+  }
 }

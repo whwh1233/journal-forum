@@ -73,11 +73,15 @@ const ProfileEditPage: React.FC = () => {
   };
 
   if (!user) {
-    return <div className="profile-edit-error">请先登录</div>;
+    return (
+      <div className="container">
+        <div className="profile-edit-error">请先登录</div>
+      </div>
+    );
   }
 
   return (
-    <div className="profile-edit-page">
+    <div className="profile-edit-page container">
       <h1>编辑资料</h1>
 
       <div className="edit-section">

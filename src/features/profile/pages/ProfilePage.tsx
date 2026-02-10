@@ -29,13 +29,26 @@ const ProfilePage: React.FC = () => {
     }
   }, [userId]);
 
-  if (loading) return <div className="profile-loading">加载中...</div>;
-  if (!profile) return <div className="profile-error">用户不存在</div>;
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="profile-loading">加载中...</div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="container">
+        <div className="profile-error">用户不存在</div>
+      </div>
+    );
+  }
 
   const isOwnProfile = user && user.id === profile.id.toString();
 
   return (
-    <div className="profile-page">
+    <div className="profile-page container">
       <div className="profile-header">
         <div className="profile-avatar">
           {profile.avatar ? (
@@ -80,14 +93,14 @@ const ProfilePage: React.FC = () => {
             <div className="stat-value">{profile.stats.favoriteCount}</div>
             <div className="stat-label">收藏</div>
           </div>
-          <div className="stat-item">
+          <Link to={`/profile/${profile.id}/follows?tab=following`} className="stat-item stat-item-link">
             <div className="stat-value">{profile.stats.followingCount}</div>
             <div className="stat-label">关注</div>
-          </div>
-          <div className="stat-item">
+          </Link>
+          <Link to={`/profile/${profile.id}/follows?tab=followers`} className="stat-item stat-item-link">
             <div className="stat-value">{profile.stats.followerCount}</div>
             <div className="stat-label">粉丝</div>
-          </div>
+          </Link>
         </div>
       )}
     </div>

@@ -41,6 +41,37 @@
   --color-header-text: #ffffff;
   --color-page-bg: #f8fafc;
 
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-success-dark: #059669;
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #dc2626;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-warning-dark: #d97706;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+  --color-info-dark: #2563eb;
+
+  /* Button Variants */
+  --color-btn-primary: var(--blue-600);
+  --color-btn-primary-hover: var(--blue-700);
+  --color-btn-secondary: var(--gray-500);
+  --color-btn-secondary-hover: var(--gray-600);
+  --color-btn-danger: var(--color-error);
+  --color-btn-danger-hover: var(--color-error-dark);
+
+  /* Interactive Colors */
+  --color-link: var(--blue-600);
+  --color-link-hover: var(--blue-700);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  --focus-ring-error: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  --focus-ring-success: 0 0 0 3px rgba(16, 185, 129, 0.15);
+
   /* Typography System */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-display: 'DM Sans', var(--font-sans);
@@ -132,6 +163,16 @@
     --color-header-bg: #0f172a;
     --color-header-text: #f1f5f9;
     --color-page-bg: #0a0a0a;
+
+    /* Dark Mode Status Colors */
+    --color-success: #34d399;
+    --color-success-light: rgba(16, 185, 129, 0.2);
+    --color-error: #f87171;
+    --color-error-light: rgba(239, 68, 68, 0.2);
+    --color-warning: #fbbf24;
+    --color-warning-light: rgba(245, 158, 11, 0.2);
+    --color-info: #60a5fa;
+    --color-info-light: rgba(59, 130, 246, 0.2);
   }
 }
 
@@ -260,6 +301,144 @@ a:focus-visible {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== MICRO-INTERACTIONS ===== */
+
+/* Button Base Interactions */
+button,
+.btn,
+[role="button"] {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+/* Interactive Button Hover */
+.btn-interactive:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-interactive:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card Hover Effect */
+.card-hover {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Input Focus Effect */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-btn-primary);
+  box-shadow: var(--focus-ring);
+}
+
+/* Link Underline Animation */
+.link-animated {
+  position: relative;
+  text-decoration: none;
+}
+
+.link-animated::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.link-animated:hover::after {
+  transform: scaleX(1);
+}
+
+/* Scale on Hover */
+.scale-hover {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.scale-hover:hover {
+  transform: scale(1.02);
+}
+
+/* Press Effect */
+.press-effect:active {
+  transform: scale(0.98);
+}
+
+/* Fade In Animation */
+.fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Slide Up Animation */
+.slide-up {
+  animation: slideUp var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger Animation Helper */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+/* Disable animations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .btn-interactive:hover,
+  .btn-interactive:active,
+  .card-hover:hover,
+  .scale-hover:hover,
+  .press-effect:active {
+    transform: none;
+  }
+
+  .link-animated::after {
+    transition: none;
+  }
+
+  .fade-in,
+  .slide-up {
+    animation: none;
   }
 }
 

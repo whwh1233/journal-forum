@@ -16,7 +16,7 @@ const JournalDetailModal: React.FC<JournalDetailModalProps> = ({ journal, isOpen
   if (!journal) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={journal.title}>
+    <Modal isOpen={isOpen} onClose={onClose} title={journal.title} size="full">
       <div className="journal-detail-content">
         <div className="journal-detail-header">
           <div className="journal-detail-meta">

@@ -1,48 +1,29 @@
 .footer {
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(30, 64, 175, 0.9) 100%);
-  color: white;
-  padding: var(--spacing-2xl) 0;
+  background: var(--color-header-bg);
+  color: var(--color-header-text);
+  padding: var(--space-6) 0;
   text-align: center;
-  margin-top: var(--spacing-2xl);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* 装饰性图案 */
-.footer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    radial-gradient(circle at 30% 50%, rgba(217, 119, 6, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 40%);
-  pointer-events: none;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .footer .container {
   position: relative;
-  z-index: 1;
 }
 
 .footer p {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  opacity: 0.9;
-  letter-spacing: 0.025em;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  opacity: 0.8;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .footer {
-    padding: var(--spacing-xl) 0;
+    padding: var(--space-5) 0;
   }
 
   .footer p {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
   }
 }

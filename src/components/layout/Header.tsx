@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import './Header.css';
 
 interface HeaderProps {
@@ -10,6 +10,13 @@ interface HeaderProps {
   isAdmin?: boolean;
 }
 
+interface NavItem {
+  path: string;
+  label: string;
+  requireAuth?: boolean;
+  requireAdmin?: boolean;
+}
+
 const Header: React.FC<HeaderProps> = ({
   onAuthClick,
   onLogout,
@@ -17,54 +24,76 @@ const Header: React.FC<HeaderProps> = ({
   userEmail,
   isAdmin
 }) => {
-  const navigate = useNavigate();
+  const location = useLocation();
 
-  // 获取用户首字母作为头像
+  // Navigation items
+  const navItems: NavItem[] = [
+    { path: '/', label: '首页' },
+    { path: '/dashboard', label: '个人中心', requireAuth: true },
+    { path: '/admin', label: '管理后台', requireAuth: true, requireAdmin: true },
+  ];
+
+  // Filter nav items based on auth status
+  const visibleNavItems = navItems.filter(item => {
+    if (item.requireAuth && !isAuthenticated) return false;
+    if (item.requireAdmin && !isAdmin) return false;
+    return true;
+  });
+
+  // Check if a path is active
+  const isActive = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname.startsWith(path);
+  };
+
+  // Get user initial for avatar
   const getUserInitial = (email: string) => {
     return email.charAt(0).toUpperCase();
-  };
-
-  const handleAdminClick = () => {
-    navigate('/admin');
-  };
-
-  const handleDashboardClick = () => {
-    navigate('/dashboard');
   };
 
   return (
     <header className="header" role="banner">
       <div className="header-container">
-        {/* 左侧: Logo 和副标题 */}
+        {/* Left: Logo and tagline */}
         <div className="header-left">
-          <h1 className="logo">期刊论坛</h1>
+          <Link to="/" className="logo-link">
+            <h1 className="logo">期刊论坛</h1>
+          </Link>
           <p className="tagline">学术期刊评价与交流平台</p>
         </div>
 
-        {/* 右侧: 用户区域 */}
+        {/* Center: Navigation */}
+        <nav className="header-nav" role="navigation" aria-label="主导航">
+          <ul className="nav-list">
+            {visibleNavItems.map((item) => (
+              <li key={item.path} className="nav-item">
+                <Link
+                  to={item.path}
+                  className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
+                  aria-current={isActive(item.path) ? 'page' : undefined}
+                >
+                  {item.label}
+                  {isActive(item.path) && (
+                    <span className="nav-indicator" aria-hidden="true" />
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Right: User area */}
         <div className="header-right">
           {isAuthenticated && userEmail ? (
             <div className="user-menu">
-              <div className="user-avatar">
-                {getUserInitial(userEmail)}
-              </div>
-              <span className="user-email">{userEmail}</span>
-              <button
-                className="dashboard-button"
-                onClick={handleDashboardClick}
-                aria-label="个人中心"
-              >
-                个人中心
-              </button>
-              {isAdmin && (
-                <button
-                  className="admin-button"
-                  onClick={handleAdminClick}
-                  aria-label="管理后台"
-                >
-                  管理后台
-                </button>
-              )}
+              <Link to="/dashboard" className="user-info-link">
+                <div className="user-avatar">
+                  {getUserInitial(userEmail)}
+                </div>
+                <span className="user-email">{userEmail}</span>
+              </Link>
               <button
                 className="logout-button"
                 onClick={onLogout}
