@@ -61,16 +61,17 @@ app.use(cors(corsOptions));
 app.use(helmet());
 
 // 速率限制 - 开发环境宽松，生产环境严格
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: process.env.NODE_ENV === 'development' ? 10000 : 100, // 开发环境10000请求，生产环境100请求
-  message: {
-    success: false,
-    message: '请求过于频繁，请稍后再试'
-  },
-  skip: process.env.NODE_ENV === 'development' && process.env.SKIP_RATE_LIMIT === 'true'
-});
-app.use(limiter);
+if (process.env.NODE_ENV !== 'development' || process.env.SKIP_RATE_LIMIT !== 'true') {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: process.env.NODE_ENV === 'development' ? 10000 : 100,
+    message: {
+      success: false,
+      message: '请求过于频繁，请稍后再试'
+    }
+  });
+  app.use(limiter);
+}
 
 // 解析JSON请求体
 app.use(express.json({ limit: '10mb' }));

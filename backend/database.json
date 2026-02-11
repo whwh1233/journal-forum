@@ -28,7 +28,7 @@
       "title": "生物医学研究",
       "issn": "2000-5678",
       "category": "biology",
-      "rating": 4.3,
+      "rating": 4.5,
       "description": "《生物医学研究》专注于分子生物学、细胞生物学和遗传学等领域的原创性研究，是生物医学领域的重要学术平台。",
       "reviews": [
         {
@@ -97,7 +97,7 @@
       "title": "数学年刊",
       "issn": "5000-7890",
       "category": "mathematics",
-      "rating": 4.6,
+      "rating": 4.7,
       "description": "《数学年刊》专注于纯数学和应用数学的前沿研究，包括代数、几何、分析、概率统计等方向，是数学界的重要学术期刊。",
       "reviews": [
         {
@@ -444,6 +444,59 @@
       "rating": 5,
       "createdAt": "2026-02-09T15:26:23.491Z",
       "isDeleted": false
+    },
+    {
+      "id": "3-1770651581663-7nd0hq",
+      "userId": 3,
+      "userName": "wh",
+      "journalId": 3,
+      "parentId": null,
+      "content": "啊",
+      "rating": 5,
+      "createdAt": "2026-02-09T15:39:41.663Z",
+      "isDeleted": false
+    },
+    {
+      "id": "5-1770651733106-gjs46r",
+      "userId": 3,
+      "userName": "wh",
+      "journalId": 5,
+      "parentId": "5-legacy-0-b6qrtq",
+      "content": "真的吗",
+      "createdAt": "2026-02-09T15:42:13.107Z",
+      "isDeleted": false
+    },
+    {
+      "id": "5-1770651767123-zcb6b1",
+      "userId": 3,
+      "userName": "wh",
+      "journalId": 5,
+      "parentId": null,
+      "content": "好吧",
+      "rating": 5,
+      "createdAt": "2026-02-09T15:42:47.123Z",
+      "isDeleted": false
+    },
+    {
+      "id": "2-1770652645634-j9mje0",
+      "userId": 3,
+      "userName": "wh",
+      "journalId": 2,
+      "parentId": null,
+      "content": "牛逼",
+      "rating": 5,
+      "createdAt": "2026-02-09T15:57:25.634Z",
+      "isDeleted": false
+    },
+    {
+      "id": "1-1770652666326-izym1y",
+      "userId": 1,
+      "userName": "1249156074",
+      "journalId": 1,
+      "parentId": "1-1770650350144-571w1t",
+      "content": "？？？",
+      "createdAt": "2026-02-09T15:57:46.326Z",
+      "isDeleted": false
     }
   ],
   "favorites": [
@@ -454,19 +507,56 @@
       "createdAt": "2026-02-09T15:15:21.867Z"
     },
     {
-      "id": 2,
-      "userId": 1,
-      "journalId": 2,
-      "createdAt": "2026-02-09T15:15:23.328Z"
-    },
-    {
       "id": 3,
       "userId": 2,
       "journalId": 3,
       "createdAt": "2026-02-09T15:26:08.466Z"
+    },
+    {
+      "id": 4,
+      "userId": 3,
+      "journalId": 3,
+      "createdAt": "2026-02-09T15:39:35.225Z"
+    },
+    {
+      "id": 5,
+      "userId": 3,
+      "journalId": 2,
+      "createdAt": "2026-02-09T15:41:58.297Z"
+    },
+    {
+      "id": 6,
+      "userId": 1,
+      "journalId": 5,
+      "createdAt": "2026-02-09T15:57:48.294Z"
+    },
+    {
+      "id": 7,
+      "userId": 3,
+      "journalId": 8,
+      "createdAt": "2026-02-10T16:26:45.653Z"
+    },
+    {
+      "id": 8,
+      "userId": 3,
+      "journalId": 7,
+      "createdAt": "2026-02-10T16:28:40.640Z"
+    },
+    {
+      "id": 9,
+      "userId": 1,
+      "journalId": 1,
+      "createdAt": "2026-02-10T16:38:44.248Z"
     }
   ],
-  "follows": [],
+  "follows": [
+    {
+      "id": 1,
+      "followerId": 1,
+      "followingId": 3,
+      "createdAt": "2026-02-09T16:07:39.698Z"
+    }
+  ],
   "migrated": {
     "comments": true
   }

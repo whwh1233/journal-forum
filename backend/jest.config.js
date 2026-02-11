@@ -1,0 +1,30 @@
+module.exports = {
+  testEnvironment: 'node',
+  coverageDirectory: 'coverage',
+  collectCoverageFrom: [
+    'controllers/**/*.js',
+    'routes/**/*.js',
+    'middleware/**/*.js',
+    'utils/**/*.js',
+    '!**/node_modules/**',
+  ],
+  testMatch: [
+    '**/__tests__/**/*.test.js',
+    '**/*.test.js',
+  ],
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setup.js'],
+  verbose: true,
+  testTimeout: 10000,
+  transformIgnorePatterns: [
+    'node_modules/(?!(lowdb)/)',
+  ],
+  transform: {},
+  coverageThreshold: {
+    global: {
+      branches: 60,
+      functions: 60,
+      lines: 60,
+      statements: 60,
+    },
+  },
+};

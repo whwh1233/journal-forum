@@ -37,7 +37,7 @@ export const checkFollow = async (followingId: number): Promise<boolean> => {
     const response = await axios.get(`${API_URL}/check/${followingId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return response.data.isFollowing;
+    return response.data.data.isFollowing;
   } catch (error) {
     return false;
   }
@@ -48,7 +48,7 @@ export const getFollowers = async (userId: number, page = 1, limit = 20) => {
   const response = await axios.get(`${API_URL}/followers/${userId}`, {
     params: { page, limit }
   });
-  return response.data;
+  return response.data.data;
 };
 
 // 获取关注列表
@@ -56,5 +56,5 @@ export const getFollowing = async (userId: number, page = 1, limit = 20) => {
   const response = await axios.get(`${API_URL}/following/${userId}`, {
     params: { page, limit }
   });
-  return response.data;
+  return response.data.data;
 };

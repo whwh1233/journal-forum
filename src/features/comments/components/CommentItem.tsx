@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import CommentForm from './CommentForm';
+import FollowButton from '../../follow/components/FollowButton';
 import type { Comment } from '../../../types';
 import './CommentItem.css';
 
@@ -91,12 +93,19 @@ const CommentItem: React.FC<CommentItemProps> = ({
     <div className={`comment-item level-${level}`}>
       <div className="comment-header">
         <div className="comment-author">
-          <span className="comment-author-name">{comment.userName}</span>
+          <Link to={`/profile/${comment.userId}`} className="comment-author-name">
+            {comment.userName}
+          </Link>
           {comment.rating && (
             <span className="comment-rating">
               {'★'.repeat(comment.rating)}
               {'☆'.repeat(5 - comment.rating)}
             </span>
+          )}
+          {user && comment.userId !== parseInt(user.id) && (
+            <div className="comment-follow-btn-wrapper">
+              <FollowButton userId={comment.userId} />
+            </div>
           )}
         </div>
         <div className="comment-meta">

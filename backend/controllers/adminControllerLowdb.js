@@ -183,7 +183,7 @@ const getComments = async (req, res, next) => {
 
     let comments = [];
 
-    // 收集所有评论
+    // 1. 收集旧评论系统的评论 (journal.reviews)
     db.data.journals.forEach(journal => {
       if (journal.reviews) {
         journal.reviews.forEach((review, index) => {
@@ -199,6 +199,26 @@ const getComments = async (req, res, next) => {
         });
       }
     });
+
+    // 2. 收集新评论系统的评论 (db.data.comments)
+    if (db.data.comments && Array.isArray(db.data.comments)) {
+      db.data.comments
+        .filter(comment => !comment.isDeleted && !comment.parentId) // 只显示顶级评论，不显示回复
+        .forEach(comment => {
+          const journal = db.data.journals.find(j => j.id === comment.journalId);
+          if (journal) {
+            comments.push({
+              id: comment.id,
+              journalId: comment.journalId,
+              journalTitle: journal.title,
+              author: comment.userName,
+              rating: comment.rating || 0,
+              content: comment.content,
+              createdAt: comment.createdAt
+            });
+          }
+        });
+    }
 
     // 按时间倒序排列
     comments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -241,26 +261,85 @@ const deleteComment = async (req, res, next) => {
     const { id } = req.params;
     const db = getDB();
 
-    // id格式: journalId-reviewIndex
-    const [journalId, reviewIndex] = id.split('-').map(Number);
+    // 判断是新评论还是旧评论
+    // 新评论ID格式: "3-1770650396042-s796nm"
+    // 旧评论ID格式: "journalId-reviewIndex" (只有两段，且都是数字)
+    const idParts = id.split('-');
 
-    const journal = db.data.journals.find(j => j.id === journalId);
-    if (!journal || !journal.reviews || !journal.reviews[reviewIndex]) {
-      return res.status(404).json({
-        success: false,
-        message: '评论未找到'
-      });
-    }
+    // 如果ID有3段或以上，或者第二段不是纯数字，说明是新评论系统
+    if (idParts.length >= 3 || (idParts.length === 2 && isNaN(idParts[1]))) {
+      // 新评论系统
+      const commentIndex = db.data.comments.findIndex(c => c.id === id);
 
-    // 删除评论
-    journal.reviews.splice(reviewIndex, 1);
+      if (commentIndex === -1) {
+        return res.status(404).json({
+          success: false,
+          message: '评论未找到'
+        });
+      }
 
-    // 重新计算平均评分
-    if (journal.reviews.length > 0) {
-      const totalRating = journal.reviews.reduce((sum, review) => sum + review.rating, 0);
-      journal.rating = Math.round((totalRating / journal.reviews.length) * 10) / 10;
+      const comment = db.data.comments[commentIndex];
+
+      // 标记为已删除而不是真正删除（保留回复关系）
+      db.data.comments[commentIndex].isDeleted = true;
+
+      // 如果有评分，需要重新计算期刊平均分
+      if (comment.rating) {
+        const journal = db.data.journals.find(j => j.id === comment.journalId);
+        if (journal) {
+          // 收集该期刊所有有效的评分
+          const ratings = db.data.comments
+            .filter(c => c.journalId === comment.journalId && !c.isDeleted && c.rating)
+            .map(c => c.rating);
+
+          // 加上旧评论系统的评分
+          if (journal.reviews) {
+            journal.reviews.forEach(r => ratings.push(r.rating));
+          }
+
+          if (ratings.length > 0) {
+            const totalRating = ratings.reduce((sum, r) => sum + r, 0);
+            journal.rating = Math.round((totalRating / ratings.length) * 10) / 10;
+          } else {
+            journal.rating = 0;
+          }
+        }
+      }
+
     } else {
-      journal.rating = 0;
+      // 旧评论系统 - id格式: journalId-reviewIndex
+      const [journalId, reviewIndex] = id.split('-').map(Number);
+
+      const journal = db.data.journals.find(j => j.id === journalId);
+      if (!journal || !journal.reviews || !journal.reviews[reviewIndex]) {
+        return res.status(404).json({
+          success: false,
+          message: '评论未找到'
+        });
+      }
+
+      // 删除评论
+      journal.reviews.splice(reviewIndex, 1);
+
+      // 重新计算平均评分（包括新评论系统的评分）
+      const ratings = [];
+
+      // 旧评论系统的评分
+      if (journal.reviews) {
+        journal.reviews.forEach(r => ratings.push(r.rating));
+      }
+
+      // 新评论系统的评分
+      db.data.comments
+        .filter(c => c.journalId === journalId && !c.isDeleted && c.rating)
+        .forEach(c => ratings.push(c.rating));
+
+      if (ratings.length > 0) {
+        const totalRating = ratings.reduce((sum, r) => sum + r, 0);
+        journal.rating = Math.round((totalRating / ratings.length) * 10) / 10;
+      } else {
+        journal.rating = 0;
+      }
     }
 
     await db.write();

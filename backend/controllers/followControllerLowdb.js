@@ -8,13 +8,19 @@ const followUser = async (req, res) => {
 
     // 不能关注自己
     if (req.user.id === parseInt(followingId)) {
-      return res.status(400).json({ message: '不能关注自己' });
+      return res.status(400).json({
+        success: false,
+        message: '不能关注自己'
+      });
     }
 
     // 验证被关注用户是否存在
     const targetUser = db.data.users.find(u => u.id === parseInt(followingId));
     if (!targetUser) {
-      return res.status(404).json({ message: '用户不存在' });
+      return res.status(404).json({
+        success: false,
+        message: '用户不存在'
+      });
     }
 
     // 检查是否已关注
@@ -23,7 +29,10 @@ const followUser = async (req, res) => {
     );
 
     if (existing) {
-      return res.status(400).json({ message: '已经关注过该用户' });
+      return res.status(400).json({
+        success: false,
+        message: '已经关注过该用户'
+      });
     }
 
     // 创建关注记录
@@ -39,10 +48,16 @@ const followUser = async (req, res) => {
     db.data.follows.push(newFollow);
     await db.write();
 
-    res.status(201).json(newFollow);
+    res.status(201).json({
+      success: true,
+      data: { follow: newFollow }
+    });
   } catch (error) {
     console.error('Error following user:', error);
-    res.status(500).json({ message: '关注失败' });
+    res.status(500).json({
+      success: false,
+      message: '关注失败'
+    });
   }
 };
 
@@ -57,16 +72,25 @@ const unfollowUser = async (req, res) => {
     );
 
     if (followIndex === -1) {
-      return res.status(404).json({ message: '未关注该用户' });
+      return res.status(404).json({
+        success: false,
+        message: '未关注该用户'
+      });
     }
 
     db.data.follows.splice(followIndex, 1);
     await db.write();
 
-    res.json({ message: '取消关注成功' });
+    res.json({
+      success: true,
+      message: '取消关注成功'
+    });
   } catch (error) {
     console.error('Error unfollowing user:', error);
-    res.status(500).json({ message: '取消关注失败' });
+    res.status(500).json({
+      success: false,
+      message: '取消关注失败'
+    });
   }
 };
 
@@ -80,10 +104,16 @@ const checkFollow = async (req, res) => {
       f => f.followerId === req.user.id && f.followingId === parseInt(followingId)
     );
 
-    res.json({ isFollowing });
+    res.json({
+      success: true,
+      data: { isFollowing }
+    });
   } catch (error) {
     console.error('Error checking follow:', error);
-    res.status(500).json({ message: '检查关注状态失败' });
+    res.status(500).json({
+      success: false,
+      message: '检查关注状态失败'
+    });
   }
 };
 
@@ -117,17 +147,23 @@ const getFollowers = async (req, res) => {
     });
 
     res.json({
-      followers: followersWithUser,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(followers.length / parseInt(limit)),
-        totalItems: followers.length,
-        itemsPerPage: parseInt(limit)
+      success: true,
+      data: {
+        followers: followersWithUser,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(followers.length / parseInt(limit)),
+          totalItems: followers.length,
+          itemsPerPage: parseInt(limit)
+        }
       }
     });
   } catch (error) {
     console.error('Error getting followers:', error);
-    res.status(500).json({ message: '获取粉丝列表失败' });
+    res.status(500).json({
+      success: false,
+      message: '获取粉丝列表失败'
+    });
   }
 };
 
@@ -161,17 +197,23 @@ const getFollowing = async (req, res) => {
     });
 
     res.json({
-      following: followingWithUser,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(following.length / parseInt(limit)),
-        totalItems: following.length,
-        itemsPerPage: parseInt(limit)
+      success: true,
+      data: {
+        following: followingWithUser,
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(following.length / parseInt(limit)),
+          totalItems: following.length,
+          itemsPerPage: parseInt(limit)
+        }
       }
     });
   } catch (error) {
     console.error('Error getting following:', error);
-    res.status(500).json({ message: '获取关注列表失败' });
+    res.status(500).json({
+      success: false,
+      message: '获取关注列表失败'
+    });
   }
 };
 

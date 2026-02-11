@@ -76,6 +76,47 @@ npm run preview
 yarn preview
 ```
 
+## 测试
+
+本项目包含完整的测试套件，包括后端API测试和前端组件测试。
+
+### 运行测试
+
+```bash
+# 后端测试
+cd backend
+npm test
+
+# 前端测试
+cd ..
+npm test
+```
+
+### 测试覆盖率
+
+```bash
+# 后端覆盖率
+cd backend
+npm run test:coverage
+
+# 前端覆盖率（带可视化界面）
+cd ..
+npm run test:ui
+```
+
+### 测试文档
+
+- 📚 [完整测试指南](./TESTING.md) - 详细的测试文档和最佳实践
+- ⚡ [快速参考](./TEST_QUICK_REFERENCE.md) - 常用命令和模式速查
+
+### 测试特性
+
+- ✅ **API集成测试**: 测试所有REST API端点
+- ✅ **组件测试**: React组件的渲染和交互测试
+- ✅ **数据一致性测试**: 防止数据结构不一致导致的bug
+- ✅ **Mock和隔离**: 独立的测试环境，不影响生产数据
+- ✅ **覆盖率报告**: 详细的代码覆盖率统计
+
 ## 数据说明
 
 当前版本使用模拟数据，包含8个不同学科的期刊信息。所有数据存储在 `src/services/journalService.ts` 文件中。
