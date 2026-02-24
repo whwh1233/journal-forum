@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type ThemeId = 'default' | 'warm-nature' | 'sunset-glow';
+export type ThemeId = 'default' | 'warm-nature' | 'sunset-glow' | 'vintage-olive';
 export type ThemeMode = 'light' | 'dark';
 
 interface ThemeConfig {
@@ -43,6 +43,16 @@ const THEMES: ThemeConfig[] = [
       preview1: '#ffa200',
       preview2: '#ff7b00',
       preview3: '#ffdd00',
+    },
+  },
+  {
+    id: 'vintage-olive',
+    name: '复古橄榄',
+    description: '优雅自然色系',
+    colors: {
+      preview1: '#a98467',
+      preview2: '#adc178',
+      preview3: '#f0ead2',
     },
   },
 ];
