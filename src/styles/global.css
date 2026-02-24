@@ -134,6 +134,122 @@
   --transition-slow: var(--duration-slow);
 
   --color-text-secondary: var(--gray-500);
+
+  /* ── 主题变量：侧边栏 ─────────────────── */
+  --nav-bg: #1e293b;
+  --nav-item-color: #94a3b8;
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.07);
+  --nav-item-hover-color: #e2e8f0;
+  --nav-active-bg: #3b82f6;
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #cbd5e1;
+  --nav-toggle-color: #64748b;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.07);
+  --nav-divider: rgba(255, 255, 255, 0.08);
+  --nav-avatar-bg: #3b82f6;
+  --nav-user-color: #94a3b8;
+
+  /* ── 主题变量：顶部栏 ─────────────────── */
+  --topbar-bg: #ffffff;
+  --topbar-border: #f1f5f9;
+  --topbar-user-border: #e5e7eb;
+  --topbar-user-hover-bg: #f8fafc;
+  --topbar-user-hover-border: #cbd5e1;
+  --topbar-user-text: #374151;
+  --topbar-login-border: #d1d5db;
+  --topbar-login-text: #374151;
+  --topbar-login-hover-bg: #1e293b;
+  --topbar-login-hover-border: #1e293b;
+  --topbar-login-hover-text: #ffffff;
+
+  /* ── 主题变量：内容面板 ───────────────── */
+  --panel-bg: #ffffff;
+  --panel-border: var(--color-border);
+}
+
+/* ══════════════════════════════════════════════
+   暗黑主题 — GitHub Dark 色系（WCAG AA 验证）
+   ══════════════════════════════════════════════ */
+[data-theme="dark"] {
+  /* 页面底色 / 卡片 / 表面层 */
+  --color-page-bg: #0d1117;       /* GitHub: canvas-default */
+  --color-background: #161b22;    /* GitHub: canvas-overlay */
+  --color-surface: #21262d;       /* GitHub: canvas-subtle */
+  --color-border: #30363d;        /* GitHub: border-default */
+
+  /* 文字（对比度在 #161b22 上：primary ≈14:1，secondary ≈5.6:1，均满足 WCAG AA） */
+  --color-text: #e6edf3;
+  --color-text-muted: #8b949e;
+  --color-text-secondary: #8b949e;
+  --color-primary: #e6edf3;
+  --color-primary-dark: #e6edf3;
+  --color-primary-light: #8b949e;
+
+  /* 强调色 / 按钮 / 链接 */
+  --color-accent: #58a6ff;
+  --color-btn-primary: #1f6feb;
+  --color-btn-primary-hover: #388bfd;
+  --color-btn-secondary: #30363d;
+  --color-btn-secondary-hover: #3c444d;
+  --color-link: #58a6ff;
+  --color-link-hover: #79c0ff;
+
+  /* 状态色 */
+  --color-success: #3fb950;
+  --color-success-light: rgba(63, 185, 80, 0.15);
+  --color-error: #f85149;
+  --color-error-light: rgba(248, 81, 73, 0.15);
+  --color-warning: #e3b341;
+  --color-warning-light: rgba(227, 179, 65, 0.15);
+  --color-info: #58a6ff;
+  --color-info-light: rgba(88, 166, 255, 0.15);
+
+  /* Gray scale 映射（供旧组件兼容） */
+  --gray-50: #161b22;
+  --gray-100: #21262d;
+  --gray-200: #30363d;
+  --gray-300: #3c444d;
+  --gray-400: #555f6d;
+  --gray-500: #8b949e;
+  --gray-600: #b1bac4;
+  --gray-700: #c9d1d9;
+  --gray-800: #e6edf3;
+  --gray-900: #f0f6fc;
+
+  /* 焦点环 */
+  --focus-ring: 0 0 0 3px rgba(88, 166, 255, 0.3);
+  --focus-ring-error: 0 0 0 3px rgba(248, 81, 73, 0.3);
+
+  /* ── 侧边栏（nav bg 更深，保证导航图标可辨识） */
+  --nav-bg: #010409;              /* GitHub: header bg */
+  --nav-item-color: #8b949e;      /* 对比度 6.8:1 on #010409 ✓ */
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-item-hover-color: #c9d1d9;
+  --nav-active-bg: #1f6feb;
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #8b949e;
+  --nav-toggle-color: #8b949e;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-divider: rgba(255, 255, 255, 0.08);
+  --nav-avatar-bg: #1f6feb;
+  --nav-user-color: #8b949e;
+
+  /* ── 顶部栏 */
+  --topbar-bg: #161b22;
+  --topbar-border: #30363d;
+  --topbar-user-border: #30363d;
+  --topbar-user-hover-bg: #21262d;
+  --topbar-user-hover-border: #3c444d;
+  --topbar-user-text: #e6edf3;
+  --topbar-login-border: #30363d;
+  --topbar-login-text: #e6edf3;
+  --topbar-login-hover-bg: #1f6feb;
+  --topbar-login-hover-border: #1f6feb;
+  --topbar-login-hover-text: #ffffff;
+
+  /* ── 内容面板 */
+  --panel-bg: #161b22;
+  --panel-border: #30363d;
 }
 
 /* Dark Mode - Clean Dark Theme */

@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { JournalProvider } from '@/contexts/JournalContext';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
-import MainLayout from '@/components/layout/MainLayout';
+import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
+import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
 import AuthModal from '@/features/auth/components/AuthModal';
 import ToastContainer from '@/components/common/Toast';
-import PageTransition from '@/components/common/PageTransition';
 import {
-  AdminLayout,
   Dashboard,
   UserManagement,
   JournalManagement,
@@ -24,16 +23,17 @@ import './App.css';
 
 /**
  * 首页内容组件
- * 只包含首页特有的内容，布局由 MainLayout 提供
  */
 const HomeContent: React.FC = () => {
   return (
-    <div className="container">
-      <SearchAndFilter />
-      <section className="journals-section">
-        <h2>期刊列表</h2>
-        <JournalsGrid />
-      </section>
+    <div className="home-content">
+      <div className="container">
+        <SearchAndFilter />
+        <section className="journals-section">
+          <h2>期刊列表</h2>
+          <JournalsGrid />
+        </section>
+      </div>
     </div>
   );
 };
@@ -72,39 +72,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
  * 主应用内容
  */
 const AppContent: React.FC = () => {
-  const { state: authState, logout } = useAuthContext();
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const handleAuthClick = () => {
-    setIsAuthModalOpen(true);
-  };
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  const handleAuthSuccess = () => {
-    console.log('Authentication successful');
-  };
-
-  const isAdmin = authState.user?.role === 'admin';
+  const { isAuthModalOpen, closeAuthModal } = useAuthModal();
 
   return (
     <>
-      <PageTransition>
-        <Routes>
-          {/* 使用 MainLayout 的普通页面路由 */}
-          <Route
-            element={
-              <MainLayout
-                onAuthClick={handleAuthClick}
-                onLogout={handleLogout}
-                isAuthenticated={authState.isAuthenticated}
-                userEmail={authState.user?.email}
-                isAdmin={isAdmin}
-              />
-            }
-          >
+      <Routes>
+        <Route element={<AppLayout />}>
             {/* 首页 */}
             <Route path="/" element={<HomeContent />} />
 
@@ -129,34 +102,53 @@ const AppContent: React.FC = () => {
                 </ProtectedRoute>
               }
             />
-          </Route>
 
-          {/* 管理后台 - 使用独立的 AdminLayout */}
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout onLogout={handleLogout} />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="journals" element={<JournalManagement />} />
-            <Route path="comments" element={<CommentManagement />} />
+            {/* 管理后台路由 */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Dashboard />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AdminRoute>
+                  <UserManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/journals"
+              element={
+                <AdminRoute>
+                  <JournalManagement />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/comments"
+              element={
+                <AdminRoute>
+                  <CommentManagement />
+                </AdminRoute>
+              }
+            />
           </Route>
         </Routes>
-      </PageTransition>
 
       {/* 全局弹窗和通知 */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthSuccess={handleAuthSuccess}
+        onClose={closeAuthModal}
+        onAuthSuccess={() => {}}
       />
       <ToastContainer />
     </>
   );
+
 };
 
 function App() {
@@ -164,9 +156,11 @@ function App() {
     <AuthProvider>
       <JournalProvider>
         <ToastProvider>
-          <div className="app">
-            <AppContent />
-          </div>
+          <AuthModalProvider>
+            <div className="app">
+              <AppContent />
+            </div>
+          </AuthModalProvider>
         </ToastProvider>
       </JournalProvider>
     </AuthProvider>

@@ -1,0 +1,270 @@
+/* ── 侧边栏容器 ─────────────────────────────── */
+.side-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 64px;
+  height: 100vh;
+  background: var(--nav-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 8px 0 12px;
+  z-index: 100;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: width 0.22s ease;
+}
+
+.side-nav.expanded {
+  width: 200px;
+}
+
+/* ── 展开/折叠按钮 ─────────────────────────── */
+.side-nav-toggle {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  flex-shrink: 0;
+  justify-content: center;
+  padding: 0;
+  margin: 0 10px 6px;
+  width: 44px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--nav-toggle-color);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.side-nav.expanded .side-nav-toggle {
+  justify-content: space-between;
+  width: calc(100% - 20px);
+  padding: 0 10px;
+}
+
+.side-nav-toggle:hover {
+  background: var(--nav-toggle-hover-bg);
+  color: var(--nav-item-hover-color);
+}
+
+.side-nav-brand {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--nav-brand-color);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.side-nav-toggle-icon {
+  font-size: 1rem;
+  color: var(--nav-toggle-color);
+  flex-shrink: 0;
+  display: inline-block;
+  transition: transform 0.22s ease, color 0.15s;
+}
+
+.side-nav.expanded .side-nav-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* ── 主导航区 / 底部区 ──────────────────────── */
+.side-nav-top {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 0 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.side-nav-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px 10px 0;
+  border-top: 1px solid var(--nav-divider);
+}
+
+/* ── 导航项（NavLink / button） ─────────────── */
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  border-radius: 8px;
+  color: var(--nav-item-color);
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 0.15s, color 0.15s;
+  justify-content: center;
+  padding: 0;
+  gap: 0;
+  width: 100%;
+}
+
+.side-nav.expanded .side-nav-item {
+  justify-content: flex-start;
+  padding: 0 10px;
+  gap: 10px;
+}
+
+.side-nav-item:hover {
+  background: var(--nav-item-hover-bg);
+  color: var(--nav-item-hover-color);
+}
+
+.side-nav-item.active {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-color);
+}
+
+.side-nav-btn {
+  text-align: left;
+}
+
+/* ── 图标 ──────────────────────────────────── */
+.side-nav-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  width: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 文字标签 ──────────────────────────────── */
+.side-nav-label {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.22s ease, opacity 0.18s ease;
+  pointer-events: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.side-nav.expanded .side-nav-label {
+  max-width: 140px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── 分隔线 ────────────────────────────────── */
+.side-nav-divider {
+  height: 1px;
+  background: var(--nav-divider);
+  margin: 4px 0;
+  border-radius: 1px;
+}
+
+/* ── 底部用户行 ─────────────────────────────── */
+.side-nav-user {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 0 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--nav-user-color);
+  width: 100%;
+  overflow: hidden;
+  transition: background 0.15s, color 0.15s;
+}
+
+.side-nav-user:hover {
+  background: var(--nav-item-hover-bg);
+  color: var(--nav-item-hover-color);
+}
+
+.side-nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--nav-avatar-bg);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.side-nav-user-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 0;
+  opacity: 0;
+  transition: max-width 0.22s ease, opacity 0.18s ease;
+}
+
+.side-nav.expanded .side-nav-user-name {
+  max-width: 120px;
+  opacity: 1;
+}
+
+/* ── 移动端：底部 Tab 栏 ─────────────────────── */
+@media (max-width: 767px) {
+  .side-nav {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100% !important;
+    height: 56px;
+    flex-direction: row;
+    padding: 0 8px;
+    overflow: visible;
+    transition: none;
+  }
+
+  .side-nav-toggle { display: none; }
+
+  .side-nav-top,
+  .side-nav-bottom {
+    flex-direction: row;
+    align-items: center;
+    padding: 0;
+    border-top: none;
+    gap: 0;
+    overflow: visible;
+  }
+
+  .side-nav-top { flex: 1; justify-content: space-around; }
+  .side-nav-bottom { flex: 0 0 auto; justify-content: flex-end; gap: 4px; }
+
+  .side-nav-item {
+    width: 44px; height: 44px;
+    justify-content: center; padding: 0; gap: 0;
+  }
+
+  .side-nav-label,
+  .side-nav-user-name,
+  .side-nav-divider { display: none !important; }
+
+  .side-nav-user {
+    width: 44px; height: 44px;
+    justify-content: center; padding: 0;
+  }
+}

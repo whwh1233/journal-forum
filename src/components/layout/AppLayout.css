@@ -1,0 +1,36 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-page-bg);
+}
+
+.app-layout-main {
+  flex: 1;
+  margin-left: 64px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  /* margin-left 只在用户切换侧边栏时变化，路由切换时不会重新触发 */
+  transition: margin-left 0.22s ease;
+}
+
+.app-layout.nav-expanded .app-layout-main {
+  margin-left: 200px;
+}
+
+.app-layout-main .container {
+  background: var(--panel-bg, var(--color-background));
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 767px) {
+  .app-layout-main,
+  .app-layout.nav-expanded .app-layout-main {
+    margin-left: 0;
+    padding-bottom: 56px;
+    transition: none;
+  }
+}

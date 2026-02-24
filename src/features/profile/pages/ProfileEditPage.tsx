@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { updateUserProfile, uploadAvatar, updatePassword } from '../../../services/userService';
+import PageHeader from '../../../components/layout/PageHeader';
 import './ProfileEditPage.css';
 
 const ProfileEditPage: React.FC = () => {
@@ -81,9 +82,9 @@ const ProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div className="profile-edit-page container">
-      <h1>编辑资料</h1>
-
+    <div className="profile-edit-page">
+      <PageHeader title="账号设置" showBack />
+      <div className="container">
       <div className="edit-section">
         <h2>头像</h2>
         <input type="file" accept="image/*" onChange={handleAvatarChange} disabled={uploading} />
@@ -169,6 +170,7 @@ const ProfileEditPage: React.FC = () => {
         </div>
         <button type="submit">修改密码</button>
       </form>
+      </div>
     </div>
   );
 };

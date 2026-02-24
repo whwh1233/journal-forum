@@ -2,6 +2,7 @@
 .comment-management {
   max-width: 1200px;
   margin: 0 auto;
+  padding: var(--space-6, 24px);
 }
 
 .page-header {
@@ -35,7 +36,8 @@
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: 0.95rem;
-  background: white;
+  background: var(--color-background);
+  color: var(--color-text);
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
@@ -83,7 +85,7 @@
   text-align: center;
   padding: var(--space-10);
   color: var(--gray-500);
-  background: white;
+  background: var(--color-background);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
@@ -96,7 +98,7 @@
 }
 
 .comment-card {
-  background: white;
+  background: var(--color-background);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
   box-shadow: var(--shadow-md);
@@ -202,10 +204,11 @@
 
 .pagination-btn {
   padding: var(--space-2) var(--space-4);
-  background: white;
+  background: var(--color-background);
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
   font-size: 0.9rem;
+  color: var(--color-text);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
 }

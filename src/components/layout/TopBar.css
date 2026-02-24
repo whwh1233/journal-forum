@@ -1,0 +1,90 @@
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 52px;
+  background: var(--topbar-bg);
+  border-bottom: 1px solid var(--topbar-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 已登录：头像 + 用户名 */
+.top-bar-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px 0 6px;
+  border-radius: 20px;
+  border: 1px solid var(--topbar-user-border);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  max-width: 200px;
+}
+
+.top-bar-user:hover {
+  background: var(--topbar-user-hover-bg);
+  border-color: var(--topbar-user-hover-border);
+}
+
+.top-bar-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--nav-avatar-bg);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.top-bar-user-name {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--topbar-user-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* 未登录：登录按钮 */
+.top-bar-login-btn {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--topbar-login-border);
+  background: transparent;
+  color: var(--topbar-login-text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.top-bar-login-btn:hover {
+  background: var(--topbar-login-hover-bg);
+  border-color: var(--topbar-login-hover-border);
+  color: var(--topbar-login-hover-text);
+}
+
+@media (max-width: 767px) {
+  .top-bar { padding: 0 14px; }
+  .top-bar-user-name { max-width: 90px; }
+}

@@ -4,6 +4,7 @@ import { getUserActivity, getUserComments, getUserFavorites } from '../../../ser
 import { getFollowing } from '../../../services/followService';
 import { Link } from 'react-router-dom';
 import FollowButton from '../../follow/components/FollowButton';
+import PageHeader from '../../../components/layout/PageHeader';
 import './DashboardPage.css';
 
 const DashboardPage: React.FC = () => {
@@ -49,9 +50,9 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="dashboard-page container">
-      <h1>个人中心</h1>
-
+    <div className="dashboard-page">
+      <PageHeader title="个人中心" />
+      <div className="container">
       <div className="dashboard-tabs">
         <button
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
@@ -171,6 +172,7 @@ const DashboardPage: React.FC = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

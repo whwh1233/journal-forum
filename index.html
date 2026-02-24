@@ -5,6 +5,14 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>期刊论坛 - 学术期刊评价与交流平台</title>
+    <!-- 主题初始化：在 React 渲染前应用，避免闪烁 -->
+    <script>
+      (function() {
+        if (localStorage.getItem('app-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

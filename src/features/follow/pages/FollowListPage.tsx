@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getFollowers, getFollowing } from '../../../services/followService';
 import FollowButton from '../components/FollowButton';
+import PageHeader from '../../../components/layout/PageHeader';
 import './FollowListPage.css';
 
 interface FollowUser {
@@ -98,9 +99,10 @@ const FollowListPage: React.FC = () => {
   }
 
   return (
-    <div className="follow-list-page container">
+    <div className="follow-list-page">
+      <PageHeader title="关注列表" showBack />
+      <div className="container">
       <div className="follow-list-header">
-        <h1>用户关系</h1>
         <div className="follow-list-tabs">
           <button
             className={`follow-tab ${tab === 'following' ? 'active' : ''}`}
@@ -118,6 +120,7 @@ const FollowListPage: React.FC = () => {
       </div>
 
       {tab === 'followers' ? renderUserList(followers) : renderUserList(following)}
+      </div>
     </div>
   );
 };

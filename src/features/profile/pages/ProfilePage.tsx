@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getUserProfile } from '../../../services/userService';
 import { useAuth } from '../../../hooks/useAuth';
 import FollowButton from '../../follow/components/FollowButton';
+import PageHeader from '../../../components/layout/PageHeader';
 import type { UserProfile } from '../../../types';
 import './ProfilePage.css';
 
@@ -48,7 +49,9 @@ const ProfilePage: React.FC = () => {
   const isOwnProfile = user && user.id === profile.id.toString();
 
   return (
-    <div className="profile-page container">
+    <div className="profile-page">
+      <PageHeader title="用户资料" showBack backTo="/" />
+      <div className="container">
       <div className="profile-header">
         <div className="profile-avatar">
           {profile.avatar ? (
@@ -103,6 +106,7 @@ const ProfilePage: React.FC = () => {
           </Link>
         </div>
       )}
+      </div>
     </div>
   );
 };

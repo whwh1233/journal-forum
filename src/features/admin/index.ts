@@ -1,4 +1,3 @@
-export { default as AdminLayout } from './components/AdminLayout';
 export { default as Dashboard } from './components/Dashboard';
 export { default as UserManagement } from './components/UserManagement';
 export { default as JournalManagement } from './components/JournalManagement';

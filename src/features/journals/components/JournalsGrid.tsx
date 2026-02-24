@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useJournals } from '@/hooks/useJournals';
 import { Journal } from '@/types';
 import JournalCard from './JournalCard';
-import JournalDetailModal from './JournalDetailModal';
+import JournalDetailPanel from './JournalDetailPanel';
 import './JournalsGrid.css';
 
 const JournalsGrid: React.FC = () => {
@@ -43,7 +43,7 @@ const JournalsGrid: React.FC = () => {
           />
         ))}
       </div>
-      <JournalDetailModal
+      <JournalDetailPanel
         journal={selectedJournal}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
