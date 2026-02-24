@@ -6,6 +6,263 @@ All routes marked with `(auth)` require a valid JWT token in the `Authorization:
 
 ---
 
+## 🔑 Authentication API
+
+### Register User
+```
+POST /api/auth/register
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Validation:**
+- Email must be valid and unique
+- Password min length: 6
+
+**Response:**
+```json
+{
+  "token": "jwt-token-here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "user",
+    "createdAt": "2026-02-24T00:00:00.000Z"
+  }
+}
+```
+
+### Login User
+```
+POST /api/auth/login
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "jwt-token-here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "role": "user"
+  }
+}
+```
+
+**Error:** 401 if credentials invalid
+
+### Get Current User
+```
+GET /api/auth/me (auth)
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "name": "张三",
+  "avatar": "/uploads/avatars/user-1-123456.jpg",
+  "role": "user",
+  "createdAt": "2026-02-24T00:00:00.000Z"
+}
+```
+
+---
+
+## 📚 Journals API
+
+### Get All Journals
+```
+GET /api/journals?search=&category=&sortBy=latest
+```
+
+**Query Parameters:**
+- `search` (optional): Search in title and description
+- `category` (optional): Filter by category
+- `sortBy` (optional): `latest`, `rating`, `reviews`
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "title": "Journal Title",
+    "description": "Description...",
+    "category": "Computer Science",
+    "rating": 4.5,
+    "reviewCount": 10,
+    "imageUrl": "/images/journal.jpg",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+```
+
+### Get Journal Details
+```
+GET /api/journals/:id
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "title": "Journal Title",
+  "description": "Detailed description...",
+  "category": "Computer Science",
+  "publisher": "Publisher Name",
+  "issn": "1234-5678",
+  "website": "https://journal.com",
+  "rating": 4.5,
+  "reviewCount": 10,
+  "imageUrl": "/images/journal.jpg",
+  "createdAt": "2026-01-01T00:00:00.000Z"
+}
+```
+
+### Add Journal Review
+```
+POST /api/journals/:id/reviews
+```
+
+**Request Body:**
+```json
+{
+  "rating": 5,
+  "content": "Review content..."
+}
+```
+
+---
+
+## 🛡️ Admin API
+
+All admin routes require admin role and use the `(admin)` protection middleware.
+
+### Get Dashboard Statistics
+```
+GET /api/admin/stats (admin)
+```
+
+**Response:**
+```json
+{
+  "userCount": 100,
+  "journalCount": 50,
+  "commentCount": 500,
+  "activeUsers": 25
+}
+```
+
+### Get All Users
+```
+GET /api/admin/users (admin)
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "email": "user@example.com",
+    "name": "张三",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  }
+]
+```
+
+### Update User
+```
+PUT /api/admin/users/:id (admin)
+```
+
+**Request Body:**
+```json
+{
+  "role": "admin",
+  "status": "active"
+}
+```
+
+### Delete User
+```
+DELETE /api/admin/users/:id (admin)
+```
+
+### Create Journal
+```
+POST /api/admin/journals (admin)
+```
+
+**Request Body:**
+```json
+{
+  "title": "Journal Title",
+  "description": "Description...",
+  "category": "Computer Science",
+  "publisher": "Publisher Name",
+  "issn": "1234-5678",
+  "website": "https://journal.com"
+}
+```
+
+### Update Journal
+```
+PUT /api/admin/journals/:id (admin)
+```
+
+**Request Body:** Same as Create Journal
+
+### Delete Journal
+```
+DELETE /api/admin/journals/:id (admin)
+```
+
+### Get All Comments
+```
+GET /api/admin/comments (admin)
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "1-123-abc",
+    "userId": 1,
+    "userName": "张三",
+    "journalId": 1,
+    "journalTitle": "Journal Title",
+    "content": "Comment content...",
+    "rating": 5,
+    "createdAt": "2026-02-24T00:00:00.000Z",
+    "isDeleted": false
+  }
+]
+```
+
+### Delete Comment
+```
+DELETE /api/admin/comments/:id (admin)
+```
+
+---
+
 ## 📝 Comments API
 
 ### Get Comments by Journal

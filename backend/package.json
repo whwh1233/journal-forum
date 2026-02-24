@@ -21,7 +21,6 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
     "lowdb": "^5.1.0",
-    "mongoose": "^7.5.0",
     "multer": "^2.0.2",
     "nanoid": "^3.3.11"
   },
@@ -36,7 +35,7 @@
     "forum",
     "academic",
     "express",
-    "mongodb"
+    "lowdb"
   ],
   "author": "Journal Forum Team",
   "license": "MIT"

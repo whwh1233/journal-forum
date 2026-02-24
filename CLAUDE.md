@@ -32,25 +32,45 @@ journal-forum/
 ├── backend/
 │   ├── config/
 │   │   ├── databaseLowdb.js      # 生产数据库配置
-│   │   └── databaseTest.js       # 测试数据库配置
+│   │   ├── databaseTest.js       # 测试数据库配置
+│   │   └── admin.js              # 管理员配置
 │   ├── controllers/              # 路由处理器（*Lowdb.js 命名）
-│   ├── middleware/               # JWT 认证中间件
+│   ├── middleware/               # JWT 认证、管理员认证中间件
 │   ├── routes/                   # API 路由
 │   ├── __tests__/                # Jest 集成测试
+│   │   ├── integration/          # API 集成测试（完整）
+│   │   └── unit/                 # 单元测试（待补充）
 │   ├── database.json             # JSON 数据库文件
+│   ├── .env                      # 后端环境变量（生产）
+│   ├── .env.test                 # 后端测试环境变量
 │   └── server.js
 ├── src/
-│   ├── components/               # 通用 UI 组件
-│   ├── contexts/                 # React Context（认证等）
+│   ├── components/
+│   │   └── layout/               # 布局组件
+│   │       ├── AppLayout.*       # 主应用布局
+│   │       ├── PageHeader.*      # 页面头部
+│   │       ├── SideNav.*         # 侧边导航
+│   │       ├── ThemeSwitcher.*   # 主题切换器
+│   │       └── TopBar.*          # 顶部导航栏
+│   ├── contexts/                 # React Context
+│   │   ├── AuthContext.tsx       # 认证上下文
+│   │   └── AuthModalContext.tsx  # 认证弹窗上下文
 │   ├── features/                 # 功能模块
-│   │   ├── auth/
-│   │   ├── comments/
-│   │   ├── profile/
-│   │   ├── favorite/
-│   │   ├── follow/
-│   │   └── dashboard/
+│   │   ├── auth/                 # 认证
+│   │   ├── comments/             # 评论
+│   │   ├── journals/             # 期刊
+│   │   ├── profile/              # 个人资料
+│   │   ├── favorite/             # 收藏
+│   │   ├── follow/               # 关注
+│   │   ├── dashboard/            # 仪表盘
+│   │   └── admin/                # 管理后台
 │   ├── services/                 # API 客户端（axios）
-│   └── types/                    # TypeScript 类型定义
+│   ├── types/                    # TypeScript 类型定义
+│   └── __tests__/                # 前端测试
+│       ├── components/           # 组件测试（完整）
+│       └── integration/          # 集成测试（待补充）
+├── .env.local                    # 前端环境变量
+├── .env.example                  # 环境变量示例
 └── CLAUDE.md
 ```
 
@@ -88,13 +108,23 @@ npm run test:coverage
 2. 编辑 `backend/database.json`
 3. 找到该用户，将 `role` 从 `"user"` 改为 `"admin"`
 
+## 环境变量配置
+
+项目使用多个 `.env` 文件：
+
+- **`backend/.env`**: 后端生产环境变量（JWT_SECRET, PORT 等）
+- **`backend/.env.test`**: 后端测试环境变量（已加入 `.gitignore`，不要提交）
+- **`.env.local`**: 前端环境变量（位于项目根目录）
+- **`.env.example`**: 环境变量示例模板
+
 ## 重要注意事项
 
 - **数据库**: LowDB 仅适合开发，生产应迁移至 PostgreSQL/MongoDB
 - **端口冲突**: `netstat -ano | findstr :3001` 查看占用进程
-- **`.env.test`** 含测试 JWT 密钥，已加入 `.gitignore`，不要提交
-- 后端控制器文件以 `Lowdb.js` 结尾（如 `userControllerLowdb.js`）
-- 评论支持嵌套（最多 3 层），删除后显示为"[该评论已被删除]"
+- **控制器命名**: 所有活跃的后端控制器文件以 `Lowdb.js` 结尾（如 `userControllerLowdb.js`）
+- **评论系统**: 支持嵌套（最多 3 层），删除后显示为"[该评论已被删除]"
+- **用户数据结构**: 包含 name, avatar, bio, location, institution, website 等字段
+- **测试覆盖**: 后端集成测试完整，前端组件测试完整，单元测试待补充
 
 ## 已实现功能
 

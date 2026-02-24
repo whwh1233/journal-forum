@@ -5,7 +5,7 @@
       "title": "计算机科学学报",
       "issn": "1000-1234",
       "category": "computer-science",
-      "rating": 4.7,
+      "rating": 4.8,
       "description": "《计算机科学学报》是中国计算机学会主办的学术期刊，主要刊登计算机科学领域的前沿研究成果，包括人工智能、机器学习、大数据分析等方向。1312321",
       "reviews": [
         {
@@ -190,18 +190,40 @@
       "id": 1,
       "email": "1249156074@qq.com",
       "password": "$2a$12$F4RNKyAzhWu3KUTH.sloqOa1O7MSQbgZ1gIvfSz0wul7wU6azIFxW",
+      "name": "",
+      "avatar": "",
+      "bio": "",
+      "location": "",
+      "institution": "",
+      "website": "",
+      "role": "user",
+      "status": "active",
       "createdAt": "2026-02-07T04:41:53.910Z"
     },
     {
       "id": 2,
       "email": "1@qq.com",
       "password": "$2a$12$U39E3rKbR9B.MHcdkJ5JW.vK0RIbxqbgmm68TM0ljgfEbd.iFhXXW",
+      "name": "",
+      "avatar": "",
+      "bio": "",
+      "location": "",
+      "institution": "",
+      "website": "",
+      "role": "user",
+      "status": "active",
       "createdAt": "2026-02-07T12:32:01.790Z"
     },
     {
       "id": 3,
       "email": "wh@qq.com",
       "password": "$2a$12$K73T6BS.rPbhRDQ4u002ZOBXOh28cZ2y/u/GBLATKNQnAnXk3pCXi",
+      "name": "",
+      "avatar": "",
+      "bio": "",
+      "location": "",
+      "institution": "",
+      "website": "",
       "role": "admin",
       "status": "active",
       "createdAt": "2026-02-07T12:58:43.155Z"
@@ -210,6 +232,12 @@
       "id": 4,
       "email": "newuser@test.com",
       "password": "$2a$12$LmWBb6xLb5QPeq2Gs8ZvNuZrIRenVsf8FPuMrAuszd8FbVF80lh32",
+      "name": "",
+      "avatar": "",
+      "bio": "",
+      "location": "",
+      "institution": "",
+      "website": "",
       "role": "user",
       "status": "active",
       "createdAt": "2026-02-09T15:19:01.487Z"
@@ -398,7 +426,7 @@
       "userName": "newuser",
       "journalId": 1,
       "parentId": null,
-      "content": "����һ���µ����۲���",
+      "content": "这是一个新的评论测试",
       "rating": 5,
       "createdAt": "2026-02-09T15:19:10.144Z",
       "isDeleted": false
@@ -497,6 +525,17 @@
       "content": "？？？",
       "createdAt": "2026-02-09T15:57:46.326Z",
       "isDeleted": false
+    },
+    {
+      "id": "1-1770824713517-hvspe6",
+      "userId": 1,
+      "userName": "1249156074",
+      "journalId": 1,
+      "parentId": null,
+      "content": "还不错",
+      "rating": 5,
+      "createdAt": "2026-02-11T15:45:13.517Z",
+      "isDeleted": false
     }
   ],
   "favorites": [
@@ -547,6 +586,12 @@
       "userId": 1,
       "journalId": 1,
       "createdAt": "2026-02-10T16:38:44.248Z"
+    },
+    {
+      "id": 10,
+      "userId": 1,
+      "journalId": 2,
+      "createdAt": "2026-02-11T15:45:15.596Z"
     }
   ],
   "follows": [
