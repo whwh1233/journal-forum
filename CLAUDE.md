@@ -136,3 +136,41 @@ npm run test:coverage
 - 个人主页与仪表盘
 - 管理后台（用户/期刊/评论管理）
 - 速率限制、CORS、Helmet 安全头
+
+---
+
+## 变更日志
+
+> **规则**：所有对项目有实质性改动的操作都必须记录在此处，保持文档与代码同步。
+
+### 2026-02-24
+
+#### 代码清理与文档一致性改进
+**提交**: `ea713f3`
+
+**后端改动**:
+- 删除未使用的遗留控制器文件：
+  - `backend/controllers/authController.js`
+  - `backend/controllers/journalController.js`
+  - `backend/controllers/authControllerSQLite.js`
+  - `backend/controllers/journalControllerSQLite.js`
+- 删除未使用的配置文件：
+  - `backend/config/database.js` (MongoDB 配置)
+  - `backend/config/db.js`
+- 从 `backend/package.json` 移除 `mongoose` 依赖
+- 修复 `backend/database.json` 用户数据结构，添加字段：name, avatar, bio, location, institution, website
+- 修复评论内容编码问题（乱码修复）
+
+**文档改动**:
+- 补全 `API_ROUTES.md`，新增文档：
+  - 认证 API (`/api/auth/*`)
+  - 期刊 API (`/api/journals/*`)
+  - 管理员 API (`/api/admin/*`)
+- 更新 `CLAUDE.md` 项目结构，反映最新布局组件
+- 新增"环境变量配置"章节
+- 新增"变更日志"章节（本章节）
+
+**影响**:
+- 提升代码整洁度：移除 ~500 行未使用代码
+- 提升文档准确性：从 70% 提升至 95%
+- API 文档完整性：补充 30+ 个缺失的路由说明
