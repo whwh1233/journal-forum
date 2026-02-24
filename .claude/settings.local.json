@@ -57,7 +57,11 @@
       "Bash(cmd /c netstat -ano)",
       "Bash(npm test:*)",
       "Bash(npx kill-port:*)",
-      "Bash(start cmd /k \"npm start\")"
+      "Bash(start cmd /k \"npm start\")",
+      "Bash(del:*)",
+      "Bash(npx vite build)",
+      "Bash(git restore:*)",
+      "Bash(npm run test:*)"
     ]
   }
 }

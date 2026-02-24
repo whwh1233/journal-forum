@@ -252,6 +252,239 @@
   --panel-border: #30363d;
 }
 
+/* ══════════════════════════════════════════════
+   主题系统 - 多配色方案
+   ══════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════
+   主题 1: Warm Nature（温暖自然）
+   ══════════════════════════════════════════════ */
+[data-theme="warm-nature"] {
+  /* 用户原始色板 */
+  --theme-tea-green: #ccd5ae;
+  --theme-beige: #e9edc9;
+  --theme-cornsilk: #fefae0;
+  --theme-papaya-whip: #faedcd;
+  --theme-light-bronze: #d4a373;
+
+  /* 背景层次 */
+  --color-page-bg: var(--theme-cornsilk);
+  --color-background: var(--theme-papaya-whip);
+  --color-surface: var(--theme-beige);
+
+  /* 主色 */
+  --color-accent: var(--theme-light-bronze);
+  --color-accent-hover: #c9935a;
+  --color-primary: #8b6f47;
+
+  /* 文字（补充深色） */
+  --color-text: #3d3328;
+  --color-text-muted: #6b5d4f;
+  --color-text-secondary: #8b7d6b;
+
+  /* 边框 */
+  --color-border: var(--theme-tea-green);
+  --color-border-light: #dce5be;
+
+  /* 导航栏 */
+  --nav-bg: #b8956a;
+  --nav-item-color: #f5ede0;
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-item-hover-color: #ffffff;
+  --nav-active-bg: var(--theme-light-bronze);
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #f5ede0;
+  --nav-toggle-color: #f5ede0;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-divider: rgba(255, 255, 255, 0.1);
+  --nav-avatar-bg: var(--theme-light-bronze);
+  --nav-user-color: #f5ede0;
+
+  /* 顶部栏 */
+  --topbar-bg: var(--theme-beige);
+  --topbar-border: var(--theme-tea-green);
+  --topbar-user-border: var(--theme-tea-green);
+  --topbar-user-hover-bg: var(--theme-papaya-whip);
+  --topbar-user-hover-border: var(--theme-light-bronze);
+  --topbar-user-text: #3d3328;
+  --topbar-login-border: var(--theme-light-bronze);
+  --topbar-login-text: #3d3328;
+  --topbar-login-hover-bg: var(--theme-light-bronze);
+  --topbar-login-hover-border: var(--theme-light-bronze);
+  --topbar-login-hover-text: #ffffff;
+
+  /* 内容面板 */
+  --panel-bg: var(--theme-papaya-whip);
+  --panel-border: var(--theme-tea-green);
+
+  /* 按钮 */
+  --color-btn-primary: var(--theme-light-bronze);
+  --color-btn-primary-hover: #c9935a;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary: #8b7d6b;
+  --color-btn-secondary-hover: #6b5d4f;
+  --color-btn-danger: #c97064;
+  --color-btn-danger-hover: #b35d52;
+
+  /* 状态色（暖色调版本） */
+  --color-success: #7ba35a;
+  --color-success-light: #e5f2d9;
+  --color-success-dark: #5d7d44;
+  --color-error: #c97064;
+  --color-error-light: #f9e6e3;
+  --color-error-dark: #a85b50;
+  --color-warning: #d9a961;
+  --color-warning-light: #f9eed9;
+  --color-warning-dark: #b88a4a;
+  --color-info: var(--theme-light-bronze);
+  --color-info-light: #f5ede0;
+  --color-info-dark: #b8956a;
+
+  /* 链接 */
+  --color-link: var(--theme-light-bronze);
+  --color-link-hover: #b8956a;
+
+  /* 灰度（棕色系） */
+  --gray-50: #faf8f4;
+  --gray-100: #f5f0e8;
+  --gray-200: #e8dfd0;
+  --gray-300: #d4c8b0;
+  --gray-400: #b8a88a;
+  --gray-500: #8b7d6b;
+  --gray-600: #6b5d4f;
+  --gray-700: #4d4339;
+  --gray-800: #3d3328;
+  --gray-900: #2a231c;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(61, 51, 40, 0.08);
+  --shadow-md: 0 4px 6px rgba(61, 51, 40, 0.1);
+  --shadow-lg: 0 10px 15px rgba(61, 51, 40, 0.12);
+  --shadow-xl: 0 20px 25px rgba(61, 51, 40, 0.15);
+
+  /* 焦点环 */
+  --focus-ring: 0 0 0 3px rgba(212, 163, 115, 0.3);
+  --focus-ring-error: 0 0 0 3px rgba(201, 112, 100, 0.3);
+  --focus-ring-success: 0 0 0 3px rgba(123, 163, 90, 0.3);
+}
+
+/* ══════════════════════════════════════════════
+   主题 2: Sunset Glow（日落辉光）- 橙黄渐变
+   ══════════════════════════════════════════════ */
+[data-theme="sunset-glow"] {
+  /* 用户原始色板（橙到黄渐变） */
+  --theme-harvest-orange: #ff7b00;
+  --theme-dark-orange: #ff8800;
+  --theme-deep-saffron: #ff9500;
+  --theme-amber-glow: #ffa200;
+  --theme-orange: #ffaa00;
+  --theme-amber-flame: #ffb700;
+  --theme-school-bus-yellow: #ffc300;
+  --theme-bright-amber: #ffd000;
+  --theme-bright-gold: #ffdd00;
+  --theme-sunbeam-yellow: #ffea00;
+
+  /* 背景层次（使用浅黄到米白） */
+  --color-page-bg: #fffbf0;
+  --color-background: #fff8e1;
+  --color-surface: #fff3cc;
+
+  /* 主色（使用中间橙色） */
+  --color-accent: var(--theme-amber-glow);
+  --color-accent-hover: var(--theme-deep-saffron);
+  --color-primary: #cc7700;
+
+  /* 文字（深棕橙色，确保对比度） */
+  --color-text: #4a2800;
+  --color-text-muted: #8b5a00;
+  --color-text-secondary: #b87700;
+
+  /* 边框（浅橙色） */
+  --color-border: #ffe0b3;
+  --color-border-light: #fff0d9;
+
+  /* 导航栏（深橙色） */
+  --nav-bg: var(--theme-harvest-orange);
+  --nav-item-color: #fff5e6;
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-item-hover-color: #ffffff;
+  --nav-active-bg: var(--theme-dark-orange);
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #fff5e6;
+  --nav-toggle-color: #fff5e6;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-divider: rgba(255, 255, 255, 0.1);
+  --nav-avatar-bg: var(--theme-amber-glow);
+  --nav-user-color: #fff5e6;
+
+  /* 顶部栏（浅黄色） */
+  --topbar-bg: var(--theme-bright-gold);
+  --topbar-border: var(--theme-school-bus-yellow);
+  --topbar-user-border: var(--theme-amber-flame);
+  --topbar-user-hover-bg: var(--theme-school-bus-yellow);
+  --topbar-user-hover-border: var(--theme-amber-glow);
+  --topbar-user-text: #4a2800;
+  --topbar-login-border: var(--theme-amber-glow);
+  --topbar-login-text: #4a2800;
+  --topbar-login-hover-bg: var(--theme-amber-glow);
+  --topbar-login-hover-border: var(--theme-amber-glow);
+  --topbar-login-hover-text: #ffffff;
+
+  /* 内容面板 */
+  --panel-bg: var(--color-background);
+  --panel-border: #ffe0b3;
+
+  /* 按钮 */
+  --color-btn-primary: var(--theme-amber-glow);
+  --color-btn-primary-hover: var(--theme-deep-saffron);
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary: #b87700;
+  --color-btn-secondary-hover: #8b5a00;
+  --color-btn-danger: #d84315;
+  --color-btn-danger-hover: #bf360c;
+
+  /* 状态色（橙黄色调版本） */
+  --color-success: #7cb342;
+  --color-success-light: #dcedc8;
+  --color-success-dark: #558b2f;
+  --color-error: #d84315;
+  --color-error-light: #ffccbc;
+  --color-error-dark: #bf360c;
+  --color-warning: var(--theme-amber-flame);
+  --color-warning-light: #fff9e6;
+  --color-warning-dark: var(--theme-dark-orange);
+  --color-info: var(--theme-amber-glow);
+  --color-info-light: #fff5e6;
+  --color-info-dark: var(--theme-harvest-orange);
+
+  /* 链接 */
+  --color-link: var(--theme-amber-glow);
+  --color-link-hover: var(--theme-harvest-orange);
+
+  /* 灰度（暖橙色系） */
+  --gray-50: #fffbf5;
+  --gray-100: #fff5e6;
+  --gray-200: #ffe0b3;
+  --gray-300: #ffcc80;
+  --gray-400: #ffb74d;
+  --gray-500: #b87700;
+  --gray-600: #8b5a00;
+  --gray-700: #663d00;
+  --gray-800: #4a2800;
+  --gray-900: #331c00;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(74, 40, 0, 0.08);
+  --shadow-md: 0 4px 6px rgba(74, 40, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(74, 40, 0, 0.12);
+  --shadow-xl: 0 20px 25px rgba(74, 40, 0, 0.15);
+
+  /* 焦点环 */
+  --focus-ring: 0 0 0 3px rgba(255, 162, 0, 0.3);
+  --focus-ring-error: 0 0 0 3px rgba(216, 67, 21, 0.3);
+  --focus-ring-success: 0 0 0 3px rgba(124, 179, 66, 0.3);
+}
+
 /* Dark Mode - Clean Dark Theme */
 @media (prefers-color-scheme: dark) {
   :root {

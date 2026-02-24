@@ -4,6 +4,7 @@ import { JournalProvider } from '@/contexts/JournalContext';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
@@ -153,17 +154,19 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <JournalProvider>
-        <ToastProvider>
-          <AuthModalProvider>
-            <div className="app">
-              <AppContent />
-            </div>
-          </AuthModalProvider>
-        </ToastProvider>
-      </JournalProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <JournalProvider>
+          <ToastProvider>
+            <AuthModalProvider>
+              <div className="app">
+                <AppContent />
+              </div>
+            </AuthModalProvider>
+          </ToastProvider>
+        </JournalProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
