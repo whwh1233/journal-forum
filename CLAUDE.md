@@ -10,6 +10,7 @@
 - **后端**: Node.js + Express (port 3001)
 - **数据库**: LowDB（JSON 文件数据库，`backend/database.json`）
 - **认证**: JWT + bcryptjs
+- **主题系统**: React Context + CSS Variables (6 个预设主题)
 - **前端测试**: Vitest
 - **后端测试**: Jest
 
@@ -46,15 +47,18 @@ journal-forum/
 │   └── server.js
 ├── src/
 │   ├── components/
-│   │   └── layout/               # 布局组件
-│   │       ├── AppLayout.*       # 主应用布局
-│   │       ├── PageHeader.*      # 页面头部
-│   │       ├── SideNav.*         # 侧边导航
-│   │       ├── ThemeSwitcher.*   # 主题切换器
-│   │       └── TopBar.*          # 顶部导航栏
+│   │   ├── layout/               # 布局组件
+│   │   │   ├── AppLayout.*       # 主应用布局
+│   │   │   ├── PageHeader.*      # 页面头部
+│   │   │   ├── SideNav.*         # 侧边导航
+│   │   │   └── TopBar.*          # 顶部导航栏
+│   │   └── common/               # 通用组件
+│   │       ├── ThemePicker.*     # 主题选择器
+│   │       └── UserDropdown.*    # 用户下拉菜单
 │   ├── contexts/                 # React Context
 │   │   ├── AuthContext.tsx       # 认证上下文
-│   │   └── AuthModalContext.tsx  # 认证弹窗上下文
+│   │   ├── AuthModalContext.tsx  # 认证弹窗上下文
+│   │   └── ThemeContext.tsx      # 主题管理上下文
 │   ├── features/                 # 功能模块
 │   │   ├── auth/                 # 认证
 │   │   ├── comments/             # 评论
@@ -71,7 +75,8 @@ journal-forum/
 │       └── integration/          # 集成测试（待补充）
 ├── .env.local                    # 前端环境变量
 ├── .env.example                  # 环境变量示例
-└── CLAUDE.md
+├── CLAUDE.md                     # 项目指南
+└── THEMES.md                     # 主题系统使用文档
 ```
 
 ## API 路由
@@ -136,6 +141,39 @@ npm run test:coverage
 - 个人主页与仪表盘
 - 管理后台（用户/期刊/评论管理）
 - 速率限制、CORS、Helmet 安全头
+- **多主题系统**（6 个预设主题，可自由切换）
+
+## 主题系统
+
+项目内置完整的多主题色彩系统，支持用户自定义视觉体验。
+
+### 可用主题
+
+1. **默认蓝** - 经典学术蓝色系，稳重专业
+2. **温暖自然** - 柔和米黄色系，温馨舒适
+3. **日落辉光** - 橙黄渐变色系，活力热情
+4. **复古橄榄** - 优雅自然色系，复古怀旧
+5. **柔和大地** - 粉褐柔和色系，温柔恬静
+6. **暖秋大地** - 金黄暖秋色系，丰收氛围
+
+### 技术实现
+
+- **架构**: React Context + CSS Variables
+- **持久化**: localStorage 保存用户偏好
+- **切换方式**: TopBar 右侧调色板图标，可视化主题选择器
+- **深浅模式**: 支持浅色/深色切换（当前仅默认蓝主题支持深色）
+- **扩展性**: 详见 `THEMES.md` 文档，支持快速添加新主题
+
+### 核心文件
+
+```
+src/
+├── contexts/ThemeContext.tsx       # 主题管理上下文
+├── components/common/
+│   ├── ThemePicker.tsx             # 主题选择器组件
+│   └── ThemePicker.css             # 主题选择器样式
+└── styles/global.css               # 6 个主题 CSS 变量定义
+```
 
 ---
 
@@ -154,6 +192,7 @@ npm run test:coverage
 - **UI 架构**: 完成布局系统重构，统一使用 AppLayout + TopBar + SideNav + PageHeader 组件
 - **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理，所有用户可通过 SideNav 和 TopBar 下拉菜单退出登录
 - **期刊交互**: JournalDetailModal 改为 JournalDetailPanel，交互更流畅
+- **主题系统**: 实现完整的多主题色彩系统，支持 6 个精美主题（默认蓝、温暖自然、日落辉光、复古橄榄、柔和大地、暖秋大地）
 
 ### 🔴 优先待办
 
