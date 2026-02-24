@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type ThemeId = 'default' | 'warm-nature' | 'sunset-glow' | 'vintage-olive';
+export type ThemeId = 'default' | 'warm-nature' | 'sunset-glow' | 'vintage-olive' | 'soft-earth' | 'warm-autumn';
 export type ThemeMode = 'light' | 'dark';
 
 interface ThemeConfig {
@@ -53,6 +53,26 @@ const THEMES: ThemeConfig[] = [
       preview1: '#a98467',
       preview2: '#adc178',
       preview3: '#f0ead2',
+    },
+  },
+  {
+    id: 'soft-earth',
+    name: '柔和大地',
+    description: '粉褐柔和色系',
+    colors: {
+      preview1: '#cb997e',
+      preview2: '#ddbea9',
+      preview3: '#fff1e6',
+    },
+  },
+  {
+    id: 'warm-autumn',
+    name: '暖秋大地',
+    description: '金黄暖秋色系',
+    colors: {
+      preview1: '#ffcb69',
+      preview2: '#d08c60',
+      preview3: '#f1dca7',
     },
   },
 ];

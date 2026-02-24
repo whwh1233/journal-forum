@@ -597,6 +597,234 @@
   --focus-ring-success: 0 0 0 3px rgba(125, 155, 90, 0.3);
 }
 
+/* ══════════════════════════════════════════════
+   主题 4: Soft Earth（柔和大地）
+   ══════════════════════════════════════════════ */
+[data-theme="soft-earth"] {
+  /* 用户原始色板（粉褐柔和色系） */
+  --theme-light-bronze: #cb997e;
+  --theme-powder-petal: #eddcd2;
+  --theme-linen: #fff1e6;
+  --theme-parchment: #f0efeb;
+  --theme-desert-sand: #ddbea9;
+  --theme-dry-sage: #a5a58d;
+  --theme-ash-grey: #b7b7a4;
+
+  /* 背景层次 */
+  --color-page-bg: var(--theme-linen);
+  --color-background: var(--theme-parchment);
+  --color-surface: var(--theme-powder-petal);
+
+  /* 主色 */
+  --color-accent: var(--theme-light-bronze);
+  --color-accent-hover: #b88569;
+  --color-primary: #9d7761;
+
+  /* 文字 */
+  --color-text: #5d4e42;
+  --color-text-muted: #8b7d71;
+  --color-text-secondary: #a89685;
+
+  /* 边框 */
+  --color-border: var(--theme-desert-sand);
+  --color-border-light: #e9d5c3;
+
+  /* 导航栏（干鼠尾草色） */
+  --nav-bg: var(--theme-dry-sage);
+  --nav-item-color: #f5f0e8;
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-item-hover-color: #ffffff;
+  --nav-active-bg: var(--theme-light-bronze);
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #f5f0e8;
+  --nav-toggle-color: #f5f0e8;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-divider: rgba(255, 255, 255, 0.1);
+  --nav-avatar-bg: var(--theme-light-bronze);
+  --nav-user-color: #f5f0e8;
+
+  /* 顶部栏 */
+  --topbar-bg: var(--theme-powder-petal);
+  --topbar-border: var(--theme-desert-sand);
+  --topbar-user-border: var(--theme-desert-sand);
+  --topbar-user-hover-bg: #e4cfc0;
+  --topbar-user-hover-border: var(--theme-light-bronze);
+  --topbar-user-text: #5d4e42;
+  --topbar-login-border: var(--theme-light-bronze);
+  --topbar-login-text: #5d4e42;
+  --topbar-login-hover-bg: var(--theme-light-bronze);
+  --topbar-login-hover-border: var(--theme-light-bronze);
+  --topbar-login-hover-text: #ffffff;
+
+  /* 内容面板 */
+  --panel-bg: var(--color-background);
+  --panel-border: var(--theme-desert-sand);
+
+  /* 按钮 */
+  --color-btn-primary: var(--theme-light-bronze);
+  --color-btn-primary-hover: #b88569;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary: #8b7d71;
+  --color-btn-secondary-hover: #5d4e42;
+  --color-btn-danger: #b5705f;
+  --color-btn-danger-hover: #9d5c4d;
+
+  /* 状态色（柔和色调版本） */
+  --color-success: #8ba580;
+  --color-success-light: #e8f0e3;
+  --color-success-dark: #6d8368;
+  --color-error: #b5705f;
+  --color-error-light: #f5e8e3;
+  --color-error-dark: #9d5c4d;
+  --color-warning: var(--theme-light-bronze);
+  --color-warning-light: #f5ede3;
+  --color-warning-dark: #b88569;
+  --color-info: var(--theme-dry-sage);
+  --color-info-light: #e8ebe3;
+  --color-info-dark: #8a8d74;
+
+  /* 链接 */
+  --color-link: var(--theme-light-bronze);
+  --color-link-hover: #9d7761;
+
+  /* 灰度（柔和褐色系） */
+  --gray-50: #faf8f5;
+  --gray-100: #f5f0e8;
+  --gray-200: #e9d5c3;
+  --gray-300: var(--theme-desert-sand);
+  --gray-400: var(--theme-ash-grey);
+  --gray-500: #8b7d71;
+  --gray-600: #6d6159;
+  --gray-700: #5d4e42;
+  --gray-800: #4a3d33;
+  --gray-900: #362d24;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(93, 78, 66, 0.08);
+  --shadow-md: 0 4px 6px rgba(93, 78, 66, 0.1);
+  --shadow-lg: 0 10px 15px rgba(93, 78, 66, 0.12);
+  --shadow-xl: 0 20px 25px rgba(93, 78, 66, 0.15);
+
+  /* 焦点环 */
+  --focus-ring: 0 0 0 3px rgba(203, 153, 126, 0.3);
+  --focus-ring-error: 0 0 0 3px rgba(181, 112, 95, 0.3);
+  --focus-ring-success: 0 0 0 3px rgba(139, 165, 128, 0.3);
+}
+
+/* ══════════════════════════════════════════════
+   主题 5: Warm Autumn（暖秋大地）
+   ══════════════════════════════════════════════ */
+[data-theme="warm-autumn"] {
+  /* 用户原始色板（暖秋色系） */
+  --theme-dusty-olive: #797d62;
+  --theme-palm-leaf: #9b9b7a;
+  --theme-desert-sand: #d9ae94;
+  --theme-soft-peach: #f1dca7;
+  --theme-golden-pollen: #ffcb69;
+  --theme-toasted-almond: #d08c60;
+  --theme-dusty-taupe: #997b66;
+
+  /* 背景层次 */
+  --color-page-bg: #fef9f0;
+  --color-background: #fdf5e6;
+  --color-surface: var(--theme-soft-peach);
+
+  /* 主色 */
+  --color-accent: var(--theme-toasted-almond);
+  --color-accent-hover: #bd7a51;
+  --color-primary: var(--theme-dusty-taupe);
+
+  /* 文字 */
+  --color-text: #4d3f33;
+  --color-text-muted: #7a6555;
+  --color-text-secondary: var(--theme-dusty-taupe);
+
+  /* 边框 */
+  --color-border: #e5cdb0;
+  --color-border-light: #f0e0cc;
+
+  /* 导航栏（深橄榄色） */
+  --nav-bg: var(--theme-dusty-olive);
+  --nav-item-color: #ebe8dc;
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-item-hover-color: #f5f2e8;
+  --nav-active-bg: var(--theme-toasted-almond);
+  --nav-active-color: #ffffff;
+  --nav-brand-color: #ebe8dc;
+  --nav-toggle-color: #ebe8dc;
+  --nav-toggle-hover-bg: rgba(255, 255, 255, 0.15);
+  --nav-divider: rgba(255, 255, 255, 0.1);
+  --nav-avatar-bg: var(--theme-toasted-almond);
+  --nav-user-color: #ebe8dc;
+
+  /* 顶部栏 */
+  --topbar-bg: var(--theme-golden-pollen);
+  --topbar-border: var(--theme-soft-peach);
+  --topbar-user-border: var(--theme-toasted-almond);
+  --topbar-user-hover-bg: #ffbe4d;
+  --topbar-user-hover-border: var(--theme-toasted-almond);
+  --topbar-user-text: #4d3f33;
+  --topbar-login-border: var(--theme-toasted-almond);
+  --topbar-login-text: #4d3f33;
+  --topbar-login-hover-bg: var(--theme-toasted-almond);
+  --topbar-login-hover-border: var(--theme-toasted-almond);
+  --topbar-login-hover-text: #ffffff;
+
+  /* 内容面板 */
+  --panel-bg: var(--color-background);
+  --panel-border: #e5cdb0;
+
+  /* 按钮 */
+  --color-btn-primary: var(--theme-toasted-almond);
+  --color-btn-primary-hover: #bd7a51;
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary: var(--theme-dusty-taupe);
+  --color-btn-secondary-hover: #7a6555;
+  --color-btn-danger: #c56a52;
+  --color-btn-danger-hover: #a85542;
+
+  /* 状态色（暖秋色调版本） */
+  --color-success: #88a060;
+  --color-success-light: #e8f0dc;
+  --color-success-dark: #6d804d;
+  --color-error: #c56a52;
+  --color-error-light: #f5e3dc;
+  --color-error-dark: #a85542;
+  --color-warning: var(--theme-golden-pollen);
+  --color-warning-light: #fff8e6;
+  --color-warning-dark: var(--theme-toasted-almond);
+  --color-info: var(--theme-palm-leaf);
+  --color-info-light: #e8ebe3;
+  --color-info-dark: var(--theme-dusty-olive);
+
+  /* 链接 */
+  --color-link: var(--theme-toasted-almond);
+  --color-link-hover: var(--theme-dusty-taupe);
+
+  /* 灰度（暖褐色系） */
+  --gray-50: #fdfaf5;
+  --gray-100: #f9f3e8;
+  --gray-200: #e5cdb0;
+  --gray-300: var(--theme-desert-sand);
+  --gray-400: var(--theme-palm-leaf);
+  --gray-500: var(--theme-dusty-taupe);
+  --gray-600: #7a6555;
+  --gray-700: #5d4f42;
+  --gray-800: #4d3f33;
+  --gray-900: #3a2f24;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(77, 63, 51, 0.08);
+  --shadow-md: 0 4px 6px rgba(77, 63, 51, 0.1);
+  --shadow-lg: 0 10px 15px rgba(77, 63, 51, 0.12);
+  --shadow-xl: 0 20px 25px rgba(77, 63, 51, 0.15);
+
+  /* 焦点环 */
+  --focus-ring: 0 0 0 3px rgba(208, 140, 96, 0.3);
+  --focus-ring-error: 0 0 0 3px rgba(197, 106, 82, 0.3);
+  --focus-ring-success: 0 0 0 3px rgba(136, 160, 96, 0.3);
+}
+
 /* Dark Mode - Clean Dark Theme */
 @media (prefers-color-scheme: dark) {
   :root {
