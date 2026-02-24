@@ -97,7 +97,7 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
 
       {/* 底部用户区 */}
       <div className="side-nav-bottom">
-        {isAdmin && isAuthenticated && (
+        {isAuthenticated && (
           <button
             className="side-nav-item side-nav-btn"
             onClick={handleLogout}

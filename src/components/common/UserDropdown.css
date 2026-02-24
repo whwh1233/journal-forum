@@ -1,0 +1,133 @@
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 36px;
+  padding: 0 12px 0 6px;
+  border-radius: 20px;
+  border: 1px solid var(--topbar-user-border);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  max-width: 200px;
+}
+
+.user-dropdown-trigger:hover {
+  background: var(--topbar-user-hover-bg);
+  border-color: var(--topbar-user-hover-border);
+}
+
+.user-dropdown-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--nav-avatar-bg);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-dropdown-name {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--topbar-user-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.user-dropdown-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: var(--topbar-user-text);
+}
+
+.user-dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background 0.15s, color 0.15s;
+}
+
+.user-dropdown-item:hover {
+  background: var(--gray-100);
+}
+
+.user-dropdown-item.logout {
+  color: var(--color-error);
+}
+
+.user-dropdown-item.logout:hover {
+  background: var(--color-error-light);
+}
+
+.user-dropdown-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+.dropdown-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 移动端适配 */
+@media (max-width: 767px) {
+  .user-dropdown-menu {
+    right: -10px;
+  }
+}

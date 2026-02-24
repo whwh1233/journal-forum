@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
 import ThemeSwitcher from './ThemeSwitcher';
+import UserDropdown from '@/components/common/UserDropdown';
 import './TopBar.css';
 
 const TopBar: React.FC = () => {
@@ -21,14 +22,7 @@ const TopBar: React.FC = () => {
         <ThemeSwitcher />
 
         {isAuthenticated ? (
-          <button
-            className="top-bar-user"
-            onClick={() => navigate('/dashboard')}
-            title="个人中心"
-          >
-            <div className="top-bar-avatar">{userInitial}</div>
-            <span className="top-bar-user-name">{userName}</span>
-          </button>
+          <UserDropdown userName={userName} userInitial={userInitial} />
         ) : (
           <button className="top-bar-login-btn" onClick={openAuthModal}>
             登录 / 注册

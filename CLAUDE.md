@@ -152,7 +152,7 @@ npm run test:coverage
 - **项目结构**: CLAUDE.md 已同步最新的布局组件结构
 - **编码问题**: database.json 评论内容乱码已修复
 - **UI 架构**: 完成布局系统重构，统一使用 AppLayout + TopBar + SideNav + PageHeader 组件
-- **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理
+- **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理，所有用户可通过 SideNav 和 TopBar 下拉菜单退出登录
 - **期刊交互**: JournalDetailModal 改为 JournalDetailPanel，交互更流畅
 
 ### 🔴 优先待办
