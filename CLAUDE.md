@@ -151,9 +151,11 @@ npm run test:coverage
 - **数据结构**: 用户数据结构完整（包含 name, avatar, bio 等字段）
 - **项目结构**: CLAUDE.md 已同步最新的布局组件结构
 - **编码问题**: database.json 评论内容乱码已修复
+- **UI 架构**: 完成布局系统重构，统一使用 AppLayout + TopBar + SideNav + PageHeader 组件
+- **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理
+- **期刊交互**: JournalDetailModal 改为 JournalDetailPanel，交互更流畅
 
 ### 🔴 优先待办
 
-1. **前端 UI 重构未提交** - git status 显示大量未暂存的布局组件改动需要整理提交
-2. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
-3. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
+1. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
+2. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
