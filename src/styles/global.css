@@ -417,11 +417,11 @@
   --nav-avatar-bg: var(--theme-amber-glow);
   --nav-user-color: #fff5e6;
 
-  /* 顶部栏（浅黄色） */
-  --topbar-bg: var(--theme-bright-gold);
+  /* 顶部栏（柔和的琥珀黄） */
+  --topbar-bg: #ffe8b3;
   --topbar-border: var(--theme-school-bus-yellow);
   --topbar-user-border: var(--theme-amber-flame);
-  --topbar-user-hover-bg: var(--theme-school-bus-yellow);
+  --topbar-user-hover-bg: var(--theme-amber-flame);
   --topbar-user-hover-border: var(--theme-amber-glow);
   --topbar-user-text: #4a2800;
   --topbar-login-border: var(--theme-amber-glow);
