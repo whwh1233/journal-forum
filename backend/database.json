@@ -582,16 +582,16 @@
       "createdAt": "2026-02-10T16:28:40.640Z"
     },
     {
-      "id": 9,
-      "userId": 1,
-      "journalId": 1,
-      "createdAt": "2026-02-10T16:38:44.248Z"
-    },
-    {
       "id": 10,
       "userId": 1,
       "journalId": 2,
       "createdAt": "2026-02-11T15:45:15.596Z"
+    },
+    {
+      "id": 11,
+      "userId": 1,
+      "journalId": 1,
+      "createdAt": "2026-02-26T12:48:33.629Z"
     }
   ],
   "follows": [
