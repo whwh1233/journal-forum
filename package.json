@@ -9,16 +9,24 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:demo": "playwright test demo.spec.ts --headed",
+    "test:e2e:monkey": "playwright test monkey.spec.ts --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "axios": "^1.13.5",
+    "lucide-react": "^0.575.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.8.0",
     "react-transition-group": "^4.4.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.40.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

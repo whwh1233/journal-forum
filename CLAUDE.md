@@ -13,6 +13,7 @@
 - **主题系统**: React Context + CSS Variables (6 个预设主题)
 - **前端测试**: Vitest
 - **后端测试**: Jest
+- **E2E 测试**: Playwright (Chrome)
 
 ## 启动项目
 
@@ -30,6 +31,13 @@ npm run dev
 
 ```
 journal-forum/
+├── e2e/                           # E2E 测试目录
+│   ├── tests/                     # 测试用例
+│   │   ├── demo.spec.ts           # 可视化演示测试
+│   │   ├── user-flows.spec.ts     # 用户流程测试
+│   │   └── monkey.spec.ts         # 随机交互测试
+│   └── fixtures/
+│       └── test-data.ts           # 测试数据和选择器
 ├── backend/
 │   ├── config/
 │   │   ├── databaseLowdb.js      # 生产数据库配置
@@ -105,6 +113,14 @@ cd backend && npm run test:coverage
 # 前端测试（Vitest）
 npm test
 npm run test:coverage
+
+# E2E 测试（Playwright）- 自动启动前后端服务
+npm run test:e2e              # 运行所有 E2E 测试
+npm run test:e2e:headed       # 有界面运行
+npm run test:e2e:demo         # 可视化演示（慢速，便于观察）
+npm run test:e2e:monkey       # 随机交互测试
+npm run test:e2e:ui           # Playwright UI 模式
+npm run test:e2e:report       # 查看测试报告
 ```
 
 ## 设置管理员账号
@@ -142,6 +158,7 @@ npm run test:coverage
 - 管理后台（用户/期刊/评论管理）
 - 速率限制、CORS、Helmet 安全头
 - **多主题系统**（6 个预设主题，可自由切换）
+- **E2E 自动化测试**（Playwright，支持可视化演示和猴子测试）
 
 ## 主题系统
 
@@ -178,8 +195,7 @@ src/
 ---
 
 ## 当前状态与待办事项
-
-> **最后更新**: 2026-02-24
+> **最后更新**: 2026-02-26
 > **规则**: 仅记录当前最新状态和最优先问题，每次改动后更新此区域
 
 ### ✅ 当前状态
@@ -193,8 +209,15 @@ src/
 - **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理，所有用户可通过 SideNav 和 TopBar 下拉菜单退出登录
 - **期刊交互**: JournalDetailModal 改为 JournalDetailPanel，交互更流畅
 - **主题系统**: 实现完整的多主题色彩系统，支持 6 个精美主题（默认蓝、温暖自然、日落辉光、复古橄榄、柔和大地、暖秋大地）
+- **E2E 测试**: 新增 Playwright 自动化测试，支持可视化演示、用户流程测试、随机交互测试
 
 ### 🔴 优先待办
 
-1. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
+1. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空（E2E 测试已完成）
 2. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
+
+
+TODO
+* 积分系统
+* 教育邮箱登录验证
+* 申请制
