@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Palette, Sun, Moon } from 'lucide-react';
+import { Palette, Sun, Moon, Check } from 'lucide-react';
 import './ThemePicker.css';
 
 const ThemePicker: React.FC = () => {
@@ -76,9 +76,7 @@ const ThemePicker: React.FC = () => {
 
                 {/* 选中标记 */}
                 {currentTheme === theme.id && (
-                  <svg className="check-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M13 4L6 11L3 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <Check className="check-icon" size={16} />
                 )}
               </button>
             ))}
