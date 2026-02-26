@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { adminService } from '../../../services/adminService';
 import { AdminComment, PaginationInfo } from '../../../types';
+import { Star } from 'lucide-react';
+import PageHeader from '../../../components/layout/PageHeader';
 import './CommentManagement.css';
 
 const CommentManagement: React.FC = () => {
@@ -65,11 +67,9 @@ const CommentManagement: React.FC = () => {
 
   return (
     <div className="comment-management">
-      <div className="page-header">
-        <h1 className="page-title">评论管理</h1>
-      </div>
-
-      <div className="search-bar">
+      <PageHeader title="评论管理" />
+      <div className="page-wrapper">
+        <div className="search-bar">
         <form onSubmit={handleSearch} className="search-form">
           <input
             type="text"
@@ -102,7 +102,7 @@ const CommentManagement: React.FC = () => {
                       <span className="comment-divider">|</span>
                       <span className="comment-journal">{truncateText(comment.journalTitle, 30)}</span>
                       <span className="comment-rating">
-                        <span className="star">&#9733;</span>
+                        <Star size={14} fill="currentColor" className="star" />
                         {comment.rating}
                       </span>
                     </div>
@@ -145,7 +145,8 @@ const CommentManagement: React.FC = () => {
           )}
         </>
       )}
-    </div>
+      </div>  
+    </div> 
   );
 };
 

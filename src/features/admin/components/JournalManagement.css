@@ -1,27 +1,12 @@
 /* Journal Management */
 .journal-management {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-6, 24px);
+  /* Container styles removed - handled by .page-wrapper */
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-5);
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin: 0;
-}
-
+/* Add Button (used in PageHeader actions) */
 .add-button {
   padding: var(--space-3) var(--space-5);
-  background: var(--blue-600);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: var(--radius-md);
@@ -32,7 +17,7 @@
 }
 
 .add-button:hover {
-  background: var(--blue-700);
+  background: var(--color-primary-dark);
 }
 
 /* Filter Bar */
@@ -380,21 +365,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-  }
-
-  .page-title {
-    font-size: 1.5rem;
-  }
-
-  .add-button {
-    width: 100%;
-    text-align: center;
-  }
-
   .search-form {
     flex-direction: column;
   }

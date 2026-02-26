@@ -92,7 +92,7 @@ const FollowListPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container">
+      <div className="page-wrapper">
         <div className="follow-list-loading">加载中...</div>
       </div>
     );
@@ -101,8 +101,8 @@ const FollowListPage: React.FC = () => {
   return (
     <div className="follow-list-page">
       <PageHeader title="关注列表" showBack />
-      <div className="container">
-      <div className="follow-list-header">
+      <div className="page-wrapper">
+        <div className="follow-list-header">
         <div className="follow-list-tabs">
           <button
             className={`follow-tab ${tab === 'following' ? 'active' : ''}`}
@@ -120,8 +120,8 @@ const FollowListPage: React.FC = () => {
       </div>
 
       {tab === 'followers' ? renderUserList(followers) : renderUserList(following)}
-      </div>
-    </div>
+      </div>  
+    </div>  
   );
 };
 

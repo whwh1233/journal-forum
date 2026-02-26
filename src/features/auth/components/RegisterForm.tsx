@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { Loader2 } from 'lucide-react';
 import './RegisterForm.css';
 
 interface RegisterFormProps {
@@ -65,6 +66,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess 
           />
         </div>
         <button type="submit" disabled={loading} className="auth-button">
+          {loading && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
           {loading ? '注册中...' : '注册'}
         </button>
       </form>

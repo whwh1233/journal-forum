@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import './PageHeader.css';
 
 interface PageHeaderProps {
@@ -25,7 +26,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, showBack, backTo, action
       <div className="page-header-bar-left">
         {showBack && (
           <button className="page-header-bar-back" onClick={handleBack} aria-label="返回">
-            <span>&#8592;</span>
+            <ArrowLeft size={20} aria-hidden="true" />
           </button>
         )}
         <h1 className="page-header-bar-title">{title}</h1>

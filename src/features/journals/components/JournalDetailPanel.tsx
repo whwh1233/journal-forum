@@ -3,6 +3,7 @@ import { Journal } from '@/types';
 import { categoryMap } from '@/services/journalService';
 import StarRating from '@/components/common/StarRating';
 import CommentList from '@/features/comments/components/CommentList';
+import { X } from 'lucide-react';
 import './JournalDetailPanel.css';
 
 interface JournalDetailPanelProps {
@@ -55,7 +56,7 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
             onClick={onClose}
             aria-label="关闭"
           >
-            &#10005;
+            <X size={24} aria-hidden="true" />
           </button>
         </div>
 

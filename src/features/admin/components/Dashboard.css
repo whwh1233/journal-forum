@@ -1,15 +1,6 @@
 /* Dashboard */
 .dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-6, 24px);
-}
-
-.dashboard-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin-bottom: var(--space-6);
+  /* Container styles removed - handled by .page-wrapper */
 }
 
 .dashboard-loading,
@@ -57,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  color: white;
 }
 
 .users-icon {
@@ -133,7 +124,9 @@
 }
 
 .action-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Responsive */
@@ -144,11 +137,6 @@
 }
 
 @media (max-width: 768px) {
-  .dashboard-title {
-    font-size: 1.5rem;
-    margin-bottom: var(--space-5);
-  }
-
   .stats-grid {
     grid-template-columns: 1fr;
     gap: var(--space-4);

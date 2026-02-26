@@ -146,6 +146,23 @@
 .journal-card:nth-child(7) { animation-delay: 300ms; }
 .journal-card:nth-child(8) { animation-delay: 350ms; }
 
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .journal-card {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .journal-card:hover {
+    transform: none !important;
+  }
+
+  .journal-title,
+  .journal-category {
+    transition: none !important;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .journal-card {

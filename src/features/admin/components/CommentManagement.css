@@ -1,22 +1,6 @@
 /* Comment Management */
 .comment-management {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--space-6, 24px);
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-5);
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--gray-900);
-  margin: 0;
+  /* Container styles removed - handled by .page-wrapper */
 }
 
 /* Search Bar */
@@ -230,10 +214,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-  .page-title {
-    font-size: 1.5rem;
-  }
-
   .search-form {
     flex-direction: column;
     max-width: 100%;

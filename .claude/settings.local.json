@@ -61,7 +61,13 @@
       "Bash(del:*)",
       "Bash(npx vite build)",
       "Bash(git restore:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "Bash(python:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(set:*)",
+      "Bash(set HTTPS_PROXY=)",
+      "Bash(npx playwright test:*)",
+      "Bash(npx playwright show-report)"
     ]
   }
 }

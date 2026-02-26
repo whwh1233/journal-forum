@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { User, Settings, LogOut } from 'lucide-react';
 import './UserDropdown.css';
 
 interface UserDropdownProps {
@@ -73,7 +74,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userName, userInitial }) =>
             onClick={() => handleNavigate('/dashboard')}
             role="menuitem"
           >
-            <span className="dropdown-icon">&#128100;</span>
+            <User className="dropdown-icon" size={16} />
             个人中心
           </button>
           <button
@@ -81,7 +82,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userName, userInitial }) =>
             onClick={() => handleNavigate('/profile/edit')}
             role="menuitem"
           >
-            <span className="dropdown-icon">&#9881;</span>
+            <Settings className="dropdown-icon" size={16} />
             账号设置
           </button>
           <div className="user-dropdown-divider" />
@@ -90,7 +91,7 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userName, userInitial }) =>
             onClick={handleLogout}
             role="menuitem"
           >
-            <span className="dropdown-icon">&#128682;</span>
+            <LogOut className="dropdown-icon" size={16} />
             退出登录
           </button>
         </div>

@@ -13,6 +13,7 @@
   flex-direction: column;
   /* margin-left 只在用户切换侧边栏时变化，路由切换时不会重新触发 */
   transition: margin-left 0.22s ease;
+  width: 100%;
 }
 
 .app-layout.nav-expanded .app-layout-main {
@@ -26,7 +27,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-@media (max-width: 767px) {
+@media (max-width: 768px) {
   .app-layout-main,
   .app-layout.nav-expanded .app-layout-main {
     margin-left: 0;

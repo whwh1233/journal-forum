@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { adminService } from '../../../services/adminService';
 import { AdminUser, PaginationInfo } from '../../../types';
+import PageHeader from '../../../components/layout/PageHeader';
 import './UserManagement.css';
 
 const UserManagement: React.FC = () => {
@@ -76,11 +77,9 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="user-management">
-      <div className="page-header">
-        <h1 className="page-title">用户管理</h1>
-      </div>
-
-      <div className="search-bar">
+      <PageHeader title="用户管理" />
+      <div className="page-wrapper">
+        <div className="search-bar">
         <form onSubmit={handleSearch} className="search-form">
           <input
             type="text"
@@ -184,6 +183,7 @@ const UserManagement: React.FC = () => {
           )}
         </>
       )}
+      </div>
     </div>
   );
 };

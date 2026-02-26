@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { Loader2 } from 'lucide-react';
 import './LoginForm.css';
 
 interface LoginFormProps {
@@ -52,6 +53,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSuccess }) 
           />
         </div>
         <button type="submit" disabled={loading} className="auth-button">
+          {loading && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
           {loading ? '登录中...' : '登录'}
         </button>
       </form>

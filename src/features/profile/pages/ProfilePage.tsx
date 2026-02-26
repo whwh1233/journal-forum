@@ -32,7 +32,7 @@ const ProfilePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container">
+      <div className="page-wrapper">
         <div className="profile-loading">加载中...</div>
       </div>
     );
@@ -40,7 +40,7 @@ const ProfilePage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="container">
+      <div className="page-wrapper">
         <div className="profile-error">用户不存在</div>
       </div>
     );
@@ -51,8 +51,8 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="profile-page">
       <PageHeader title="用户资料" showBack backTo="/" />
-      <div className="container">
-      <div className="profile-header">
+      <div className="page-wrapper">
+        <div className="profile-header">
         <div className="profile-avatar">
           {profile.avatar ? (
             <img src={`http://localhost:3001${profile.avatar}`} alt={profile.name} />
@@ -106,8 +106,8 @@ const ProfilePage: React.FC = () => {
           </Link>
         </div>
       )}
-      </div>
-    </div>
+      </div>  
+    </div>  
   );
 };
 

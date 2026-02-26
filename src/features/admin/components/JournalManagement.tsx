@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { journalService, categoryMap } from '../../../services/journalService';
 import { adminService } from '../../../services/adminService';
 import { Journal } from '../../../types';
+import { Star, X } from 'lucide-react';
+import PageHeader from '../../../components/layout/PageHeader';
 import './JournalManagement.css';
 
 interface JournalFormData {
@@ -119,14 +121,16 @@ const JournalManagement: React.FC = () => {
 
   return (
     <div className="journal-management">
-      <div className="page-header">
-        <h1 className="page-title">期刊管理</h1>
-        <button className="add-button" onClick={handleAdd}>
-          + 添加期刊
-        </button>
-      </div>
-
-      <div className="filter-bar">
+      <PageHeader
+        title="期刊管理"
+        actions={
+          <button className="add-button" onClick={handleAdd}>
+            + 添加期刊
+          </button>
+        }
+      />
+      <div className="page-wrapper">
+        <div className="filter-bar">
         <form onSubmit={handleSearch} className="search-form">
           <input
             type="text"
@@ -189,7 +193,7 @@ const JournalManagement: React.FC = () => {
                     </td>
                     <td>
                       <span className="rating">
-                        <span className="star">&#9733;</span>
+                        <Star size={14} fill="currentColor" className="star" />
                         {journal.rating.toFixed(1)}
                       </span>
                     </td>
@@ -225,7 +229,7 @@ const JournalManagement: React.FC = () => {
                 {editingJournal ? '编辑期刊' : '添加期刊'}
               </h2>
               <button className="modal-close" onClick={handleCloseModal}>
-                &#10005;
+                <X size={24} />
               </button>
             </div>
 
@@ -308,7 +312,8 @@ const JournalManagement: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>  
+    </div> 
   );
 };
 

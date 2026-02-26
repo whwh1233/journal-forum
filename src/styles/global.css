@@ -1,4 +1,4 @@
-/* Modern Clean Design - Typography */
+/* Modern Clean Design - Typography (优化字体加载) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 /* Design System - Clean Modern Palette */
@@ -106,6 +106,20 @@
   --duration-fast: 150ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
+
+  /* Responsive Breakpoints */
+  --breakpoint-mobile: 375px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+  --breakpoint-wide: 1440px;
+
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-sticky: 50;
+  --z-nav: 100;
+  --z-modal: 200;
+  --z-tooltip: 300;
 
   /* Legacy Variable Aliases (for compatibility) */
   --spacing-xs: var(--space-1);
@@ -394,10 +408,10 @@
   --color-accent-hover: var(--theme-deep-saffron);
   --color-primary: #cc7700;
 
-  /* 文字（深棕橙色，确保对比度） */
-  --color-text: #4a2800;
-  --color-text-muted: #8b5a00;
-  --color-text-secondary: #b87700;
+  /* 文字（加深以确保对比度 ≥ 4.5:1） */
+  --color-text: #3a1f00;
+  --color-text-muted: #7a4800;
+  --color-text-secondary: #9d5f00;
 
   /* 边框（浅橙色） */
   --color-border: #ffe0b3;
@@ -417,13 +431,13 @@
   --nav-avatar-bg: var(--theme-amber-glow);
   --nav-user-color: #fff5e6;
 
-  /* 顶部栏（柔和的琥珀黄） */
-  --topbar-bg: #ffe8b3;
+  /* 顶部栏（加深背景以提升对比度） */
+  --topbar-bg: #ffd699;
   --topbar-border: var(--theme-school-bus-yellow);
   --topbar-user-border: var(--theme-amber-flame);
   --topbar-user-hover-bg: var(--theme-amber-flame);
   --topbar-user-hover-border: var(--theme-amber-glow);
-  --topbar-user-text: #4a2800;
+  --topbar-user-text: #3a1f00;
   --topbar-login-border: var(--theme-amber-glow);
   --topbar-login-text: #4a2800;
   --topbar-login-hover-bg: var(--theme-amber-glow);
@@ -757,13 +771,13 @@
   --nav-avatar-bg: var(--theme-toasted-almond);
   --nav-user-color: #ebe8dc;
 
-  /* 顶部栏 */
-  --topbar-bg: var(--theme-golden-pollen);
+  /* 顶部栏（加深背景以提升对比度） */
+  --topbar-bg: #ffbe4d;
   --topbar-border: var(--theme-soft-peach);
   --topbar-user-border: var(--theme-toasted-almond);
-  --topbar-user-hover-bg: #ffbe4d;
+  --topbar-user-hover-bg: #ffb038;
   --topbar-user-hover-border: var(--theme-toasted-almond);
-  --topbar-user-text: #4d3f33;
+  --topbar-user-text: #3a2f24;
   --topbar-login-border: var(--theme-toasted-almond);
   --topbar-login-text: #4d3f33;
   --topbar-login-hover-bg: var(--theme-toasted-almond);
@@ -1131,7 +1145,7 @@ select:focus {
   }
 }
 
-/* Responsive */
+/* Responsive - 统一断点 */
 @media (max-width: 1024px) {
   h1 { font-size: 2.5rem; }
   h2 { font-size: 1.75rem; }
@@ -1156,7 +1170,7 @@ select:focus {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 375px) {
   h1 { font-size: 1.75rem; }
   h2 { font-size: 1.35rem; }
 

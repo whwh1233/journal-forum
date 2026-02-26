@@ -1,7 +1,7 @@
 .top-bar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: var(--z-sticky);
   height: 52px;
   background: var(--topbar-bg);
   border-bottom: 1px solid var(--topbar-border);
@@ -37,6 +37,11 @@
 .top-bar-user:hover {
   background: var(--topbar-user-hover-bg);
   border-color: var(--topbar-user-hover-border);
+}
+
+.top-bar-user:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .top-bar-avatar {
@@ -84,7 +89,12 @@
   color: var(--topbar-login-hover-text);
 }
 
-@media (max-width: 767px) {
+.top-bar-login-btn:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
   .top-bar { padding: 0 14px; }
   .top-bar-user-name { max-width: 90px; }
 }

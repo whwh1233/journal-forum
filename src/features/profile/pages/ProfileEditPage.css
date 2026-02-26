@@ -1,95 +1,332 @@
+/* 页面容器 */
 .profile-edit-page {
-  /* 使用 container 类提供的布局，限制最大宽度 */
-  max-width: 700px;
+  /* Container styles removed - handled by .page-wrapper */
 }
 
-.profile-edit-page h1 {
-  margin-bottom: var(--space-6);
-  color: var(--color-text);
-}
-
-.profile-edit-error {
+/* 错误提示（带 slideDown 动画） */
+.profile-error {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: #991b1b;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
   text-align: center;
-  padding: var(--space-8);
-  color: var(--color-error);
+  border-left: 4px solid #dc2626;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
 }
 
-.edit-section {
+/* 成功提示 */
+.profile-success {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  border-left: 4px solid #10b981;
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 头像区域 */
+.avatar-section {
   background: var(--color-background);
-  padding: var(--space-6);
+  padding: var(--spacing-xl);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--spacing-2xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
 }
 
-.edit-section h2 {
-  margin: 0 0 var(--space-5) 0;
-  font-size: 1.25rem;
+.avatar-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
   color: var(--color-text);
-}
-
-.form-group {
-  margin-bottom: var(--space-5);
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: var(--space-2);
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.form-group input,
-.form-group textarea {
+  margin: 0;
+  align-self: flex-start;
   width: 100%;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-family: inherit;
-  font-size: 1rem;
-  transition: all var(--duration-fast) var(--ease-out);
-  background: var(--color-background);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--color-btn-primary);
-  box-shadow: var(--focus-ring);
+.avatar-preview {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-normal);
 }
 
-.edit-section button {
-  padding: var(--space-3) var(--space-6);
-  background: var(--color-btn-primary);
+.avatar-preview:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* 自定义文件上传按钮 */
+.file-upload-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.file-upload-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.file-upload-button {
+  padding: 0.875rem var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 1rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-out);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  max-width: 200px;
 }
 
-.edit-section button:hover:not(:disabled) {
-  background: var(--color-btn-primary-hover);
-  transform: translateY(-1px);
+.file-upload-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.file-upload-button:hover:not(.disabled) {
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
-.edit-section button:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
+.file-upload-button:hover:not(.disabled)::before {
+  left: 100%;
 }
 
-.edit-section button:disabled {
+.file-upload-button.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none;
+  background: var(--color-text-secondary);
 }
 
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  .edit-section button:hover:not(:disabled),
-  .edit-section button:active:not(:disabled) {
-    transform: none;
+.upload-hint {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin: 0;
+}
+
+/* 表单区域 */
+.profile-form-section {
+  background: var(--color-background);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.form-section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--color-border);
+}
+
+/* 表单组 */
+.profile-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.profile-form-label {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+
+/* 输入框（2px 边框 + hover 状态） */
+.profile-form-input,
+.profile-form-textarea {
+  padding: 0.875rem var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-text);
+  transition: all var(--transition-base);
+}
+
+.profile-form-input:hover,
+.profile-form-textarea:hover {
+  border-color: var(--color-primary-light);
+}
+
+.profile-form-input:focus,
+.profile-form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.profile-form-input::placeholder,
+.profile-form-textarea::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.profile-form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* 提交按钮（渐变 + shimmer 动画） */
+.profile-submit-button {
+  padding: 0.875rem var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.profile-submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.profile-submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-submit-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.profile-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.profile-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--color-text-secondary);
+}
+
+/* 加载动画 */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 错误状态样式 */
+.profile-edit-error {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-error);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .profile-edit-page {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .profile-edit-title {
+    font-size: 1.75rem;
+  }
+
+  .avatar-preview {
+    width: 100px;
+    height: 100px;
+  }
+
+  .avatar-section,
+  .profile-form-section {
+    padding: var(--spacing-lg);
+  }
+
+  .form-section-title,
+  .avatar-section-title {
+    font-size: 1.25rem;
   }
 }
