@@ -15,6 +15,77 @@
 - **后端测试**: Jest
 - **E2E 测试**: Playwright (Chrome)
 
+## 功能模块导航
+
+快速定位各功能模块的实现位置和状态。
+
+### 🔐 认证系统
+**状态**: ✅ 已完成
+**功能**: 用户注册、登录、JWT 认证、全局认证弹窗
+**关键文件**:
+- 前端: `src/features/auth/`, `src/contexts/AuthContext.tsx`, `src/contexts/AuthModalContext.tsx`
+- 后端: `backend/routes/auth.js`, `backend/controllers/authControllerLowdb.js`
+- 中间件: `backend/middleware/authMiddleware.js`
+
+### 📚 期刊管理
+**状态**: ✅ 已完成
+**功能**: 期刊浏览、搜索筛选、详情查看、评分
+**关键文件**:
+- 前端: `src/features/journals/`, `src/hooks/useJournals.ts`
+- 后端: `backend/routes/journals.js`, `backend/controllers/journalControllerLowdb.js`
+
+### 💬 评论系统
+**状态**: ✅ 已完成
+**功能**: 嵌套评论（3 层）、点赞、删除标记
+**关键文件**:
+- 前端: `src/features/comments/`
+- 后端: `backend/routes/comments.js`, `backend/controllers/commentControllerLowdb.js`
+
+### ⭐ 收藏系统
+**状态**: ✅ 已完成
+**功能**: 收藏期刊、取消收藏、收藏列表
+**关键文件**:
+- 前端: `src/features/favorite/`
+- 后端: `backend/routes/favorites.js`, `backend/controllers/favoriteControllerLowdb.js`
+
+### 👥 关注系统
+**状态**: ✅ 已完成
+**功能**: 关注用户、取消关注、关注列表、粉丝列表
+**关键文件**:
+- 前端: `src/features/follow/`
+- 后端: `backend/routes/follows.js`, `backend/controllers/followControllerLowdb.js`
+
+### 🎨 主题系统
+**状态**: ✅ 已完成
+**功能**: 6 个预设主题、深浅模式切换、localStorage 持久化
+**关键文件**:
+- 前端: `src/contexts/ThemeContext.tsx`, `src/components/common/ThemePicker.*`, `src/styles/global.css`
+- 文档: `THEMES.md`
+
+### 👤 个人中心
+**状态**: ✅ 已完成
+**功能**: 个人资料编辑、头像上传、仪表盘统计
+**关键文件**:
+- 前端: `src/features/profile/`, `src/features/dashboard/`
+- 后端: `backend/routes/users.js`, `backend/controllers/userControllerLowdb.js`
+
+### 🛡️ 管理后台
+**状态**: ✅ 已完成
+**功能**: 用户管理、期刊管理、评论审核
+**关键文件**:
+- 前端: `src/features/admin/`
+- 后端: `backend/routes/admin.js`, `backend/controllers/adminControllerLowdb.js`
+- 中间件: `backend/middleware/adminMiddleware.js`
+
+### 🧪 测试系统
+**状态**: 🚧 进行中
+**已完成**: E2E 测试、后端集成测试、部分前端组件测试
+**待补充**: 前端单元测试、后端单元测试
+**关键文件**:
+- E2E: `e2e/tests/`
+- 后端测试: `backend/__tests__/`
+- 前端测试: `src/__tests__/`
+
 ## 启动项目
 
 ```bash
