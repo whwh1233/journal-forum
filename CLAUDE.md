@@ -104,7 +104,12 @@ npm run dev
 journal-forum/
 ├── e2e/                           # E2E 测试目录
 │   ├── tests/                     # 测试用例
-│   │   ├── demo.spec.ts           # 可视化演示测试
+│   │   ├── full-demo.spec.ts      # 完整功能可视化演示
+│   │   ├── demo-modules/          # 模块化演示测试
+│   │   │   ├── 01-guest.spec.ts   # 游客场景
+│   │   │   ├── 02-auth.spec.ts    # 认证场景
+│   │   │   ├── 03-user.spec.ts    # 用户场景
+│   │   │   └── 04-admin.spec.ts   # 管理员场景
 │   │   ├── user-flows.spec.ts     # 用户流程测试
 │   │   └── monkey.spec.ts         # 随机交互测试
 │   └── fixtures/
@@ -188,10 +193,17 @@ npm run test:coverage
 # E2E 测试（Playwright）- 自动启动前后端服务
 npm run test:e2e              # 运行所有 E2E 测试
 npm run test:e2e:headed       # 有界面运行
-npm run test:e2e:demo         # 可视化演示（慢速，便于观察）
 npm run test:e2e:monkey       # 随机交互测试
 npm run test:e2e:ui           # Playwright UI 模式
 npm run test:e2e:report       # 查看测试报告
+
+# E2E 可视化演示测试（覆盖全部功能）
+npm run test:e2e:full-demo      # 完整功能演示（约10分钟）
+npm run test:e2e:demo:guest     # 游客场景
+npm run test:e2e:demo:auth      # 认证场景
+npm run test:e2e:demo:user      # 用户场景
+npm run test:e2e:demo:admin     # 管理员场景
+npm run test:e2e:demo:all       # 运行所有模块
 ```
 
 ## 设置管理员账号
