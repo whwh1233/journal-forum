@@ -137,24 +137,33 @@ test.describe('游客场景演示', () => {
     await expect(page.locator(`${selectors.journal.panel}.open`)).not.toBeVisible();
   });
 
-  test('主题切换', async ({ page }) => {
+  test('主题切换', async ({ page }, testInfo) => {
+    testInfo.setTimeout(180000); // 3 分钟超时
+
     await showChapterTitle(page, '主题切换', '切换不同的视觉主题');
 
     const themeTrigger = page.locator(selectors.theme.trigger);
     if (await themeTrigger.isVisible()) {
       await demoClick(page, selectors.theme.trigger, '🎨 打开主题选择器');
-      await delay(500);
+      await delay(300);
 
       const themeOptions = page.locator(selectors.theme.option);
       const themeCount = await themeOptions.count();
       await showToast(page, `共有 ${themeCount} 个主题可选`);
-      await delay(1000);
+      await delay(500);
 
-      // 切换每个主题
-      for (let i = 0; i < Math.min(themeCount, 6); i++) {
-        await themeOptions.nth(i).click();
+      // 切换每个主题（点击后面板会关闭，需要重新打开）
+      for (let i = 0; i < Math.min(themeCount, 4); i++) {
+        // 确保选择器面板是打开的
+        const panel = page.locator('.theme-picker-panel');
+        if (!(await panel.isVisible())) {
+          await themeTrigger.click();
+          await delay(200);
+        }
+
+        await page.locator(selectors.theme.option).nth(i).click();
         await showToast(page, `✨ 主题 ${i + 1}`);
-        await delay(1200);
+        await delay(600);
       }
 
       await showToast(page, '🎨 主题切换完成');

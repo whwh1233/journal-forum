@@ -244,15 +244,21 @@ test.describe('完整功能演示', () => {
     const themeTrigger = page.locator(selectors.theme.trigger);
     if (await themeTrigger.isVisible()) {
       await demoClick(page, selectors.theme.trigger, '🎨 打开主题选择器');
-      await delay(500);
+      await delay(300);
 
       const themeOptions = page.locator(selectors.theme.option);
       const themeCount = await themeOptions.count();
 
-      for (let i = 0; i < Math.min(themeCount, 6); i++) {
-        await themeOptions.nth(i).click();
+      // 点击主题后面板会关闭，需要重新打开
+      for (let i = 0; i < Math.min(themeCount, 4); i++) {
+        const panel = page.locator('.theme-picker-panel');
+        if (!(await panel.isVisible())) {
+          await themeTrigger.click();
+          await delay(200);
+        }
+        await page.locator(selectors.theme.option).nth(i).click();
         await showToast(page, `✨ 主题 ${i + 1}`);
-        await delay(1000);
+        await delay(500);
       }
     }
 

@@ -31,10 +31,10 @@ const PORT = process.env.PORT || 3001;
 // CORS配置 - 必须在helmet之前
 const corsOptions = {
   origin: function(origin, callback) {
-    // 开发环境：允许所有localhost
-    if (process.env.NODE_ENV === 'development') {
+    // 开发/测试环境：允许所有localhost
+    if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       // 允许没有origin的请求（如移动应用、桌面应用）和localhost
-      if (!origin || origin.includes('localhost')) {
+      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

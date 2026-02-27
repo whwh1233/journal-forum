@@ -14,9 +14,12 @@ const StarRating: React.FC<StarRatingProps> = ({
   size = 'medium',
   showText = false
 }) => {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const emptyStars = maxRating - fullStars - (hasHalfStar ? 1 : 0);
+  // 防御性检查：确保 rating 是有效数字
+  const safeRating = typeof rating === 'number' && !isNaN(rating) ? Math.max(0, Math.min(rating, maxRating)) : 0;
+
+  const fullStars = Math.floor(safeRating);
+  const hasHalfStar = safeRating % 1 >= 0.5;
+  const emptyStars = Math.max(0, maxRating - fullStars - (hasHalfStar ? 1 : 0));
 
   const getStarClass = () => {
     switch (size) {
@@ -48,7 +51,7 @@ const StarRating: React.FC<StarRatingProps> = ({
       ))}
       {showText && (
         <span className="star-rating__text">
-          {rating}/{maxRating}
+          {safeRating.toFixed(1)}/{maxRating}
         </span>
       )}
     </div>

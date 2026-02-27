@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './e2e/tests',
   webServer: [
     {
-      command: 'cd backend && cross-env NODE_ENV=test npm start',
+      command: 'cd backend && npx cross-env NODE_ENV=test npm start',
       port: 3001,
       reuseExistingServer: !process.env.CI,
       timeout: 30000,
@@ -25,7 +25,7 @@ export default defineConfig({
     video: 'retain-on-failure',
     channel: 'chrome',
     launchOptions: {
-      slowMo: 100, // 减少默认延迟，演示测试自己控制节奏
+      slowMo: 50, // 减少延迟加速测试
     },
   },
   projects: [{ name: 'chrome', use: { channel: 'chrome' } }],

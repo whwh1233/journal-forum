@@ -108,11 +108,11 @@ export async function showChapterTitle(page: Page, title: string, subtitle?: str
 
     setTimeout(() => {
       overlay.style.opacity = '0';
-      setTimeout(() => overlay.remove(), 500);
-    }, 2000);
+      setTimeout(() => overlay.remove(), 300);
+    }, 1200);
   }, [title, subtitle] as const);
 
-  await delay(2500);
+  await delay(1500);
 }
 
 /**
@@ -122,10 +122,10 @@ export async function demoAction(
   page: Page,
   selector: string,
   description: string,
-  delayMs = 800
+  delayMs = 400
 ): Promise<void> {
   await showToast(page, description);
-  await delay(300);
+  await delay(200);
   await highlight(page, selector);
   await delay(delayMs);
 }
