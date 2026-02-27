@@ -2,8 +2,9 @@ const { Low } = require('lowdb');
 const { JSONFile } = require('lowdb/node');
 const path = require('path');
 
-// 数据库文件路径
-const dbPath = path.join(__dirname, '..', 'database.json');
+// 数据库文件路径 - 测试环境使用独立数据库
+const dbFile = process.env.NODE_ENV === 'test' ? 'database.test.json' : 'database.json';
+const dbPath = path.join(__dirname, '..', dbFile);
 
 // 默认数据结构
 const defaultData = {
