@@ -271,24 +271,20 @@ src/
 
 ### ✅ 当前状态
 
-- **代码整洁度**: 已清理所有未使用的遗留文件（MongoDB/SQLite 控制器和配置）
-- **文档完整性**: API_ROUTES.md 已补全所有路由文档（认证、期刊、管理员）
-- **数据结构**: 用户数据结构完整（包含 name, avatar, bio 等字段）
-- **项目结构**: CLAUDE.md 已同步最新的布局组件结构
-- **编码问题**: database.json 评论内容乱码已修复
-- **UI 架构**: 完成布局系统重构，统一使用 AppLayout + TopBar + SideNav + PageHeader 组件
-- **认证体验**: 新增 AuthModalContext 实现全局认证弹窗管理，所有用户可通过 SideNav 和 TopBar 下拉菜单退出登录
-- **期刊交互**: JournalDetailModal 改为 JournalDetailPanel，交互更流畅
-- **主题系统**: 实现完整的多主题色彩系统，支持 6 个精美主题（默认蓝、温暖自然、日落辉光、复古橄榄、柔和大地、暖秋大地）
-- **E2E 测试**: 新增 Playwright 自动化测试，支持可视化演示、用户流程测试、随机交互测试
+- **代码质量**: 图标系统已统一使用 Lucide React，UI 组件已优化（SearchAndFilter）
+- **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试部分完成（5/15+）
+- **UI 架构**: AppLayout + TopBar + SideNav + PageHeader 统一布局
+- **主题系统**: 6 个预设主题可用
+- **认证体验**: AuthModalContext 全局管理
 
 ### 🔴 优先待办
 
-1. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空（E2E 测试已完成）
-2. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
+1. **前端组件测试** - 剩余 10+ 组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
+2. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
+3. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
 
+### 📋 功能积压
 
-TODO
-* 积分系统
+* 积分+徽章系统、活跃度记录和统计
 * 教育邮箱登录验证
 * 申请制
