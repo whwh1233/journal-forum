@@ -1,0 +1,42 @@
+.badge-wall {
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.badge-wall--empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: 40px 20px;
+}
+
+.badge-wall__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+}
+
+.badge-wall__category {
+  margin-bottom: 20px;
+}
+
+.badge-wall__category:last-child {
+  margin-bottom: 0;
+}
+
+.badge-wall__category-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.badge-wall__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
