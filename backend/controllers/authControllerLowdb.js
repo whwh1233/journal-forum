@@ -2,6 +2,7 @@ const { getDB } = require('../config/databaseLowdb');
 const { hashPassword, comparePassword } = require('../utils/password');
 const { generateToken } = require('../utils/jwt');
 const { ADMIN_EMAIL, ADMIN_PASSWORD } = require('../config/admin');
+const badgeService = require('../services/badgeService');
 
 // 注册用户
 const registerUser = async (req, res, next) => {
@@ -112,6 +113,16 @@ const loginUser = async (req, res, next) => {
     // 生成JWT token
     const token = generateToken(user.id);
 
+    // 检查身份徽章
+    let newBadges = [];
+    try {
+      newBadges = await badgeService.checkIdentityBadges(user.id);
+    } catch (err) {
+      console.error('Badge check failed:', err);
+    }
+
+    const hasNewBadges = badgeService.hasNewBadges(user.id);
+
     res.status(200).json({
       success: true,
       data: {
@@ -121,7 +132,9 @@ const loginUser = async (req, res, next) => {
           name: user.name,
           role: user.role || 'user'
         },
-        token
+        token,
+        newBadges: newBadges.length > 0 ? newBadges : undefined,
+        hasNewBadges
       }
     });
   } catch (error) {

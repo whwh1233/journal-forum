@@ -1,5 +1,6 @@
 const { getDB } = require('../config/databaseLowdb');
 const { customAlphabet } = require('nanoid');
+const badgeService = require('../services/badgeService');
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 6);
 
 // 递归构建评论树（最多3层）
@@ -116,7 +117,18 @@ const createComment = async (req, res) => {
       }
     }
 
-    res.status(201).json(newComment);
+    // 检查评论徽章
+    let newBadges = [];
+    try {
+      newBadges = await badgeService.checkAndGrantBadges(req.user.id, 'commentCount');
+    } catch (err) {
+      console.error('Badge check failed:', err);
+    }
+
+    res.status(201).json({
+      ...newComment,
+      newBadges: newBadges.length > 0 ? newBadges : undefined
+    });
   } catch (error) {
     console.error('Error creating comment:', error);
     res.status(500).json({ message: '创建评论失败' });

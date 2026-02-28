@@ -1,4 +1,5 @@
 const { getDB } = require('../config/databaseLowdb');
+const badgeService = require('../services/badgeService');
 
 // 添加收藏
 const addFavorite = async (req, res) => {
@@ -34,7 +35,18 @@ const addFavorite = async (req, res) => {
     db.data.favorites.push(newFavorite);
     await db.write();
 
-    res.status(201).json(newFavorite);
+    // 检查收藏徽章
+    let newBadges = [];
+    try {
+      newBadges = await badgeService.checkAndGrantBadges(req.user.id, 'favoriteCount');
+    } catch (err) {
+      console.error('Badge check failed:', err);
+    }
+
+    res.status(201).json({
+      ...newFavorite,
+      newBadges: newBadges.length > 0 ? newBadges : undefined
+    });
   } catch (error) {
     console.error('Error adding favorite:', error);
     res.status(500).json({ message: '收藏失败' });

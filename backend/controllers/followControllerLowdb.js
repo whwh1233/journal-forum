@@ -1,4 +1,5 @@
 const { getDB } = require('../config/databaseLowdb');
+const badgeService = require('../services/badgeService');
 
 // 关注用户
 const followUser = async (req, res) => {
@@ -48,9 +49,20 @@ const followUser = async (req, res) => {
     db.data.follows.push(newFollow);
     await db.write();
 
+    // 检查被关注者的粉丝徽章
+    let targetUserNewBadges = [];
+    try {
+      targetUserNewBadges = await badgeService.checkAndGrantBadges(parseInt(followingId), 'followerCount');
+    } catch (err) {
+      console.error('Badge check failed:', err);
+    }
+
     res.status(201).json({
       success: true,
-      data: { follow: newFollow }
+      data: {
+        follow: newFollow,
+        targetUserNewBadges: targetUserNewBadges.length > 0 ? targetUserNewBadges : undefined
+      }
     });
   } catch (error) {
     console.error('Error following user:', error);
