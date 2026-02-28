@@ -13,6 +13,8 @@ const defaultData = {
   comments: [],
   favorites: [],
   follows: [],
+  badges: [],
+  userBadges: [],
   migrated: {}
 };
 
@@ -38,7 +40,17 @@ const connectDB = async () => {
     if (!db.data.comments) db.data.comments = [];
     if (!db.data.favorites) db.data.favorites = [];
     if (!db.data.follows) db.data.follows = [];
+    if (!db.data.badges) db.data.badges = [];
+    if (!db.data.userBadges) db.data.userBadges = [];
     if (!db.data.migrated) db.data.migrated = {};
+
+    // 初始化徽章数据（如果为空）
+    if (db.data.badges.length === 0) {
+      const { initialBadges } = require('../data/initialBadges');
+      db.data.badges = initialBadges;
+      await db.write();
+      console.log('Initial badges data loaded');
+    }
 
     // 运行数据迁移
     const { migrateReviewsToComments } = require('../migrations/migrateComments');
