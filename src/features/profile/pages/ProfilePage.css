@@ -54,6 +54,13 @@
   color: var(--color-text);
 }
 
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
 .profile-bio {
   color: var(--color-text-muted);
   margin: var(--space-2) 0 var(--space-4) 0;
@@ -172,6 +179,10 @@
 
 .stat-item-link:hover .stat-label {
   color: var(--color-text);
+}
+
+.profile-page .badge-wall {
+  margin-top: var(--space-6);
 }
 
 /* Responsive */

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getUserProfile } from '../../../services/userService';
+import { getUserBadges } from '../../../services/badgeService';
 import { useAuth } from '../../../hooks/useAuth';
 import FollowButton from '../../follow/components/FollowButton';
 import PageHeader from '../../../components/layout/PageHeader';
-import type { UserProfile } from '../../../types';
+import { BadgeWall, BadgeList } from '../../badges';
+import type { UserProfile, Badge } from '../../../types';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
@@ -12,6 +14,8 @@ const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [pinnedBadges, setPinnedBadges] = useState<Badge[]>([]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -28,6 +32,21 @@ const ProfilePage: React.FC = () => {
     if (userId) {
       loadProfile();
     }
+  }, [userId]);
+
+  useEffect(() => {
+    const loadBadges = async () => {
+      if (userId) {
+        try {
+          const data = await getUserBadges(parseInt(userId));
+          setBadges(data.badges);
+          setPinnedBadges(data.pinnedBadges);
+        } catch (error) {
+          console.error('Error loading badges:', error);
+        }
+      }
+    };
+    loadBadges();
   }, [userId]);
 
   if (loading) {
@@ -63,7 +82,12 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
         <div className="profile-info">
-          <h1>{profile.name || profile.email}</h1>
+          <h1 className="profile-name-row">
+            <span>{profile.name || profile.email}</span>
+            {pinnedBadges.length > 0 && (
+              <BadgeList badges={pinnedBadges} maxDisplay={3} size="sm" />
+            )}
+          </h1>
           {profile.bio && <p className="profile-bio">{profile.bio}</p>}
           <div className="profile-meta">
             {profile.location && <span>📍 {profile.location}</span>}
@@ -105,6 +129,10 @@ const ProfilePage: React.FC = () => {
             <div className="stat-label">粉丝</div>
           </Link>
         </div>
+      )}
+
+      {badges.length > 0 && (
+        <BadgeWall badges={badges} title="获得的徽章" />
       )}
       </div>  
     </div>  
