@@ -21,6 +21,7 @@ import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
 import FollowListPage from '@/features/follow/pages/FollowListPage';
+import { NewBadgeToast } from '@/features/badges';
 import './App.css';
 
 /**
@@ -148,6 +149,7 @@ const AppContent: React.FC = () => {
         onAuthSuccess={() => {}}
       />
       <ToastContainer />
+      <NewBadgeToast />
     </>
   );
 

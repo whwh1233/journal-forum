@@ -1,0 +1,92 @@
+.new-badge-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  min-width: 300px;
+  max-width: 400px;
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--badge-color);
+  z-index: 9999;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.new-badge-toast--visible {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.new-badge-toast__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.new-badge-toast__close:hover {
+  background: var(--color-bg-secondary);
+}
+
+.new-badge-toast__content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.new-badge-toast__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--badge-color), color-mix(in srgb, var(--badge-color) 70%, black));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: badge-bounce 0.6s ease;
+}
+
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.new-badge-toast__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.new-badge-toast__title {
+  font-size: 12px;
+  color: var(--badge-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.new-badge-toast__name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.new-badge-toast__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
