@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { updateUserProfile, uploadAvatar, updatePassword } from '../../../services/userService';
 import PageHeader from '../../../components/layout/PageHeader';
+import { BadgePicker } from '../../badges';
 import { Loader2, Upload, Camera } from 'lucide-react';
 import './ProfileEditPage.css';
 
@@ -145,6 +146,12 @@ const ProfileEditPage: React.FC = () => {
             </label>
           </div>
           <p className="upload-hint">支持 JPG、PNG 格式，最大 2MB</p>
+        </div>
+
+        {/* 置顶徽章选择 */}
+        <div className="badge-section">
+          <h2 className="form-section-title">置顶徽章</h2>
+          <BadgePicker onSave={() => setSuccess('徽章设置已保存')} />
         </div>
 
         {/* 基本信息表单 */}

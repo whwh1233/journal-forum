@@ -1,0 +1,103 @@
+.badge-picker {
+  background: var(--color-bg-primary);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.badge-picker--empty {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.badge-picker__loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-secondary);
+}
+
+.badge-picker__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.badge-picker__header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.badge-picker__count {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.badge-picker__hint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+}
+
+.badge-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.badge-picker__item {
+  position: relative;
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.badge-picker__item:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-secondary);
+}
+
+.badge-picker__item--selected {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.badge-picker__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-picker__save {
+  width: 100%;
+  padding: 12px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.badge-picker__save:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.badge-picker__save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
