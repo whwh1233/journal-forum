@@ -46,6 +46,7 @@ export interface UserProfile {
   website?: string;
   role: 'user' | 'admin';
   createdAt: string;
+  pinnedBadges?: number[];      // 置顶徽章ID
   stats?: {
     commentCount: number;
     favoriteCount: number;
@@ -134,3 +135,63 @@ export interface ActivityStats {
 export type CategoryMap = {
   [key: string]: string;
 };
+
+// 徽章系统类型
+export interface Badge {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  category: 'activity' | 'identity' | 'honor';
+  type: 'auto' | 'manual';
+  triggerCondition?: {
+    metric: string;
+    threshold: number;
+  };
+  priority: number;
+  isActive: boolean;
+  createdAt: string;
+  // 用户徽章附加字段
+  grantedAt?: string;
+  isNew?: boolean;
+  grantedBy?: number;
+  holderCount?: number;
+}
+
+export interface UserBadgesResponse {
+  badges: Badge[];
+  pinnedBadges: Badge[];
+}
+
+export interface MyBadgesResponse {
+  badges: Badge[];
+  pinnedBadges: Badge[];
+  hasNewBadges: boolean;
+}
+
+export interface BadgeStats {
+  totalBadges: number;
+  activeBadges: number;
+  inactiveBadges: number;
+  byType: {
+    auto: number;
+    manual: number;
+    identity: number;
+  };
+  totalGrants: number;
+  usersWithBadges: number;
+  topBadges: Array<{
+    id: number;
+    name: string;
+    icon: string;
+    count: number;
+  }>;
+  recentGrants: Array<{
+    userBadgeId: number;
+    badge: { id: number; name: string; icon: string } | null;
+    user: { id: number; name: string; email: string } | null;
+    grantedAt: string;
+  }>;
+}
