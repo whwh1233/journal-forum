@@ -4,15 +4,28 @@ const badgeService = require('../services/badgeService');
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 6);
 
 // 递归构建评论树（最多3层）
-const buildCommentTree = (comments, parentId = null, level = 0) => {
+const buildCommentTree = (comments, parentId = null, level = 0, db = null) => {
   if (level >= 3) return [];
 
   return comments
     .filter(comment => comment.parentId === parentId)
-    .map(comment => ({
-      ...comment,
-      replies: level < 2 ? buildCommentTree(comments, comment.id, level + 1) : []
-    }))
+    .map(comment => {
+      // 获取用户的置顶徽章
+      let userBadges = [];
+      if (db) {
+        const user = db.data.users.find(u => u.id === comment.userId);
+        if (user && user.pinnedBadges && user.pinnedBadges.length > 0) {
+          userBadges = user.pinnedBadges
+            .map(badgeId => db.data.badges.find(b => b.id === badgeId && b.isActive))
+            .filter(Boolean);
+        }
+      }
+      return {
+        ...comment,
+        userBadges,
+        replies: level < 2 ? buildCommentTree(comments, comment.id, level + 1, db) : []
+      };
+    })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
@@ -27,8 +40,8 @@ const getCommentsByJournalId = async (req, res) => {
     const comments = db.data.comments
       .filter(c => c.journalId === parseInt(journalId));
 
-    // 构建评论树
-    let commentTree = buildCommentTree(comments);
+    // 构建评论树（包含用户徽章）
+    let commentTree = buildCommentTree(comments, null, 0, db);
 
     // 排序
     if (sort === 'oldest') {

@@ -61,6 +61,19 @@
   flex-wrap: wrap;
 }
 
+.profile-level-badge {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color, #8a2be2));
+  color: white;
+  border-radius: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .profile-bio {
   color: var(--color-text-muted);
   margin: var(--space-2) 0 var(--space-4) 0;
@@ -143,10 +156,15 @@
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-link);
-  margin-bottom: var(--space-1);
+  color: var(--text-color);
+  margin-bottom: 0.25rem;
+}
+
+.stat-item.points-item .stat-value {
+  color: var(--primary-color);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .stat-label {
@@ -221,6 +239,7 @@
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
+
   .profile-edit-btn:hover,
   .stat-item-link:hover {
     transform: none;

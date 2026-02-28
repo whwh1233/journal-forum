@@ -15,13 +15,14 @@ import {
   Dashboard,
   UserManagement,
   JournalManagement,
-  CommentManagement
+  CommentManagement,
+  BadgeManagement
 } from '@/features/admin';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
 import FollowListPage from '@/features/follow/pages/FollowListPage';
-import { NewBadgeToast } from '@/features/badges';
+import { NewBadgeToast, BadgeGalleryPage } from '@/features/badges';
 import './App.css';
 
 /**
@@ -81,72 +82,83 @@ const AppContent: React.FC = () => {
     <>
       <Routes>
         <Route element={<AppLayout />}>
-            {/* 首页 */}
-            <Route path="/" element={<HomeContent />} />
+          {/* 首页 */}
+          <Route path="/" element={<HomeContent />} />
 
-            {/* 用户资料页 */}
-            <Route path="/profile/:userId" element={<ProfilePage />} />
-            <Route path="/profile/:userId/follows" element={<FollowListPage />} />
+          {/* 用户资料页 */}
+          <Route path="/profile/:userId" element={<ProfilePage />} />
+          <Route path="/profile/:userId/follows" element={<FollowListPage />} />
 
-            {/* 需要登录的页面 */}
-            <Route
-              path="/profile/edit"
-              element={
-                <ProtectedRoute>
-                  <ProfileEditPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardPage />
-                </ProtectedRoute>
-              }
-            />
+          {/* 徽章图鉴页 */}
+          <Route path="/badges" element={<BadgeGalleryPage />} />
 
-            {/* 管理后台路由 */}
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <Dashboard />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <AdminRoute>
-                  <UserManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/journals"
-              element={
-                <AdminRoute>
-                  <JournalManagement />
-                </AdminRoute>
-              }
-            />
-            <Route
-              path="/admin/comments"
-              element={
-                <AdminRoute>
-                  <CommentManagement />
-                </AdminRoute>
-              }
-            />
-          </Route>
-        </Routes>
+          {/* 需要登录的页面 */}
+          <Route
+            path="/profile/edit"
+            element={
+              <ProtectedRoute>
+                <ProfileEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 管理后台路由 */}
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <Dashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/journals"
+            element={
+              <AdminRoute>
+                <JournalManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/comments"
+            element={
+              <AdminRoute>
+                <CommentManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/badges"
+            element={
+              <AdminRoute>
+                <BadgeManagement />
+              </AdminRoute>
+            }
+          />
+        </Route>
+      </Routes>
 
       {/* 全局弹窗和通知 */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={closeAuthModal}
-        onAuthSuccess={() => {}}
+        onAuthSuccess={() => { }}
       />
       <ToastContainer />
       <NewBadgeToast />

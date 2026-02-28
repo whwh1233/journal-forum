@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
 import ThemePicker from '@/components/common/ThemePicker';
@@ -7,7 +6,6 @@ import UserDropdown from '@/components/common/UserDropdown';
 import './TopBar.css';
 
 const TopBar: React.FC = () => {
-  const navigate = useNavigate();
   const { state: authState } = useAuthContext();
   const { openAuthModal } = useAuthModal();
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import CommentForm from './CommentForm';
 import FollowButton from '../../follow/components/FollowButton';
+import { BadgeList } from '../../badges';
 import type { Comment } from '../../../types';
 import './CommentItem.css';
 
@@ -96,6 +97,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <Link to={`/profile/${comment.userId}`} className="comment-author-name">
             {comment.userName}
           </Link>
+          {comment.userBadges && comment.userBadges.length > 0 && (
+            <BadgeList badges={comment.userBadges} maxDisplay={3} size="sm" />
+          )}
           {comment.rating && (
             <span className="comment-rating">
               {'★'.repeat(comment.rating)}

@@ -71,11 +71,19 @@
 
 ### 🛡️ 管理后台
 **状态**: ✅ 已完成
-**功能**: 用户管理、期刊管理、评论审核
+**功能**: 用户管理、期刊管理、评论审核、荣誉徽章颁发
 **关键文件**:
 - 前端: `src/features/admin/`
 - 后端: `backend/routes/admin.js`, `backend/controllers/adminControllerLowdb.js`
 - 中间件: `backend/middleware/adminMiddleware.js`
+
+### 🏅 积分与荣誉系统 (New)
+**状态**: ✅ 已完成
+**功能**: 动态积分与等级计算、自动/手动触发徽章、全局荣誉图鉴、管理端直签
+**关键文件**:
+- 前端: `src/features/badges/`, `src/features/admin/components/BadgeManagement.tsx`
+- 后端: `backend/services/badgeService.js`
+- 数据: `backend/data/initialBadges.js`
 
 ### 🧪 测试系统
 **状态**: 🚧 进行中
@@ -151,6 +159,7 @@ journal-forum/
 │   │   ├── favorite/             # 收藏
 │   │   ├── follow/               # 关注
 │   │   ├── dashboard/            # 仪表盘
+│   │   ├── badges/               # 荣誉系统 (徽章图鉴等)
 │   │   └── admin/                # 管理后台
 │   ├── services/                 # API 客户端（axios）
 │   ├── types/                    # TypeScript 类型定义
@@ -175,6 +184,7 @@ journal-forum/
 | 评论 | `/api/comments/*` |
 | 收藏 | `/api/favorites/*` |
 | 关注 | `/api/follows/*` |
+| 荣誉 | `/api/badges/*` |
 | 管理 | `/api/admin/*` |
 
 完整 API 文档见 `API_ROUTES.md`。
@@ -237,8 +247,10 @@ npm run test:e2e:demo:all       # 运行所有模块
 - 嵌套评论系统（含评分）
 - 收藏期刊
 - 关注用户
+- **积分与等级系统**（动态计算）
+- **荣誉徽章系统**（图鉴与后台管理）
 - 个人主页与仪表盘
-- 管理后台（用户/期刊/评论管理）
+- 管理后台（用户/期刊/评论/徽章管理）
 - 速率限制、CORS、Helmet 安全头
 - **多主题系统**（6 个预设主题，可自由切换）
 - **E2E 自动化测试**（Playwright，支持可视化演示和猴子测试）
@@ -283,9 +295,10 @@ src/
 
 ### ✅ 当前状态
 
+- **核心功能**: 补充了完整的积分（Points）与体系化荣誉徽章（Badges）功能。
 - **代码质量**: 图标系统已统一使用 Lucide React，UI 组件已优化（SearchAndFilter）
 - **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试部分完成（5/15+）
-- **UI 架构**: AppLayout + TopBar + SideNav + PageHeader 统一布局
+- **UI 架构**: 具备高级拟态面板的 Admin 控制台、TopBar + SideNav + PageHeader 统一布局
 - **主题系统**: 6 个预设主题可用
 - **认证体验**: AuthModalContext 全局管理
 
@@ -297,7 +310,6 @@ src/
 
 ### 📋 功能积压
 
-* 积分+徽章系统、活跃度记录和统计
 * 教育邮箱登录验证
 * 申请制
 
@@ -306,11 +318,14 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
+### 2026-03-01 (Current)
+实现动态积分与徽章系统：
+1. **积分与等级**：基于用户评论、收藏、被关注数据实时动态计算总积分与 Level 等级，并在 Dashboard / Profile 分发展示。
+2. **荣誉殿堂 (Badge Gallery)**：创建面向全站用户的自动/手动徽章规则公示与导览页。
+3. **Admin UI 升级**：为 Admin 侧边栏注入徽章管理台（BadgeManagement），采用高质感玻璃拟态 UI 提供一键授勋能力。
+
 ### 2026-02-26 (commit: 670ae26)
 图标系统重构 + UI 优化 + 组件测试覆盖（SVG→Lucide, SearchAndFilter 改进, ThemePicker/UserDropdown/Modal/BackButton/Breadcrumb 测试）
-
-### 2026-02-26 (commit: 679e6b1)
-CLAUDE.md 结构优化（新增功能模块导航、最近重要改动区域，微调当前状态描述）
 
 ---
 **维护说明**: 每次会话结束时更新此区域，保留最近 3 次会话记录。

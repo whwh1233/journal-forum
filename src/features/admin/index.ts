@@ -2,3 +2,4 @@ export { default as Dashboard } from './components/Dashboard';
 export { default as UserManagement } from './components/UserManagement';
 export { default as JournalManagement } from './components/JournalManagement';
 export { default as CommentManagement } from './components/CommentManagement';
+export { default as BadgeManagement } from './components/BadgeManagement';

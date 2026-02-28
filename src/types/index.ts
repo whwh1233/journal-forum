@@ -26,6 +26,7 @@ export interface Comment {
   updatedAt?: string;
   isDeleted: boolean;
   replies?: Comment[];           // 前端组装
+  userBadges?: Badge[];          // 用户置顶徽章
 }
 
 export interface User {
@@ -52,6 +53,8 @@ export interface UserProfile {
     favoriteCount: number;
     followingCount: number;
     followerCount: number;
+    points: number;
+    level: number;
   };
 }
 
@@ -128,6 +131,8 @@ export interface ActivityStats {
     favoriteCount: number;
     followingCount: number;
     followerCount: number;
+    points: number;
+    level: number;
   };
   recentActivity: any[];  // Will be defined later
 }

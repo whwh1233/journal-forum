@@ -54,11 +54,19 @@ const calculateUserStats = (userId, db) => {
     f => f.followingId === parseInt(userId)
   ).length || 0;
 
+  // 计算积分：评论记 5 分，收藏记 2 分，粉丝记 10 分
+  const points = (commentCount * 5) + (favoriteCount * 2) + (followerCount * 10);
+
+  // 计算等级：每100分升一级（最大Lv.100）
+  const level = Math.min(Math.floor(points / 100) + 1, 100);
+
   return {
     commentCount,
     favoriteCount,
     followingCount,
-    followerCount
+    followerCount,
+    points,
+    level
   };
 };
 

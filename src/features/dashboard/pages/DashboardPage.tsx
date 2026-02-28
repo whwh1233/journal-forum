@@ -82,7 +82,11 @@ const DashboardPage: React.FC = () => {
 
         <div className="dashboard-content">
           {activeTab === 'overview' && activity && (
-            <div className="dashboard-stats">
+            <div className="dashboard-stats dashboard-stats-with-points">
+              <div className="stat-card points-card">
+                <div className="stat-value points-val">{activity.stats.points}</div>
+                <div className="stat-label">总积分 <span className="profile-level-badge">Lv.{activity.stats.level}</span></div>
+              </div>
               <div className="stat-card">
                 <div className="stat-value">{activity.stats.commentCount}</div>
                 <div className="stat-label">评论数</div>

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { User, Settings, LogOut, ChevronDown, Award } from 'lucide-react';
 import './UserDropdown.css';
 
 interface UserDropdownProps {
@@ -82,6 +82,14 @@ const UserDropdown: React.FC<UserDropdownProps> = ({ userName, userInitial }) =>
           >
             <Settings className="dropdown-icon" size={16} />
             账号设置
+          </button>
+          <button
+            className="user-dropdown-item"
+            onClick={() => handleNavigate('/badges')}
+            role="menuitem"
+          >
+            <Award className="dropdown-icon" size={16} />
+            荣誉殿堂
           </button>
           <div className="user-dropdown-divider" />
           <button

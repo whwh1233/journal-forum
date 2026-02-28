@@ -32,7 +32,7 @@
       "publisher": "物理学会",
       "description": "记录物理学最新发现和理论突破。",
       "impactFactor": 3.9,
-      "avgRating": 4.0,
+      "avgRating": 4,
       "reviewCount": 5,
       "createdAt": "2024-01-03T00:00:00.000Z"
     }
@@ -57,6 +57,14 @@
       "bio": "资深学术研究者，专注于计算机科学领域。",
       "institution": "测试大学",
       "createdAt": "2024-01-02T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "email": "demo@test.com",
+      "password": "$2a$12$bgYgUJvz5y1vL/DvBLSA7eu0kpKQy8JhMMaA.HdhUqlb6jUCFq7CW",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2026-02-27T15:44:36.779Z"
     }
   ],
   "comments": [
@@ -72,5 +80,7 @@
   ],
   "favorites": [],
   "follows": [],
-  "migrated": {}
+  "migrated": {
+    "comments": true
+  }
 }

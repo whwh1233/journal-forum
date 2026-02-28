@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
-import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight } from 'lucide-react';
+import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award } from 'lucide-react';
 import './SideNav.css';
 
 interface SideNavProps {
@@ -66,6 +66,10 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
             <NavLink to="/admin/comments" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '评论管理'}>
               <MessageSquare className="side-nav-icon" size={20} />
               <span className="side-nav-label">评论管理</span>
+            </NavLink>
+            <NavLink to="/admin/badges" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '荣誉系统'}>
+              <Award className="side-nav-icon" size={20} />
+              <span className="side-nav-label">荣誉系统</span>
             </NavLink>
             <div className="side-nav-divider" />
             <NavLink to="/" className="side-nav-item" title={expanded ? undefined : '返回首页'}>
