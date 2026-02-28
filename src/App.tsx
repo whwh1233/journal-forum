@@ -5,6 +5,7 @@ import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { BadgeProvider } from '@/contexts/BadgeContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
@@ -156,15 +157,17 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <JournalProvider>
-          <ToastProvider>
-            <AuthModalProvider>
-              <div className="app">
-                <AppContent />
-              </div>
-            </AuthModalProvider>
-          </ToastProvider>
-        </JournalProvider>
+        <BadgeProvider>
+          <JournalProvider>
+            <ToastProvider>
+              <AuthModalProvider>
+                <div className="app">
+                  <AppContent />
+                </div>
+              </AuthModalProvider>
+            </ToastProvider>
+          </JournalProvider>
+        </BadgeProvider>
       </AuthProvider>
     </ThemeProvider>
   );
