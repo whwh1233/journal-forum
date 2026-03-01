@@ -7,6 +7,7 @@ interface FilterState {
   searchQuery: string;
   selectedCategory: string;
   minRating: number;
+  sortBy: string;
 }
 
 // Journal上下文状态
@@ -25,6 +26,7 @@ type JournalAction =
   | { type: 'SET_SEARCH_QUERY'; payload: string }
   | { type: 'SET_SELECTED_CATEGORY'; payload: string }
   | { type: 'SET_MIN_RATING'; payload: number }
+  | { type: 'SET_SORT_BY'; payload: string }
   | { type: 'CLEAR_FILTERS' };
 
 // 初始状态
@@ -35,7 +37,8 @@ const initialState: JournalState = {
   error: null,
   searchQuery: '',
   selectedCategory: '',
-  minRating: 0
+  minRating: 0,
+  sortBy: ''
 };
 
 // Reducer函数
@@ -59,12 +62,15 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
       return { ...state, selectedCategory: action.payload };
     case 'SET_MIN_RATING':
       return { ...state, minRating: action.payload };
+    case 'SET_SORT_BY':
+      return { ...state, sortBy: action.payload };
     case 'CLEAR_FILTERS':
       return {
         ...state,
         searchQuery: '',
         selectedCategory: '',
         minRating: 0,
+        sortBy: '',
         filteredJournals: state.journals
       };
     default:
@@ -77,11 +83,11 @@ function filterJournals(
   journals: Journal[],
   searchQuery: string,
   selectedCategory: string,
-  minRating: number
+  minRating: number,
+  sortBy: string
 ): Journal[] {
   let filtered = [...journals];
 
-  // 按搜索关键词过滤
   if (searchQuery.trim()) {
     const searchTerm = searchQuery.toLowerCase();
     filtered = filtered.filter(journal =>
@@ -91,14 +97,22 @@ function filterJournals(
     );
   }
 
-  // 按学科过滤
   if (selectedCategory) {
     filtered = filtered.filter(journal => journal.category === selectedCategory);
   }
 
-  // 按评分过滤
   if (minRating > 0) {
     filtered = filtered.filter(journal => journal.rating >= minRating);
+  }
+
+  // 本地排序（后端已排，这里作为双重保险）
+  const dimensionFields = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
+  if (sortBy === 'rating') {
+    filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  } else if (sortBy && dimensionFields.includes(sortBy)) {
+    filtered.sort((a, b) =>
+      ((b.dimensionAverages as any)?.[sortBy] || 0) - ((a.dimensionAverages as any)?.[sortBy] || 0)
+    );
   }
 
   return filtered;
@@ -111,8 +125,8 @@ const JournalContext = createContext<{
   refreshJournals: () => Promise<void>;
 }>({
   state: initialState,
-  dispatch: () => {},
-  refreshJournals: async () => {}
+  dispatch: () => { },
+  refreshJournals: async () => { }
 });
 
 // Provider组件
@@ -126,7 +140,8 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
       const journals = await journalService.getAllJournals(
         state.searchQuery,
         state.selectedCategory,
-        state.minRating
+        state.minRating,
+        state.sortBy
       );
       dispatch({ type: 'SET_JOURNALS', payload: journals });
     } catch (error) {
@@ -135,19 +150,20 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         payload: error instanceof Error ? error.message : '加载期刊数据失败'
       });
     }
-  }, [state.searchQuery, state.selectedCategory, state.minRating]);
+  }, [state.searchQuery, state.selectedCategory, state.minRating, state.sortBy]);
 
   // 初始加载和过滤器变化时重新加载
   useEffect(() => {
     refreshJournals();
-  }, [state.searchQuery, state.selectedCategory, state.minRating, refreshJournals]);
+  }, [state.searchQuery, state.selectedCategory, state.minRating, state.sortBy, refreshJournals]);
 
   // 单独处理filteredJournals的更新
   const filteredJournals = filterJournals(
     state.journals,
     state.searchQuery,
     state.selectedCategory,
-    state.minRating
+    state.minRating,
+    state.sortBy
   );
 
   return (

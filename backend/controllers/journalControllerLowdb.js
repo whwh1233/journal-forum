@@ -3,7 +3,7 @@ const { getDB } = require('../config/databaseLowdb');
 // 获取所有期刊（支持搜索和筛选）
 const getJournals = async (req, res, next) => {
   try {
-    const { search, category, minRating, page = 1, limit = 10 } = req.query;
+    const { search, category, minRating, sortBy, page = 1, limit = 10 } = req.query;
     const db = getDB();
 
     // 获取所有期刊
@@ -27,6 +27,17 @@ const getJournals = async (req, res, next) => {
     // 评分筛选
     if (minRating) {
       journalList = journalList.filter(journal => journal.rating >= Number(minRating));
+    }
+
+    // 排序
+    const dimensionFields = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
+    if (sortBy === 'rating') {
+      journalList.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy && dimensionFields.includes(sortBy)) {
+      journalList.sort((a, b) =>
+        ((b.dimensionAverages && b.dimensionAverages[sortBy]) || 0) -
+        ((a.dimensionAverages && a.dimensionAverages[sortBy]) || 0)
+      );
     }
 
     // 分页设置

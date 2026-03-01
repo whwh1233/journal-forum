@@ -6,7 +6,7 @@ const API_URL = 'http://localhost:3001/api/comments';
 // 获取期刊的所有评论
 export const getCommentsByJournalId = async (
   journalId: number,
-  sort: 'newest' | 'oldest' | 'rating' = 'newest'
+  sort: 'newest' | 'oldest' | 'rating' | 'helpful' = 'newest'
 ): Promise<Comment[]> => {
   const token = localStorage.getItem('authToken');
   const response = await axios.get(`${API_URL}/journal/${journalId}`, {
@@ -65,6 +65,18 @@ export const deleteComment = async (commentId: string): Promise<void> => {
   await axios.delete(`${API_URL}/${commentId}`, {
     headers: { Authorization: `Bearer ${token}` }
   });
+};
+
+// 点赞/取消点赞评论
+export const likeComment = async (commentId: string): Promise<{ liked: boolean; likeCount: number }> => {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    throw new Error('请先登录');
+  }
+  const response = await axios.post(`${API_URL}/${commentId}/like`, {}, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return response.data;
 };
 
 // 获取期刊多维评分汇总

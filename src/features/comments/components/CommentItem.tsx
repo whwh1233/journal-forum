@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ThumbsUp } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import CommentForm from './CommentForm';
 import DimensionRatingDisplay from './DimensionRatingDisplay';
 import FollowButton from '../../follow/components/FollowButton';
 import { BadgeList } from '../../badges';
+import { likeComment } from '../../../services/commentService';
 import type { Comment } from '../../../types';
 import './CommentItem.css';
 
@@ -24,6 +26,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [localLiked, setLocalLiked] = useState(comment.isLikedByMe || false);
+  const [localLikeCount, setLocalLikeCount] = useState(comment.likeCount || 0);
 
   const isAuthor = user && comment.userId === parseInt(user.id);
   const isAdmin = user?.role === 'admin';
@@ -168,6 +173,27 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
       {!comment.isDeleted && (
         <div className="comment-actions">
+          <button
+            className={`comment-action-btn comment-helpful-btn ${localLiked ? 'liked' : ''}`}
+            onClick={async () => {
+              if (!user || isLiking) return;
+              setIsLiking(true);
+              try {
+                const result = await likeComment(comment.id);
+                setLocalLiked(result.liked);
+                setLocalLikeCount(result.likeCount);
+              } catch (err) {
+                console.error('Like failed:', err);
+              } finally {
+                setIsLiking(false);
+              }
+            }}
+            disabled={!user || isLiking}
+            title={localLiked ? '取消有用标记' : '标记为有用'}
+          >
+            <ThumbsUp size={14} />
+            {localLikeCount > 0 && <span>{localLikeCount}</span>}
+          </button>
           {canReply && (
             <button
               className="comment-action-btn"

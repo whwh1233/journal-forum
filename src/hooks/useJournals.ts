@@ -16,6 +16,10 @@ export function useJournals() {
     dispatch({ type: 'SET_MIN_RATING', payload: rating });
   }, [dispatch]);
 
+  const setSortBy = useCallback((sortBy: string) => {
+    dispatch({ type: 'SET_SORT_BY', payload: sortBy });
+  }, [dispatch]);
+
   const clearFilters = useCallback(() => {
     dispatch({ type: 'CLEAR_FILTERS' });
   }, [dispatch]);
@@ -28,9 +32,11 @@ export function useJournals() {
     searchQuery: state.searchQuery,
     selectedCategory: state.selectedCategory,
     minRating: state.minRating,
+    sortBy: state.sortBy,
     setSearchQuery,
     setSelectedCategory,
     setMinRating,
+    setSortBy,
     clearFilters,
     refreshJournals
   };

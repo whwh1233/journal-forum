@@ -24,6 +24,9 @@ export interface Comment {
   content: string;
   rating?: number;               // 综合评分（向后兼容）
   dimensionRatings?: DimensionRatings; // 多维评分
+  likes?: string[];              // 点赞用户 ID 列表
+  likeCount?: number;            // 点赞数
+  isLikedByMe?: boolean;         // 当前用户是否已点赞
   createdAt: string;
   updatedAt?: string;
   isDeleted: boolean;

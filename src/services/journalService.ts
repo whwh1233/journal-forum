@@ -19,7 +19,8 @@ export const journalService = {
   getAllJournals: async (
     search?: string,
     category?: string,
-    minRating?: number
+    minRating?: number,
+    sortBy?: string
   ): Promise<Journal[]> => {
     let url = `${API_URL}/api/journals`;
     const params = new URLSearchParams();
@@ -27,6 +28,7 @@ export const journalService = {
     if (search) params.append('search', search);
     if (category) params.append('category', category);
     if (minRating) params.append('minRating', minRating.toString());
+    if (sortBy) params.append('sortBy', sortBy);
 
     if (params.toString()) {
       url += `?${params.toString()}`;

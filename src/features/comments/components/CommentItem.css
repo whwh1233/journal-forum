@@ -236,8 +236,31 @@
   margin-top: var(--space-4);
 }
 
+/* Helpful (like) button */
+.comment-helpful-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-muted);
+}
+
+.comment-helpful-btn.liked {
+  color: var(--color-btn-primary);
+  font-weight: 600;
+}
+
+.comment-helpful-btn.liked:hover {
+  color: var(--color-btn-primary-hover);
+}
+
+.comment-helpful-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
+
   .comment-item:hover,
   .comment-btn:hover,
   .comment-action-btn:active,

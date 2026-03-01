@@ -91,9 +91,27 @@ const getCommentsByJournalId = async (req, res) => {
     const { sort = 'newest' } = req.query;
     const db = getDB();
 
+    // 尝试从 token 获取当前用户 ID
+    let currentUserId = null;
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const jwt = require('jsonwebtoken');
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
+        currentUserId = String(decoded.id);
+      }
+    } catch (e) { /* 未登录，忽略 */ }
+
     // 获取该期刊的所有评论
     const comments = db.data.comments
       .filter(c => c.journalId === parseInt(journalId));
+
+    // 附加 likeCount 和 isLikedByMe
+    comments.forEach(c => {
+      c.likeCount = (c.likes || []).length;
+      c.isLikedByMe = currentUserId ? (c.likes || []).includes(currentUserId) : false;
+    });
 
     // 构建评论树（包含用户徽章）
     let commentTree = buildCommentTree(comments, null, 0, db);
@@ -103,6 +121,8 @@ const getCommentsByJournalId = async (req, res) => {
       commentTree.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     } else if (sort === 'rating') {
       commentTree.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sort === 'helpful') {
+      commentTree.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
     }
 
     res.json(commentTree);
@@ -193,10 +213,11 @@ const createComment = async (req, res) => {
     db.data.comments.push(newComment);
     await db.write();
 
-    // 如果是顶级评论，更新期刊评分
+    // 如果是顶级评论，更新期刊评分和维度缓存
     if (!parentId) {
       const agg = computeJournalDimensionAverages(db.data.comments, parseInt(journalId));
       journal.rating = agg.rating;
+      journal.dimensionAverages = agg.dimensionAverages;
       await db.write();
     }
 
@@ -275,12 +296,13 @@ const deleteComment = async (req, res) => {
 
     await db.write();
 
-    // 如果是顶级评论，重新计算期刊评分
+    // 如果是顶级评论，重新计算期刊评分和维度缓存
     if (!comment.parentId) {
       const journal = db.data.journals.find(j => j.id === comment.journalId);
       if (journal) {
         const agg = computeJournalDimensionAverages(db.data.comments, comment.journalId);
         journal.rating = agg.rating;
+        journal.dimensionAverages = agg.dimensionAverages;
         await db.write();
       }
     }
@@ -318,10 +340,50 @@ const getRatingSummary = async (req, res) => {
   }
 };
 
+// 点赞/取消点赞评论
+const likeComment = async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = String(req.user.id);
+    const db = getDB();
+
+    const comment = db.data.comments.find(c => c.id === commentId);
+    if (!comment) {
+      return res.status(404).json({ message: '评论不存在' });
+    }
+    if (comment.isDeleted) {
+      return res.status(400).json({ message: '无法点赞已删除评论' });
+    }
+
+    // 初始化 likes 数组
+    if (!comment.likes) comment.likes = [];
+
+    // Toggle 逻辑
+    const idx = comment.likes.indexOf(userId);
+    if (idx > -1) {
+      comment.likes.splice(idx, 1); // 取消点赞
+    } else {
+      comment.likes.push(userId);    // 点赞
+    }
+    comment.likeCount = comment.likes.length;
+
+    await db.write();
+
+    res.json({
+      liked: idx === -1,
+      likeCount: comment.likeCount
+    });
+  } catch (error) {
+    console.error('Error liking comment:', error);
+    res.status(500).json({ message: '点赞失败' });
+  }
+};
+
 module.exports = {
   getCommentsByJournalId,
   createComment,
   updateComment,
   deleteComment,
-  getRatingSummary
+  getRatingSummary,
+  likeComment
 };

@@ -13,7 +13,7 @@ const CommentList: React.FC<CommentListProps> = ({ journalId }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating'>('newest');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'rating' | 'helpful'>('newest');
 
   const loadComments = async () => {
     try {
@@ -49,6 +49,7 @@ const CommentList: React.FC<CommentListProps> = ({ journalId }) => {
             <option value="newest">最新</option>
             <option value="oldest">最早</option>
             <option value="rating">评分</option>
+            <option value="helpful">最有用</option>
           </select>
         </div>
       </div>

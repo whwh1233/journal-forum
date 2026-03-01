@@ -1,7 +1,8 @@
 import React from 'react';
-import { Search, X, BookOpen, Star, ChevronDown } from 'lucide-react';
+import { Search, X, BookOpen, Star, ArrowUpDown, ChevronDown } from 'lucide-react';
 import { useJournals } from '@/hooks/useJournals';
 import { categoryMap } from '@/services/journalService';
+import { DIMENSION_LABELS } from '@/types';
 import './SearchAndFilter.css';
 
 const SearchAndFilter: React.FC = () => {
@@ -9,13 +10,15 @@ const SearchAndFilter: React.FC = () => {
     searchQuery,
     selectedCategory,
     minRating,
+    sortBy,
     setSearchQuery,
     setSelectedCategory,
     setMinRating,
+    setSortBy,
     clearFilters
   } = useJournals();
 
-  const hasActiveFilters = searchQuery || selectedCategory || minRating > 0;
+  const hasActiveFilters = searchQuery || selectedCategory || minRating > 0 || sortBy;
 
   const ratingLabels: Record<number, string> = {
     0: '所有评分',
@@ -99,6 +102,31 @@ const SearchAndFilter: React.FC = () => {
           </div>
         </div>
 
+        <div className="filter-group">
+          <label htmlFor="sort-filter" className="filter-label">
+            <ArrowUpDown size={16} />
+            排序
+          </label>
+          <div className="select-wrapper">
+            <select
+              id="sort-filter"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className={`filter-select ${sortBy ? 'has-value' : ''}`}
+              aria-label="按维度排序"
+            >
+              <option value="">默认</option>
+              <option value="rating">综合评分</option>
+              <option value="reviewSpeed">审稿速度</option>
+              <option value="editorAttitude">编辑态度</option>
+              <option value="acceptDifficulty">录用难度</option>
+              <option value="reviewQuality">审稿质量</option>
+              <option value="overallExperience">综合体验</option>
+            </select>
+            <ChevronDown className="select-arrow" size={14} />
+          </div>
+        </div>
+
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
@@ -137,6 +165,15 @@ const SearchAndFilter: React.FC = () => {
               <Star size={12} />
               {ratingLabels[minRating]}
               <button onClick={() => setMinRating(0)} aria-label="移除评分筛选">
+                <X size={10} />
+              </button>
+            </span>
+          )}
+          {sortBy && (
+            <span className="filter-tag">
+              <ArrowUpDown size={12} />
+              {sortBy === 'rating' ? '综合评分' : (DIMENSION_LABELS[sortBy] || sortBy)}
+              <button onClick={() => setSortBy('')} aria-label="移除排序">
                 <X size={10} />
               </button>
             </span>
