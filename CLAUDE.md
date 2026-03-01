@@ -24,36 +24,37 @@
 **功能**: 用户注册、登录、JWT 认证、全局认证弹窗
 **关键文件**:
 - 前端: `src/features/auth/`, `src/contexts/AuthContext.tsx`, `src/contexts/AuthModalContext.tsx`
-- 后端: `backend/routes/auth.js`, `backend/controllers/authControllerLowdb.js`
-- 中间件: `backend/middleware/authMiddleware.js`
+- 后端: `backend/routes/authRoutes.js`, `backend/controllers/authControllerLowdb.js`
+- 中间件: `backend/middleware/auth.js`
 
 ### 📚 期刊管理
 **状态**: ✅ 已完成
 **功能**: 期刊浏览、搜索筛选、详情查看、评分
 **关键文件**:
 - 前端: `src/features/journals/`, `src/hooks/useJournals.ts`
-- 后端: `backend/routes/journals.js`, `backend/controllers/journalControllerLowdb.js`
+- 后端: `backend/routes/journalRoutes.js`, `backend/controllers/journalControllerLowdb.js`
 
 ### 💬 评论系统
 **状态**: ✅ 已完成
-**功能**: 嵌套评论（3 层）、点赞、删除标记
+**功能**: 嵌套评论（3 层）、多维结构化评分（5 维度）、点赞、删除标记
+**评分维度**: 审稿速度 / 编辑态度 / 录用难度 / 审稿质量 / 综合体验
 **关键文件**:
-- 前端: `src/features/comments/`
-- 后端: `backend/routes/comments.js`, `backend/controllers/commentControllerLowdb.js`
+- 前端: `src/features/comments/`（含 `DimensionRatingInput.*`, `DimensionRatingDisplay.*`）
+- 后端: `backend/routes/commentRoutes.js`, `backend/controllers/commentControllerLowdb.js`
 
 ### ⭐ 收藏系统
 **状态**: ✅ 已完成
 **功能**: 收藏期刊、取消收藏、收藏列表
 **关键文件**:
 - 前端: `src/features/favorite/`
-- 后端: `backend/routes/favorites.js`, `backend/controllers/favoriteControllerLowdb.js`
+- 后端: `backend/routes/favoriteRoutes.js`, `backend/controllers/favoriteControllerLowdb.js`
 
 ### 👥 关注系统
 **状态**: ✅ 已完成
 **功能**: 关注用户、取消关注、关注列表、粉丝列表
 **关键文件**:
 - 前端: `src/features/follow/`
-- 后端: `backend/routes/follows.js`, `backend/controllers/followControllerLowdb.js`
+- 后端: `backend/routes/followRoutes.js`, `backend/controllers/followControllerLowdb.js`
 
 ### 🎨 主题系统
 **状态**: ✅ 已完成
@@ -67,22 +68,22 @@
 **功能**: 个人资料编辑、头像上传、仪表盘统计
 **关键文件**:
 - 前端: `src/features/profile/`, `src/features/dashboard/`
-- 后端: `backend/routes/users.js`, `backend/controllers/userControllerLowdb.js`
+- 后端: `backend/routes/userRoutes.js`, `backend/controllers/userControllerLowdb.js`
 
 ### 🛡️ 管理后台
 **状态**: ✅ 已完成
 **功能**: 用户管理、期刊管理、评论审核、荣誉徽章颁发
 **关键文件**:
 - 前端: `src/features/admin/`
-- 后端: `backend/routes/admin.js`, `backend/controllers/adminControllerLowdb.js`
-- 中间件: `backend/middleware/adminMiddleware.js`
+- 后端: `backend/routes/adminRoutes.js`, `backend/controllers/adminControllerLowdb.js`
+- 中间件: `backend/middleware/adminAuth.js`
 
 ### 🏅 积分与荣誉系统 (New)
 **状态**: ✅ 已完成
 **功能**: 动态积分与等级计算、自动/手动触发徽章、全局荣誉图鉴、管理端直签
 **关键文件**:
 - 前端: `src/features/badges/`, `src/features/admin/components/BadgeManagement.tsx`
-- 后端: `backend/services/badgeService.js`
+- 后端: `backend/routes/badgeRoutes.js`, `backend/controllers/badgeControllerLowdb.js`, `backend/services/badgeService.js`
 - 数据: `backend/data/initialBadges.js`
 
 ### 🧪 测试系统
@@ -124,22 +125,30 @@ journal-forum/
 │   │   │   ├── 02-auth.spec.ts    # 认证场景
 │   │   │   ├── 03-user.spec.ts    # 用户场景
 │   │   │   └── 04-admin.spec.ts   # 管理员场景
+│   │   ├── accessibility.spec.ts  # 无障碍测试
 │   │   ├── user-flows.spec.ts     # 用户流程测试
 │   │   └── monkey.spec.ts         # 随机交互测试
-│   └── fixtures/
-│       └── test-data.ts           # 测试数据和选择器
+│   ├── fixtures/
+│   │   ├── test-data.ts           # 测试数据和选择器
+│   │   └── demo-helpers.ts        # 演示辅助工具
+│   └── utils/                     # E2E 工具函数
 ├── backend/
 │   ├── config/
 │   │   ├── databaseLowdb.js      # 生产数据库配置
 │   │   ├── databaseTest.js       # 测试数据库配置
 │   │   └── admin.js              # 管理员配置
 │   ├── controllers/              # 路由处理器（*Lowdb.js 命名）
-│   ├── middleware/               # JWT 认证、管理员认证中间件
-│   ├── routes/                   # API 路由
+│   ├── middleware/               # auth.js, adminAuth.js, error.js
+│   ├── routes/                   # API 路由（*Routes.js 命名）
+│   ├── services/                 # 业务逻辑层（badgeService.js）
+│   ├── models/                   # 数据模型（LowDB/Sequelize）
+│   ├── utils/                    # 工具函数（jwt, password 等）
+│   ├── data/                     # 初始数据（initialBadges.js）
 │   ├── __tests__/                # Jest 集成测试
 │   │   ├── integration/          # API 集成测试（完整）
 │   │   └── unit/                 # 单元测试（待补充）
-│   ├── database.json             # JSON 数据库文件
+│   ├── database.json             # JSON 数据库文件（生产）
+│   ├── database.test.json        # JSON 数据库文件（测试）
 │   ├── .env                      # 后端环境变量（生产）
 │   ├── .env.test                 # 后端测试环境变量
 │   ├── server.js
@@ -159,7 +168,10 @@ journal-forum/
 │   ├── contexts/                 # React Context
 │   │   ├── AuthContext.tsx       # 认证上下文
 │   │   ├── AuthModalContext.tsx  # 认证弹窗上下文
-│   │   └── ThemeContext.tsx      # 主题管理上下文
+│   │   ├── ThemeContext.tsx      # 主题管理上下文
+│   │   ├── BadgeContext.tsx      # 徽章上下文
+│   │   ├── JournalContext.tsx    # 期刊数据上下文
+│   │   └── ToastContext.tsx      # Toast 通知上下文
 │   ├── features/                 # 功能模块
 │   │   ├── auth/                 # 认证
 │   │   ├── comments/             # 评论
@@ -245,6 +257,8 @@ npm run test:e2e:demo:all       # 运行所有模块
 - **数据库**: LowDB 仅适合开发，生产应迁移至 PostgreSQL/MongoDB
 - **端口冲突**: `netstat -ano | findstr :3001` 查看占用进程
 - **控制器命名**: 所有活跃的后端控制器文件以 `Lowdb.js` 结尾（如 `userControllerLowdb.js`）
+- **路由命名**: 所有后端路由文件以 `Routes.js` 结尾（如 `authRoutes.js`）
+- **中间件命名**: `auth.js`（JWT 认证）、`adminAuth.js`（管理员认证）、`error.js`（错误处理）
 - **评论系统**: 支持嵌套（最多 3 层），删除后显示为"[该评论已被删除]"
 - **用户数据结构**: 包含 name, avatar, bio, location, institution, website 等字段
 - **测试覆盖**: 后端集成测试完整，前端组件测试完整，单元测试待补充
@@ -327,7 +341,14 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
-### 2026-03-01 (Current)
+### 2026-03-01 (Session 2)
+实现结构化多维评价系统：
+1. **5 维度评分系统**：将单一 rating 升级为审稿速度/编辑态度/录用难度/审稿质量/综合体验 5 维评价，完全向后兼容旧评论。
+2. **新增组件**：`DimensionRatingInput`（评分输入）和 `DimensionRatingDisplay`（compact/summary 两种模式的视觉化展示）。
+3. **期刊详情页多维汇总**：新增 `GET /api/comments/journal/:id/ratings` 接口，期刊详情页展示各维度均分条形图。
+4. **CLAUDE.md 修正**：修正了 7 个路由文件名、中间件命名、缺失的 Context/E2E 测试文件等文档不精确处。
+
+### 2026-03-01 (Session 1)
 实现动态积分与徽章系统及独立测试环境：
 1. **测试数据环境构建**：增加 `database.test.json` 和 `npm run seed:test`，实现自动生成带有社交网络（关注、粉丝、收藏）和盖楼评论的复杂测试数据集，并支持 `cross-env NODE_ENV=test` 隔离运行。
 2. **核心 Bug 修复**：修复了 AuthContext 和 authService 长期存在的邮箱错误当作 userId 存储导致查不到关注列表的 bug，并兼容修正了测试环境的 Rate Limit 放行。

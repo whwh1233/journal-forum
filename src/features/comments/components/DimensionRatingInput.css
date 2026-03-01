@@ -1,0 +1,65 @@
+.dimension-rating-input {
+    background: var(--card-bg, #f8f9fa);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+
+.dimension-rating-input__title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary, #666);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.dimension-rating-input__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.dimension-rating-input__label {
+    min-width: 70px;
+    font-size: 0.82rem;
+    color: var(--text-primary, #333);
+    font-weight: 500;
+}
+
+.dimension-rating-input__stars {
+    display: flex;
+    gap: 2px;
+}
+
+.dimension-star {
+    cursor: pointer;
+    font-size: 1.15rem;
+    color: var(--border-color, #ccc);
+    transition: color 0.15s ease, transform 0.15s ease;
+    user-select: none;
+    line-height: 1;
+}
+
+.dimension-star:hover {
+    transform: scale(1.2);
+}
+
+.dimension-star.filled {
+    color: var(--accent-color, #f59e0b);
+}
+
+.dimension-rating-input__score {
+    font-size: 0.78rem;
+    color: var(--text-secondary, #999);
+    min-width: 30px;
+    text-align: right;
+}
+
+.dimension-rating-input__hint {
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--text-secondary, #999);
+    font-style: italic;
+}

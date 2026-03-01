@@ -1,0 +1,118 @@
+/* === Compact mode (in comment items) === */
+.dim-display--compact {
+    margin-top: 6px;
+}
+
+.dim-display__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--text-secondary, #888);
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.dim-display__toggle:hover {
+    background: var(--hover-bg, rgba(0, 0, 0, 0.04));
+}
+
+.dim-display__toggle-icon {
+    font-size: 0.65rem;
+}
+
+.dim-display__toggle-text {
+    font-weight: 500;
+}
+
+/* === Summary mode (in journal detail) === */
+.dim-display--summary {
+    background: var(--card-bg, #f8f9fa);
+    border: 1px solid var(--border-color, #e0e0e0);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 12px;
+}
+
+.dim-display__summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.dim-display__summary-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+}
+
+.dim-display__summary-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #999);
+}
+
+/* === Shared grid and bar styles === */
+.dim-display__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.dim-display__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dim-display__item-label {
+    min-width: 60px;
+    font-size: 0.78rem;
+    color: var(--text-secondary, #666);
+    font-weight: 500;
+}
+
+.dim-display__item-bar-wrap {
+    flex: 1;
+    height: 8px;
+    background: var(--border-color, #e0e0e0);
+    border-radius: 4px;
+    overflow: hidden;
+    min-width: 60px;
+}
+
+.dim-display__item-bar {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent-color, #f59e0b), var(--accent-color-light, #fbbf24));
+    transition: width 0.4s ease;
+}
+
+.dim-display__item-val {
+    min-width: 28px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+    text-align: right;
+}
+
+/* Compact mode smaller bars */
+.dim-display--compact .dim-display__item-bar-wrap {
+    height: 6px;
+    max-width: 100px;
+}
+
+.dim-display--compact .dim-display__item-label {
+    min-width: 52px;
+    font-size: 0.72rem;
+}
+
+.dim-display--compact .dim-display__item-val {
+    font-size: 0.72rem;
+    min-width: 20px;
+}

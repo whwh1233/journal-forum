@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Comment } from '../types';
+import type { Comment, DimensionRatings, RatingSummary } from '../types';
 
 const API_URL = 'http://localhost:3001/api/comments';
 
@@ -22,6 +22,7 @@ export const createComment = async (data: {
   parentId?: string | null;
   content: string;
   rating?: number;
+  dimensionRatings?: DimensionRatings;
 }): Promise<Comment> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
@@ -65,3 +66,10 @@ export const deleteComment = async (commentId: string): Promise<void> => {
     headers: { Authorization: `Bearer ${token}` }
   });
 };
+
+// 获取期刊多维评分汇总
+export const getRatingSummary = async (journalId: number): Promise<RatingSummary> => {
+  const response = await axios.get(`${API_URL}/journal/${journalId}/ratings`);
+  return response.data;
+};
+

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import CommentForm from './CommentForm';
+import DimensionRatingDisplay from './DimensionRatingDisplay';
 import FollowButton from '../../follow/components/FollowButton';
 import { BadgeList } from '../../badges';
 import type { Comment } from '../../../types';
@@ -151,9 +152,17 @@ const CommentItem: React.FC<CommentItemProps> = ({
             </div>
           </div>
         ) : (
-          <p className={comment.isDeleted ? 'comment-deleted' : ''}>
-            {comment.content}
-          </p>
+          <>
+            <p className={comment.isDeleted ? 'comment-deleted' : ''}>
+              {comment.content}
+            </p>
+            {comment.dimensionRatings && !comment.isDeleted && (
+              <DimensionRatingDisplay
+                dimensionRatings={comment.dimensionRatings}
+                mode="compact"
+              />
+            )}
+          </>
         )}
       </div>
 

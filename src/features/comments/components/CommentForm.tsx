@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import DimensionRatingInput from './DimensionRatingInput';
+import type { DimensionRatings } from '../../../types';
 import './CommentForm.css';
 
 interface CommentFormProps {
@@ -19,7 +21,7 @@ const CommentForm: React.FC<CommentFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
-  const [rating, setRating] = useState(5);
+  const [dimensionRatings, setDimensionRatings] = useState<DimensionRatings>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,6 +37,12 @@ const CommentForm: React.FC<CommentFormProps> = ({
       return;
     }
 
+    // 顶级评论需要综合体验评分
+    if (!parentId && !dimensionRatings.overallExperience) {
+      alert('请至少填写综合体验评分');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -44,11 +52,11 @@ const CommentForm: React.FC<CommentFormProps> = ({
         journalId,
         parentId,
         content: content.trim(),
-        rating: parentId ? undefined : rating
+        dimensionRatings: parentId ? undefined : dimensionRatings
       });
 
       setContent('');
-      setRating(5);
+      setDimensionRatings({});
       onCommentAdded();
 
       if (onCancel) {
@@ -73,20 +81,10 @@ const CommentForm: React.FC<CommentFormProps> = ({
   return (
     <form className="comment-form" onSubmit={handleSubmit}>
       {!parentId && (
-        <div className="comment-form-rating">
-          <label>评分：</label>
-          <div className="rating-stars">
-            {[1, 2, 3, 4, 5].map(star => (
-              <span
-                key={star}
-                className={`star ${star <= rating ? 'filled' : ''}`}
-                onClick={() => setRating(star)}
-              >
-                ★
-              </span>
-            ))}
-          </div>
-        </div>
+        <DimensionRatingInput
+          value={dimensionRatings}
+          onChange={setDimensionRatings}
+        />
       )}
 
       <textarea
@@ -122,3 +120,4 @@ const CommentForm: React.FC<CommentFormProps> = ({
 };
 
 export default CommentForm;
+

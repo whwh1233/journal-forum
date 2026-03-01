@@ -3,6 +3,61 @@ const { customAlphabet } = require('nanoid');
 const badgeService = require('../services/badgeService');
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 6);
 
+// 多维评分维度定义
+const DIMENSION_KEYS = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
+const DIMENSION_LABELS = {
+  reviewSpeed: '审稿速度',
+  editorAttitude: '编辑态度',
+  acceptDifficulty: '录用难度',
+  reviewQuality: '审稿质量',
+  overallExperience: '综合体验'
+};
+
+// 验证多维评分
+const validateDimensionRatings = (dimensionRatings) => {
+  if (!dimensionRatings || typeof dimensionRatings !== 'object') return '多维评分数据无效';
+  for (const key of Object.keys(dimensionRatings)) {
+    if (!DIMENSION_KEYS.includes(key)) return `无效的评分维度: ${key}`;
+    const val = dimensionRatings[key];
+    if (typeof val !== 'number' || val < 1 || val > 5) return `${DIMENSION_LABELS[key] || key} 评分必须在 1-5 之间`;
+  }
+  if (!dimensionRatings.overallExperience) return '综合体验维度为必填';
+  return null;
+};
+
+// 计算期刊多维评分聚合
+const computeJournalDimensionAverages = (comments, journalId) => {
+  const topLevelComments = comments.filter(
+    c => c.journalId === journalId && !c.parentId && !c.isDeleted
+  );
+  const result = {};
+  let overallSum = 0;
+  let overallCount = 0;
+
+  for (const key of DIMENSION_KEYS) {
+    const withDim = topLevelComments.filter(c => c.dimensionRatings && c.dimensionRatings[key]);
+    if (withDim.length > 0) {
+      const sum = withDim.reduce((s, c) => s + c.dimensionRatings[key], 0);
+      result[key] = Math.round((sum / withDim.length) * 10) / 10;
+    }
+  }
+
+  // 综合评分：优先取 overallExperience 均值，否则取旧 rating 均值
+  for (const c of topLevelComments) {
+    const overall = (c.dimensionRatings && c.dimensionRatings.overallExperience) || c.rating;
+    if (overall) {
+      overallSum += overall;
+      overallCount++;
+    }
+  }
+
+  return {
+    dimensionAverages: result,
+    rating: overallCount > 0 ? Math.round((overallSum / overallCount) * 10) / 10 : 0,
+    ratingCount: overallCount
+  };
+};
+
 // 递归构建评论树（最多3层）
 const buildCommentTree = (comments, parentId = null, level = 0, db = null) => {
   if (level >= 3) return [];
@@ -60,7 +115,7 @@ const getCommentsByJournalId = async (req, res) => {
 // 创建评论或回复
 const createComment = async (req, res) => {
   try {
-    const { journalId, parentId, content, rating } = req.body;
+    const { journalId, parentId, content, rating, dimensionRatings } = req.body;
     const db = getDB();
 
     // 验证期刊是否存在
@@ -88,14 +143,34 @@ const createComment = async (req, res) => {
       }
     }
 
-    // 验证顶级评论必须有评分
-    if (!parentId && (rating === undefined || rating === null)) {
-      return res.status(400).json({ message: '顶级评论必须包含评分' });
-    }
+    // 顶级评论评分验证
+    let finalRating = undefined;
+    let finalDimensionRatings = undefined;
 
-    // 验证评分范围
-    if (rating !== undefined && (rating < 1 || rating > 5)) {
-      return res.status(400).json({ message: '评分必须在1-5之间' });
+    if (!parentId) {
+      if (dimensionRatings) {
+        // 新版：多维评分
+        const dimError = validateDimensionRatings(dimensionRatings);
+        if (dimError) {
+          return res.status(400).json({ message: dimError });
+        }
+        finalDimensionRatings = {};
+        for (const key of DIMENSION_KEYS) {
+          if (dimensionRatings[key] !== undefined) {
+            finalDimensionRatings[key] = dimensionRatings[key];
+          }
+        }
+        // 向后兼容：rating = overallExperience
+        finalRating = finalDimensionRatings.overallExperience;
+      } else if (rating !== undefined && rating !== null) {
+        // 旧版：单维度评分（向后兼容）
+        if (rating < 1 || rating > 5) {
+          return res.status(400).json({ message: '评分必须在1-5之间' });
+        }
+        finalRating = rating;
+      } else {
+        return res.status(400).json({ message: '顶级评论必须包含评分' });
+      }
     }
 
     // 创建评论ID
@@ -109,7 +184,8 @@ const createComment = async (req, res) => {
       journalId: parseInt(journalId),
       parentId: parentId || null,
       content,
-      rating: parentId ? undefined : rating,
+      rating: finalRating,
+      dimensionRatings: finalDimensionRatings || undefined,
       createdAt: new Date().toISOString(),
       isDeleted: false
     };
@@ -119,15 +195,9 @@ const createComment = async (req, res) => {
 
     // 如果是顶级评论，更新期刊评分
     if (!parentId) {
-      const topLevelComments = db.data.comments.filter(
-        c => c.journalId === parseInt(journalId) && !c.parentId && !c.isDeleted && c.rating
-      );
-
-      if (topLevelComments.length > 0) {
-        const avgRating = topLevelComments.reduce((sum, c) => sum + c.rating, 0) / topLevelComments.length;
-        journal.rating = Math.round(avgRating * 10) / 10;
-        await db.write();
-      }
+      const agg = computeJournalDimensionAverages(db.data.comments, parseInt(journalId));
+      journal.rating = agg.rating;
+      await db.write();
     }
 
     // 检查评论徽章
@@ -209,16 +279,8 @@ const deleteComment = async (req, res) => {
     if (!comment.parentId) {
       const journal = db.data.journals.find(j => j.id === comment.journalId);
       if (journal) {
-        const topLevelComments = db.data.comments.filter(
-          c => c.journalId === comment.journalId && !c.parentId && !c.isDeleted && c.rating
-        );
-
-        if (topLevelComments.length > 0) {
-          const avgRating = topLevelComments.reduce((sum, c) => sum + c.rating, 0) / topLevelComments.length;
-          journal.rating = Math.round(avgRating * 10) / 10;
-        } else {
-          journal.rating = 0;
-        }
+        const agg = computeJournalDimensionAverages(db.data.comments, comment.journalId);
+        journal.rating = agg.rating;
         await db.write();
       }
     }
@@ -230,9 +292,36 @@ const deleteComment = async (req, res) => {
   }
 };
 
+// 获取期刊多维评分汇总
+const getRatingSummary = async (req, res) => {
+  try {
+    const { journalId } = req.params;
+    const db = getDB();
+
+    const journal = db.data.journals.find(j => j.id === parseInt(journalId));
+    if (!journal) {
+      return res.status(404).json({ message: '期刊不存在' });
+    }
+
+    const agg = computeJournalDimensionAverages(db.data.comments, parseInt(journalId));
+
+    res.json({
+      journalId: parseInt(journalId),
+      rating: agg.rating,
+      ratingCount: agg.ratingCount,
+      dimensionAverages: agg.dimensionAverages,
+      dimensionLabels: DIMENSION_LABELS
+    });
+  } catch (error) {
+    console.error('Error getting rating summary:', error);
+    res.status(500).json({ message: '获取评分汇总失败' });
+  }
+};
+
 module.exports = {
   getCommentsByJournalId,
   createComment,
   updateComment,
-  deleteComment
+  deleteComment,
+  getRatingSummary
 };

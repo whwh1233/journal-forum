@@ -4,12 +4,16 @@ const {
   getCommentsByJournalId,
   createComment,
   updateComment,
-  deleteComment
+  deleteComment,
+  getRatingSummary
 } = require('../controllers/commentControllerLowdb');
 const { protect } = require('../middleware/auth');
 
 // 获取期刊的所有评论
 router.get('/journal/:journalId', getCommentsByJournalId);
+
+// 获取期刊多维评分汇总
+router.get('/journal/:journalId/ratings', getRatingSummary);
 
 // 创建评论或回复（需要登录）
 router.post('/', protect, createComment);

@@ -1,7 +1,9 @@
-import React, { useEffect } from 'react';
-import { Journal } from '@/types';
+import React, { useEffect, useState } from 'react';
+import { Journal, RatingSummary } from '@/types';
 import { categoryMap } from '@/services/journalService';
+import { getRatingSummary } from '@/services/commentService';
 import StarRating from '@/components/common/StarRating';
+import DimensionRatingDisplay from '@/features/comments/components/DimensionRatingDisplay';
 import CommentList from '@/features/comments/components/CommentList';
 import { X } from 'lucide-react';
 import './JournalDetailPanel.css';
@@ -13,6 +15,8 @@ interface JournalDetailPanelProps {
 }
 
 const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen, onClose }) => {
+  const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -33,6 +37,17 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
+  // 获取多维评分汇总
+  useEffect(() => {
+    if (journal && isOpen) {
+      getRatingSummary(journal.id)
+        .then(setRatingSummary)
+        .catch(() => setRatingSummary(null));
+    } else {
+      setRatingSummary(null);
+    }
+  }, [journal?.id, isOpen]);
 
   if (!journal && !isOpen) return null;
 
@@ -75,11 +90,20 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
                 <div className="detail-item">
                   <span className="detail-label">评分</span>
                   <span className="detail-value">
-                    <StarRating rating={journal.rating} showText={true} />
+                    <StarRating rating={ratingSummary?.rating ?? journal.rating} showText={true} />
                   </span>
                 </div>
               </div>
             </div>
+
+            {ratingSummary && Object.keys(ratingSummary.dimensionAverages).length > 0 && (
+              <DimensionRatingDisplay
+                dimensionRatings={ratingSummary.dimensionAverages}
+                mode="summary"
+                ratingCount={ratingSummary.ratingCount}
+              />
+            )}
+
             <div className="journal-detail-description">
               <p>{journal.description}</p>
             </div>
@@ -92,3 +116,4 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
 };
 
 export default JournalDetailPanel;
+
