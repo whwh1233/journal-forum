@@ -36,11 +36,12 @@
 
 ### 💬 评论系统
 **状态**: ✅ 已完成
-**功能**: 嵌套评论（3 层）、多维结构化评分（5 维度）、点赞、删除标记
+**功能**: 嵌套评论（3 层）、多维结构化评分（5 维度）、有用性点赞（Toggle）、多维排序、删除标记
 **评分维度**: 审稿速度 / 编辑态度 / 录用难度 / 审稿质量 / 综合体验
 **关键文件**:
 - 前端: `src/features/comments/`（含 `DimensionRatingInput.*`, `DimensionRatingDisplay.*`）
 - 后端: `backend/routes/commentRoutes.js`, `backend/controllers/commentControllerLowdb.js`
+- 排序: `src/features/journals/components/SearchAndFilter.tsx`, `src/contexts/JournalContext.tsx`
 
 ### ⭐ 收藏系统
 **状态**: ✅ 已完成
@@ -341,6 +342,12 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
+### 2026-03-01 (Session 3 - Current)
+多维排序与评论有用性点赞：
+1. **多维期刊排序**：首页 `SearchAndFilter` 新增排序下拉菜单，支持按综合评分及 5 个评价维度排序。后端 `getJournals` 接收 `sortBy` 参数，排序基于缓存在 `journal.dimensionAverages` 中的实时均值。
+2. **评论有用性点赞**：新增 `POST /api/comments/:id/like` Toggle 接口，`CommentItem` 增加点赞按钮（本地即时反馈），`CommentList` 排序增加"最有用"选项。
+3. **性能优化**：`createComment`/`deleteComment` 时自动将 `dimensionAverages` 持久化到 `journal` 对象，避免排序时实时遍历评论。
+
 ### 2026-03-01 (Session 2)
 实现结构化多维评价系统：
 1. **5 维度评分系统**：将单一 rating 升级为审稿速度/编辑态度/录用难度/审稿质量/综合体验 5 维评价，完全向后兼容旧评论。
@@ -355,9 +362,6 @@ src/
 3. **积分与等级**：基于用户评论、收藏、被关注数据实时动态计算总积分与 Level 等级，并在 Dashboard / Profile 分发展示。
 4. **荣誉殿堂 (Badge Gallery)**：创建面向全站用户的自动/手动徽章规则公示与导览页。
 5. **Admin UI 升级**：为 Admin 侧边栏注入徽章管理台（BadgeManagement），采用高质感玻璃拟态 UI 提供一键授勋能力。
-
-### 2026-02-26 (commit: 670ae26)
-图标系统重构 + UI 优化 + 组件测试覆盖（SVG→Lucide, SearchAndFilter 改进, ThemePicker/UserDropdown/Modal/BackButton/Breadcrumb 测试）
 
 ---
 **维护说明**: 每次会话结束时更新此区域，保留最近 3 次会话记录。
