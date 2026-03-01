@@ -97,8 +97,14 @@
 ## 启动项目
 
 ```bash
-# 后端
+# 后端 (生产/开发环境)
 cd backend && npm start
+
+# 后端 (独立测试数据环境)
+cd backend && npm run start:test
+
+# 播种测试数据
+cd backend && npm run seed:test
 
 # 前端（另开终端）
 npm run dev
@@ -136,7 +142,10 @@ journal-forum/
 │   ├── database.json             # JSON 数据库文件
 │   ├── .env                      # 后端环境变量（生产）
 │   ├── .env.test                 # 后端测试环境变量
-│   └── server.js
+│   ├── server.js
+│   └── scripts/
+│       ├── initLowdb.js          # 初始化数据库脚本
+│       └── seedData.js           # 独立测试数据生成脚本
 ├── src/
 │   ├── components/
 │   │   ├── layout/               # 布局组件
@@ -319,10 +328,12 @@ src/
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
 ### 2026-03-01 (Current)
-实现动态积分与徽章系统：
-1. **积分与等级**：基于用户评论、收藏、被关注数据实时动态计算总积分与 Level 等级，并在 Dashboard / Profile 分发展示。
-2. **荣誉殿堂 (Badge Gallery)**：创建面向全站用户的自动/手动徽章规则公示与导览页。
-3. **Admin UI 升级**：为 Admin 侧边栏注入徽章管理台（BadgeManagement），采用高质感玻璃拟态 UI 提供一键授勋能力。
+实现动态积分与徽章系统及独立测试环境：
+1. **测试数据环境构建**：增加 `database.test.json` 和 `npm run seed:test`，实现自动生成带有社交网络（关注、粉丝、收藏）和盖楼评论的复杂测试数据集，并支持 `cross-env NODE_ENV=test` 隔离运行。
+2. **核心 Bug 修复**：修复了 AuthContext 和 authService 长期存在的邮箱错误当作 userId 存储导致查不到关注列表的 bug，并兼容修正了测试环境的 Rate Limit 放行。
+3. **积分与等级**：基于用户评论、收藏、被关注数据实时动态计算总积分与 Level 等级，并在 Dashboard / Profile 分发展示。
+4. **荣誉殿堂 (Badge Gallery)**：创建面向全站用户的自动/手动徽章规则公示与导览页。
+5. **Admin UI 升级**：为 Admin 侧边栏注入徽章管理台（BadgeManagement），采用高质感玻璃拟态 UI 提供一键授勋能力。
 
 ### 2026-02-26 (commit: 670ae26)
 图标系统重构 + UI 优化 + 组件测试覆盖（SVG→Lucide, SearchAndFilter 改进, ThemePicker/UserDropdown/Modal/BackButton/Breadcrumb 测试）
