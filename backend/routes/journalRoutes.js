@@ -1,5 +1,5 @@
 const express = require('express');
-const { getJournals, getJournalById, addJournalReview } = require('../controllers/journalControllerLowdb');
+const { getJournals, getJournalById, addJournalReview } = require('../controllers/journalController');
 
 const router = express.Router();
 

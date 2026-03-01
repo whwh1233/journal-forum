@@ -1,40 +1,87 @@
-const mongoose = require('mongoose');
-const { hashPassword } = require('../utils/password');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+const { v4: uuidv4 } = require('uuid');
 
-const UserSchema = new mongoose.Schema({
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.CHAR(36),
+    primaryKey: true,
+    defaultValue: () => uuidv4()
+  },
   email: {
-    type: String,
-    required: [true, '邮箱是必填项'],
+    type: DataTypes.STRING(255),
+    allowNull: false,
     unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^\S+@\S+\.\S+$/, '请输入有效的邮箱地址']
+    validate: {
+      isEmail: { msg: '请输入有效的邮箱地址' },
+      notEmpty: { msg: '邮箱是必填项' }
+    },
+    set(value) {
+      this.setDataValue('email', value.toLowerCase().trim());
+    }
   },
   password: {
-    type: String,
-    required: [true, '密码是必填项'],
-    minlength: [6, '密码长度至少为6位'],
-    select: false // 默认不返回密码字段
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      notEmpty: { msg: '密码是必填项' },
+      len: { args: [6, 255], msg: '密码长度至少为6位' }
+    }
   },
   name: {
-    type: String,
-    trim: true
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: ''
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
+  avatar: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    defaultValue: ''
+  },
+  bio: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    defaultValue: ''
+  },
+  location: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    defaultValue: ''
+  },
+  institution: {
+    type: DataTypes.STRING(200),
+    allowNull: true,
+    defaultValue: ''
+  },
+  website: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    defaultValue: ''
+  },
+  pinnedBadges: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null,
+    field: 'pinned_badges'
+  },
+  role: {
+    type: DataTypes.ENUM('user', 'admin'),
+    defaultValue: 'user'
+  },
+  status: {
+    type: DataTypes.ENUM('active', 'disabled'),
+    defaultValue: 'active'
   }
 }, {
-  timestamps: true
-});
-
-// 密码加密中间件
-UserSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
+  tableName: 'users',
+  defaultScope: {
+    attributes: { exclude: ['password'] }
+  },
+  scopes: {
+    withPassword: {
+      attributes: {} // 返回所有字段含 password
+    }
   }
-  this.password = await hashPassword(this.password);
-  next();
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;

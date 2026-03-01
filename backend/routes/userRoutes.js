@@ -8,7 +8,7 @@ const {
   getUserComments,
   getUserFavorites,
   getUserActivity
-} = require('../controllers/userControllerLowdb');
+} = require('../controllers/userController');
 const { protect } = require('../middleware/auth');
 
 // 获取用户资料（公开）

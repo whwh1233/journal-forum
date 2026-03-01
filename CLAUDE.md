@@ -8,7 +8,7 @@
 
 - **前端**: React 18 + TypeScript + Vite (port 3000)
 - **后端**: Node.js + Express (port 3001)
-- **数据库**: LowDB（JSON 文件数据库，`backend/database.json`）
+- **数据库**: MySQL 8.0 (Sequelize ORM) + *LowDB（兼容遗留测试)*
 - **认证**: JWT + bcryptjs
 - **主题系统**: React Context + CSS Variables (6 个预设主题)
 - **前端测试**: Vitest
@@ -24,7 +24,7 @@
 **功能**: 用户注册、登录、JWT 认证、全局认证弹窗
 **关键文件**:
 - 前端: `src/features/auth/`, `src/contexts/AuthContext.tsx`, `src/contexts/AuthModalContext.tsx`
-- 后端: `backend/routes/authRoutes.js`, `backend/controllers/authControllerLowdb.js`
+- 后端: `backend/routes/authRoutes.js`, `backend/controllers/authController.js`
 - 中间件: `backend/middleware/auth.js`
 
 ### 📚 期刊管理
@@ -32,7 +32,7 @@
 **功能**: 期刊浏览、搜索筛选、详情查看、评分
 **关键文件**:
 - 前端: `src/features/journals/`, `src/hooks/useJournals.ts`
-- 后端: `backend/routes/journalRoutes.js`, `backend/controllers/journalControllerLowdb.js`
+- 后端: `backend/routes/journalRoutes.js`, `backend/controllers/journalController.js`
 
 ### 💬 评论系统
 **状态**: ✅ 已完成
@@ -40,7 +40,8 @@
 **评分维度**: 审稿速度 / 编辑态度 / 录用难度 / 审稿质量 / 综合体验
 **关键文件**:
 - 前端: `src/features/comments/`（含 `DimensionRatingInput.*`, `DimensionRatingDisplay.*`）
-- 后端: `backend/routes/commentRoutes.js`, `backend/controllers/commentControllerLowdb.js`
+- 后端: `backend/routes/commentRoutes.js`, `backend/controllers/commentController.js`
+- 模型: `backend/models/Comment.js`, `backend/models/CommentLike.js`
 - 排序: `src/features/journals/components/SearchAndFilter.tsx`, `src/contexts/JournalContext.tsx`
 
 ### ⭐ 收藏系统
@@ -48,14 +49,14 @@
 **功能**: 收藏期刊、取消收藏、收藏列表
 **关键文件**:
 - 前端: `src/features/favorite/`
-- 后端: `backend/routes/favoriteRoutes.js`, `backend/controllers/favoriteControllerLowdb.js`
+- 后端: `backend/routes/favoriteRoutes.js`, `backend/controllers/favoriteController.js`
 
 ### 👥 关注系统
 **状态**: ✅ 已完成
 **功能**: 关注用户、取消关注、关注列表、粉丝列表
 **关键文件**:
 - 前端: `src/features/follow/`
-- 后端: `backend/routes/followRoutes.js`, `backend/controllers/followControllerLowdb.js`
+- 后端: `backend/routes/followRoutes.js`, `backend/controllers/followController.js`
 
 ### 🎨 主题系统
 **状态**: ✅ 已完成
@@ -69,14 +70,14 @@
 **功能**: 个人资料编辑、头像上传、仪表盘统计
 **关键文件**:
 - 前端: `src/features/profile/`, `src/features/dashboard/`
-- 后端: `backend/routes/userRoutes.js`, `backend/controllers/userControllerLowdb.js`
+- 后端: `backend/routes/userRoutes.js`, `backend/controllers/userController.js`
 
 ### 🛡️ 管理后台
 **状态**: ✅ 已完成
 **功能**: 用户管理、期刊管理、评论审核、荣誉徽章颁发
 **关键文件**:
 - 前端: `src/features/admin/`
-- 后端: `backend/routes/adminRoutes.js`, `backend/controllers/adminControllerLowdb.js`
+- 后端: `backend/routes/adminRoutes.js`, `backend/controllers/adminController.js`
 - 中间件: `backend/middleware/adminAuth.js`
 
 ### 🏅 积分与荣誉系统 (New)
@@ -84,8 +85,8 @@
 **功能**: 动态积分与等级计算、自动/手动触发徽章、全局荣誉图鉴、管理端直签
 **关键文件**:
 - 前端: `src/features/badges/`, `src/features/admin/components/BadgeManagement.tsx`
-- 后端: `backend/routes/badgeRoutes.js`, `backend/controllers/badgeControllerLowdb.js`, `backend/services/badgeService.js`
-- 数据: `backend/data/initialBadges.js`
+- 后端: `backend/routes/badgeRoutes.js`, `backend/controllers/badgeController.js`, `backend/services/badgeService.js`
+- 模型: `backend/models/Badge.js`, `backend/models/UserBadge.js`
 
 ### 🧪 测试系统
 **状态**: 🚧 进行中
@@ -135,14 +136,20 @@ journal-forum/
 │   └── utils/                     # E2E 工具函数
 ├── backend/
 │   ├── config/
-│   │   ├── databaseLowdb.js      # 生产数据库配置
+│   │   ├── database.js           # MySQL 生产数据库配置 (Sequelize)
+│   │   ├── databaseLowdb.js      # 遗留 LowDB 配置（用于测试/参考）
 │   │   ├── databaseTest.js       # 测试数据库配置
 │   │   └── admin.js              # 管理员配置
-│   ├── controllers/              # 路由处理器（*Lowdb.js 命名）
+│   ├── controllers/              # 路由处理器
+│   │   ├── *Controller.js        # MySQL Sequelize 控制器
+│   │   └── *ControllerLowdb.js   # 遗留 LowDB 控制器（参考归档）
 │   ├── middleware/               # auth.js, adminAuth.js, error.js
 │   ├── routes/                   # API 路由（*Routes.js 命名）
 │   ├── services/                 # 业务逻辑层（badgeService.js）
-│   ├── models/                   # 数据模型（LowDB/Sequelize）
+│   ├── models/                   # 数据模型 (Sequelize)
+│   │   ├── index.js              # 模型聚合与关联
+│   │   ├── User.js, Journal.js, Comment.js, Badge.js 等
+│   ├── utils/                    # 工具函数（jwt, password 等）
 │   ├── utils/                    # 工具函数（jwt, password 等）
 │   ├── data/                     # 初始数据（initialBadges.js）
 │   ├── __tests__/                # Jest 集成测试
@@ -154,7 +161,8 @@ journal-forum/
 │   ├── .env.test                 # 后端测试环境变量
 │   ├── server.js
 │   └── scripts/
-│       ├── initLowdb.js          # 初始化数据库脚本
+│       ├── migrateData.js        # JSON 到 MySQL 数据迁移脚本
+│       ├── initLowdb.js          # 初始化旧版数据库脚本
 │       └── seedData.js           # 独立测试数据生成脚本
 ├── src/
 │   ├── components/
@@ -240,9 +248,9 @@ npm run test:e2e:demo:all       # 运行所有模块
 
 ## 设置管理员账号
 
-1. 通过 UI 注册账号
-2. 编辑 `backend/database.json`
-3. 找到该用户，将 `role` 从 `"user"` 改为 `"admin"`
+1. MySQL 环境配置：
+   - 生产环境：直接修改 `users` 表中的 `role` 列为 `'admin'`
+   - 支持通过后端修改 Admin 数据表记录实现无缝介入
 
 ## 环境变量配置
 
@@ -255,9 +263,9 @@ npm run test:e2e:demo:all       # 运行所有模块
 
 ## 重要注意事项
 
-- **数据库**: LowDB 仅适合开发，生产应迁移至 PostgreSQL/MongoDB
+- **数据库配置**: 已从 LowDB 迁移至 MySQL 8.0。需配置 `.env` 文件中的 DB 环境变量以连接 MySQL。
 - **端口冲突**: `netstat -ano | findstr :3001` 查看占用进程
-- **控制器命名**: 所有活跃的后端控制器文件以 `Lowdb.js` 结尾（如 `userControllerLowdb.js`）
+- **控制器命名**: 现所有活跃的控制器文件为 `*Controller.js`，带有 `Lowdb.js` 后缀的为已弃用的遗留代码
 - **路由命名**: 所有后端路由文件以 `Routes.js` 结尾（如 `authRoutes.js`）
 - **中间件命名**: `auth.js`（JWT 认证）、`adminAuth.js`（管理员认证）、`error.js`（错误处理）
 - **评论系统**: 支持嵌套（最多 3 层），删除后显示为"[该评论已被删除]"
@@ -319,6 +327,7 @@ src/
 
 ### ✅ 当前状态
 
+- **数据库升级**：已完整从 LowDB 迁移至 MySQL 8.0。包括 8 大 Sequelize 模型构建（支持高并发）、数据平滑迁移（支持 UUID）、所有控制器与服务层的彻底重写。目前完全抛弃 LowDB 提供服务，遗留代码已做归档处理。
 - **核心功能**: 补充了完整的积分（Points）与体系化荣誉徽章（Badges）功能。
 - **代码质量**: 图标系统已统一使用 Lucide React，UI 组件已优化（SearchAndFilter）
 - **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试部分完成（5/15+）
@@ -328,9 +337,9 @@ src/
 
 ### 🔴 优先待办
 
-1. **前端组件测试** - 剩余 10+ 组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
-2. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
-3. **生产环境准备** - LowDB 需迁移至 PostgreSQL/MongoDB（生产部署前必做）
+1. **测试兼容性恢复** - E2E 测试和 Jest 测试脚本当前仍绑定 LowDB 接口，需重构所有测试数据工厂与钩子以适配全新 MySQL 场景
+2. **前端组件测试** - 剩余 10+ 组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
+3. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
 
 ### 📋 功能积压
 
@@ -342,7 +351,13 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
-### 2026-03-01 (Session 3 - Current)
+### 2026-03-01 (Session 4 - Current)
+全面迁移至 MySQL 数据库架构：
+1. **数据层重构**：引入 Sequelize ORM 构建 8 个数据模型，实现复杂表间关联（一对多、多对多、自关联），支持细粒度的约束和外键连级管理。
+2. **控制器完全替换**：将全部 Controller、Service 及 Middleware 从基于 LowDB 的 JSON 操作改写为异步 SQL 查询，优化内存占用与并发性能（如 COUNT/SUM 替代数组遍历）。
+3. **数据无损迁移**：开发了 `scripts/migrateData.js` 脚本，将旧版 database.json 中包含的 5 个用户、8 个期刊、34 条级联评论等历史数据平滑迁移到 MySQL，期间完成 Integer ID 到 UUID 主键的安全转换和 Decimal 的格式修正。
+
+### 2026-03-01 (Session 3)
 多维排序与评论有用性点赞：
 1. **多维期刊排序**：首页 `SearchAndFilter` 新增排序下拉菜单，支持按综合评分及 5 个评价维度排序。后端 `getJournals` 接收 `sortBy` 参数，排序基于缓存在 `journal.dimensionAverages` 中的实时均值。
 2. **评论有用性点赞**：新增 `POST /api/comments/:id/like` Toggle 接口，`CommentItem` 增加点赞按钮（本地即时反馈），`CommentList` 排序增加"最有用"选项。

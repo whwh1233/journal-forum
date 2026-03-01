@@ -8,12 +8,12 @@ const {
   deleteUser,
   getComments,
   deleteComment
-} = require('../controllers/adminControllerLowdb');
+} = require('../controllers/adminController');
 const {
   createJournal,
   updateJournal,
   deleteJournal
-} = require('../controllers/journalControllerLowdb');
+} = require('../controllers/journalController');
 
 // 所有路由都需要管理员权限
 router.use(adminProtect);

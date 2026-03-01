@@ -7,7 +7,7 @@ const {
   deleteComment,
   getRatingSummary,
   likeComment
-} = require('../controllers/commentControllerLowdb');
+} = require('../controllers/commentController');
 const { protect } = require('../middleware/auth');
 
 // 获取期刊的所有评论

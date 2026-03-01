@@ -17,11 +17,9 @@ const badgeRoutes = require('./routes/badgeRoutes');
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
 
-// 导入数据库连接
-const { connectDB } = require('./config/databaseLowdb');
-
-// 连接数据库
-connectDB();
+// 导入数据库连接 (MySQL + Sequelize)
+const { connectDB } = require('./config/database');
+const { syncDatabase } = require('./models');
 
 // 初始化Express应用
 const app = express();
@@ -117,9 +115,25 @@ app.use(notFound);
 // 错误处理
 app.use(errorHandler);
 
-// 启动服务器
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+// 启动服务器（异步：先连接 MySQL，再同步模型，最后监听端口）
+const startServer = async () => {
+  try {
+    // 1. 连接 MySQL 数据库
+    await connectDB();
+
+    // 2. 同步模型到数据库（不使用 force，保护数据安全）
+    await syncDatabase({ alter: false });
+
+    // 3. 启动 HTTP 服务
+    app.listen(PORT, () => {
+      console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;

@@ -1,11 +1,9 @@
 const { verifyToken } = require('../utils/jwt');
-const { getDB } = require('../config/databaseLowdb');
+const { User } = require('../models');
 const { ADMIN_EMAIL } = require('../config/admin');
 
-// 管理员权限验证中间件
 const adminProtect = async (req, res, next) => {
   try {
-    // 从请求头获取token
     let token = req.headers.authorization;
 
     if (token && token.startsWith('Bearer ')) {
@@ -19,7 +17,6 @@ const adminProtect = async (req, res, next) => {
       });
     }
 
-    // 验证token
     const decoded = verifyToken(token);
     if (!decoded) {
       return res.status(401).json({
@@ -28,9 +25,7 @@ const adminProtect = async (req, res, next) => {
       });
     }
 
-    // 获取用户信息
-    const db = getDB();
-    const user = db.data.users.find(u => u.id === decoded.id);
+    const user = await User.findByPk(decoded.id);
 
     if (!user) {
       return res.status(401).json({
@@ -39,7 +34,6 @@ const adminProtect = async (req, res, next) => {
       });
     }
 
-    // 检查用户是否被禁用
     if (user.status === 'disabled') {
       return res.status(403).json({
         success: false,
@@ -47,7 +41,6 @@ const adminProtect = async (req, res, next) => {
       });
     }
 
-    // 检查是否是管理员
     if (user.role !== 'admin' && user.email !== ADMIN_EMAIL.toLowerCase()) {
       return res.status(403).json({
         success: false,

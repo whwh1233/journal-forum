@@ -5,7 +5,7 @@ const {
   removeFavorite,
   checkFavorite,
   getUserFavorites
-} = require('../controllers/favoriteControllerLowdb');
+} = require('../controllers/favoriteController');
 const { protect } = require('../middleware/auth');
 
 // 添加收藏（需要登录）

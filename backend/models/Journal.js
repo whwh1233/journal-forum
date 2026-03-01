@@ -1,75 +1,66 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-const ReviewSchema = new mongoose.Schema({
-  author: {
-    type: String,
-    required: [true, '评论作者是必填项'],
-    trim: true
+const Journal = sequelize.define('Journal', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
   },
-  rating: {
-    type: Number,
-    required: [true, '评分是必填项'],
-    min: [1, '评分最低为1分'],
-    max: [5, '评分最高为5分']
-  },
-  content: {
-    type: String,
-    required: [true, '评论内容是必填项'],
-    trim: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true
-});
-
-const JournalSchema = new mongoose.Schema({
   title: {
-    type: String,
-    required: [true, '期刊标题是必填项'],
-    trim: true
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      notEmpty: { msg: '期刊标题是必填项' }
+    }
   },
   issn: {
-    type: String,
-    required: [true, 'ISSN是必填项'],
+    type: DataTypes.STRING(9),
+    allowNull: false,
     unique: true,
-    trim: true,
-    match: [/^\d{4}-\d{4}$/, '请输入有效的ISSN格式（如：1234-5678）']
+    validate: {
+      notEmpty: { msg: 'ISSN是必填项' },
+      is: { args: /^\d{4}-\d{4}$/, msg: '请输入有效的ISSN格式（如：1234-5678）' }
+    }
   },
   category: {
-    type: String,
-    required: [true, '学科分类是必填项'],
-    enum: {
-      values: ['computer-science', 'biology', 'physics', 'chemistry', 'mathematics', 'medicine'],
-      message: '学科分类必须是预定义的值之一'
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [['computer-science', 'biology', 'physics', 'chemistry', 'mathematics', 'medicine']],
+        msg: '学科分类必须是预定义的值之一'
+      }
     }
   },
   rating: {
-    type: Number,
-    default: 0,
-    min: [0, '评分不能小于0'],
-    max: [5, '评分不能大于5']
+    type: DataTypes.DECIMAL(2, 1),
+    defaultValue: 0,
+    get() {
+      const val = this.getDataValue('rating');
+      return val === null ? 0 : parseFloat(val);
+    }
   },
   description: {
-    type: String,
-    required: [true, '期刊描述是必填项']
+    type: DataTypes.TEXT,
+    allowNull: false,
+    defaultValue: ''
   },
-  reviews: [ReviewSchema]
+  // 多维评分均值缓存（JSON）
+  dimensionAverages: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    defaultValue: null,
+    field: 'dimension_averages'
+  },
+  // 旧版 reviews 数组（JSON，兼容迁移数据）
+  reviews: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+    field: 'reviews'
+  }
 }, {
-  timestamps: true
+  tableName: 'journals'
 });
 
-// 虚拟字段：计算平均评分
-JournalSchema.virtual('averageRating').get(function() {
-  if (this.reviews.length === 0) return 0;
-  const total = this.reviews.reduce((sum, review) => sum + review.rating, 0);
-  return Math.round((total / this.reviews.length) * 10) / 10;
-});
-
-// 确保虚拟字段在JSON输出中包含
-JournalSchema.set('toJSON', { virtuals: true });
-JournalSchema.set('toObject', { virtuals: true });
-
-module.exports = mongoose.model('Journal', JournalSchema);
+module.exports = Journal;

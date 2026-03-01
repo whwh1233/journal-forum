@@ -14,7 +14,7 @@ const {
   revokeBadgeFromUser,
   getBadgeStats,
   batchGrantBadge
-} = require('../controllers/badgeControllerLowdb');
+} = require('../controllers/badgeController');
 const { protect } = require('../middleware/auth');
 const { adminProtect } = require('../middleware/adminAuth');
 

@@ -1,9 +1,8 @@
 const { verifyToken } = require('../utils/jwt');
-const { getDB } = require('../config/databaseLowdb');
+const { User } = require('../models');
 
 const protect = async (req, res, next) => {
   try {
-    // 从请求头获取token
     let token = req.headers.authorization;
 
     if (token && token.startsWith('Bearer ')) {
@@ -17,7 +16,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 验证token
     const decoded = verifyToken(token);
     if (!decoded) {
       return res.status(401).json({
@@ -26,9 +24,8 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 从数据库查询完整的用户信息
-    const db = getDB();
-    const user = db.data.users.find(u => u.id === decoded.id);
+    // 从 MySQL 查询用户
+    const user = await User.findByPk(decoded.id);
 
     if (!user) {
       return res.status(401).json({
@@ -37,7 +34,6 @@ const protect = async (req, res, next) => {
       });
     }
 
-    // 将完整的用户信息附加到请求对象
     req.user = {
       id: user.id,
       email: user.email,

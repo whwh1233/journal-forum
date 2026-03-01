@@ -1,47 +1,28 @@
-const { getDB } = require('../config/databaseLowdb');
+const { Badge, UserBadge, User, Comment, Favorite, Follow } = require('../models');
+const { Op } = require('sequelize');
 
 /**
- * 徽章服务层
+ * 徽章服务层 - Sequelize 版
  * 处理徽章的授予、撤销、查询等业务逻辑
  */
 class BadgeService {
-  /**
-   * 获取用户统计数据
-   * @param {number} userId - 用户ID
-   * @returns {Object} 用户统计数据
-   */
-  getUserStats(userId) {
-    const db = getDB();
-    const user = db.data.users.find(u => u.id === parseInt(userId));
-
+  async getUserStats(userId) {
+    const user = await User.findByPk(userId);
     if (!user) {
       throw new Error('用户不存在');
     }
 
-    // 统计评论数（不包括已删除的评论）
-    const commentCount = db.data.comments.filter(
-      c => c.userId === parseInt(userId) && !c.isDeleted
-    ).length;
+    const commentCount = await Comment.count({
+      where: { userId, isDeleted: false }
+    });
 
-    // 统计收藏数
-    const favoriteCount = db.data.favorites.filter(
-      f => f.userId === parseInt(userId)
-    ).length;
+    const favoriteCount = await Favorite.count({ where: { userId } });
 
-    // 统计粉丝数（关注该用户的人数）
-    const followerCount = db.data.follows.filter(
-      f => f.followingId === parseInt(userId)
-    ).length;
+    const followerCount = await Follow.count({ where: { followingId: userId } });
 
-    // 统计关注数（该用户关注的人数）
-    const followingCount = db.data.follows.filter(
-      f => f.followerId === parseInt(userId)
-    ).length;
+    const followingCount = await Follow.count({ where: { followerId: userId } });
 
-    // 计算积分：评论记 5 分，收藏记 2 分，粉丝记 10 分
     const points = (commentCount * 5) + (favoriteCount * 2) + (followerCount * 10);
-
-    // 计算等级：每100分升一级（最大Lv.100）
     const level = Math.min(Math.floor(points / 100) + 1, 100);
 
     return {
@@ -56,106 +37,81 @@ class BadgeService {
     };
   }
 
-  /**
-   * 检查并授予活跃度徽章
-   * @param {number} userId - 用户ID
-   * @param {string} metric - 指标类型 ('commentCount' | 'favoriteCount' | 'followerCount')
-   * @returns {Promise<Array>} 新获得的徽章数组
-   */
   async checkAndGrantBadges(userId, metric) {
-    const db = getDB();
-    const stats = this.getUserStats(userId);
+    const stats = await this.getUserStats(userId);
     const currentValue = stats[metric];
 
     if (currentValue === undefined) {
       throw new Error(`无效的指标类型: ${metric}`);
     }
 
-    // 查询该指标的所有自动徽章
-    const eligibleBadges = db.data.badges.filter(
-      b => b.isActive &&
-        b.type === 'auto' &&
-        b.triggerCondition &&
-        b.triggerCondition.metric === metric &&
-        b.triggerCondition.threshold <= currentValue
+    const eligibleBadges = await Badge.findAll({
+      where: {
+        isActive: true,
+        type: 'auto'
+      }
+    });
+
+    // 过滤符合条件的徽章
+    const matchedBadges = eligibleBadges.filter(b =>
+      b.triggerCondition &&
+      b.triggerCondition.metric === metric &&
+      b.triggerCondition.threshold <= currentValue
     );
 
-    // 获取用户已拥有的徽章ID
-    const ownedBadgeIds = db.data.userBadges
-      .filter(ub => ub.userId === parseInt(userId))
-      .map(ub => ub.badgeId);
+    const ownedBadgeIds = (await UserBadge.findAll({
+      where: { userId },
+      attributes: ['badgeId']
+    })).map(ub => ub.badgeId);
 
-    // 筛选出尚未拥有的徽章
-    const newBadges = eligibleBadges.filter(
-      b => !ownedBadgeIds.includes(b.id)
-    );
+    const newBadges = matchedBadges.filter(b => !ownedBadgeIds.includes(b.id));
 
-    // 授予新徽章
     const grantedBadges = [];
     for (const badge of newBadges) {
-      const userBadge = {
-        id: db.data.userBadges.length > 0
-          ? Math.max(...db.data.userBadges.map(ub => ub.id)) + 1
-          : 1,
-        userId: parseInt(userId),
+      const userBadge = await UserBadge.create({
+        userId,
         badgeId: badge.id,
-        grantedAt: new Date().toISOString(),
+        grantedAt: new Date(),
         isNew: true
-      };
+      });
 
-      db.data.userBadges.push(userBadge);
       grantedBadges.push({
-        ...badge,
+        ...badge.toJSON(),
         userBadgeId: userBadge.id,
         grantedAt: userBadge.grantedAt
       });
     }
 
-    if (grantedBadges.length > 0) {
-      await db.write();
-    }
-
     return grantedBadges;
   }
 
-  /**
-   * 检查身份徽章（登录时调用）
-   * @param {number} userId - 用户ID
-   * @returns {Promise<Array>} 新获得的徽章数组
-   */
   async checkIdentityBadges(userId) {
-    const db = getDB();
-    const stats = this.getUserStats(userId);
+    const stats = await this.getUserStats(userId);
     const grantedBadges = [];
 
-    // 获取用户已拥有的徽章ID
-    const ownedBadgeIds = db.data.userBadges
-      .filter(ub => ub.userId === parseInt(userId))
-      .map(ub => ub.badgeId);
+    const ownedBadgeIds = (await UserBadge.findAll({
+      where: { userId },
+      attributes: ['badgeId']
+    })).map(ub => ub.badgeId);
 
-    // 检查早期用户徽章（注册时间 < 2026-06-01）
+    // 检查早期用户徽章
     const earlyUserDeadline = new Date('2026-06-01T00:00:00.000Z');
     const userCreatedAt = new Date(stats.createdAt);
 
     if (userCreatedAt < earlyUserDeadline) {
-      const pioneerBadge = db.data.badges.find(
-        b => b.code === 'pioneer' && b.isActive
-      );
+      const pioneerBadge = await Badge.findOne({
+        where: { code: 'pioneer', isActive: true }
+      });
 
       if (pioneerBadge && !ownedBadgeIds.includes(pioneerBadge.id)) {
-        const userBadge = {
-          id: db.data.userBadges.length > 0
-            ? Math.max(...db.data.userBadges.map(ub => ub.id)) + 1
-            : 1,
-          userId: parseInt(userId),
+        const userBadge = await UserBadge.create({
+          userId,
           badgeId: pioneerBadge.id,
-          grantedAt: new Date().toISOString(),
+          grantedAt: new Date(),
           isNew: true
-        };
-
-        db.data.userBadges.push(userBadge);
+        });
         grantedBadges.push({
-          ...pioneerBadge,
+          ...pioneerBadge.toJSON(),
           userBadgeId: userBadge.id,
           grantedAt: userBadge.grantedAt
         });
@@ -164,140 +120,78 @@ class BadgeService {
 
     // 检查管理员徽章
     if (stats.role === 'admin') {
-      const adminBadge = db.data.badges.find(
-        b => b.code === 'admin' && b.isActive
-      );
+      const adminBadge = await Badge.findOne({
+        where: { code: 'admin', isActive: true }
+      });
 
       if (adminBadge && !ownedBadgeIds.includes(adminBadge.id)) {
-        const userBadge = {
-          id: db.data.userBadges.length > 0
-            ? Math.max(...db.data.userBadges.map(ub => ub.id)) + 1
-            : 1,
-          userId: parseInt(userId),
+        const userBadge = await UserBadge.create({
+          userId,
           badgeId: adminBadge.id,
-          grantedAt: new Date().toISOString(),
+          grantedAt: new Date(),
           isNew: true
-        };
-
-        db.data.userBadges.push(userBadge);
+        });
         grantedBadges.push({
-          ...adminBadge,
+          ...adminBadge.toJSON(),
           userBadgeId: userBadge.id,
           grantedAt: userBadge.grantedAt
         });
       }
     }
 
-    if (grantedBadges.length > 0) {
-      await db.write();
-    }
-
     return grantedBadges;
   }
 
-  /**
-   * 手动授予徽章
-   * @param {number} badgeId - 徽章ID
-   * @param {number} userId - 用户ID
-   * @param {number} grantedBy - 授予者ID（管理员）
-   * @returns {Promise<Object>} 授予结果
-   */
   async grantBadge(badgeId, userId, grantedBy) {
-    const db = getDB();
+    const badge = await Badge.findByPk(badgeId);
+    if (!badge) throw new Error('徽章不存在');
 
-    // 验证徽章是否存在
-    const badge = db.data.badges.find(b => b.id === parseInt(badgeId));
-    if (!badge) {
-      throw new Error('徽章不存在');
+    const user = await User.findByPk(userId);
+    if (!user) throw new Error('用户不存在');
+
+    const existing = await UserBadge.findOne({
+      where: { userId, badgeId }
+    });
+
+    if (existing) {
+      return { alreadyOwned: true, badge: badge.toJSON(), userBadge: existing.toJSON() };
     }
 
-    // 验证用户是否存在
-    const user = db.data.users.find(u => u.id === parseInt(userId));
-    if (!user) {
-      throw new Error('用户不存在');
-    }
-
-    // 检查是否已拥有该徽章（幂等处理）
-    const existingUserBadge = db.data.userBadges.find(
-      ub => ub.userId === parseInt(userId) && ub.badgeId === parseInt(badgeId)
-    );
-
-    if (existingUserBadge) {
-      return {
-        alreadyOwned: true,
-        badge,
-        userBadge: existingUserBadge
-      };
-    }
-
-    // 创建用户徽章记录
-    const userBadge = {
-      id: db.data.userBadges.length > 0
-        ? Math.max(...db.data.userBadges.map(ub => ub.id)) + 1
-        : 1,
-      userId: parseInt(userId),
-      badgeId: parseInt(badgeId),
-      grantedBy: parseInt(grantedBy),
-      grantedAt: new Date().toISOString(),
+    const userBadge = await UserBadge.create({
+      userId,
+      badgeId,
+      grantedBy,
+      grantedAt: new Date(),
       isNew: true
-    };
+    });
 
-    db.data.userBadges.push(userBadge);
-    await db.write();
-
-    return {
-      alreadyOwned: false,
-      badge,
-      userBadge
-    };
+    return { alreadyOwned: false, badge: badge.toJSON(), userBadge: userBadge.toJSON() };
   }
 
-  /**
-   * 撤销徽章
-   * @param {number} badgeId - 徽章ID
-   * @param {number} userId - 用户ID
-   * @returns {Promise<Object>} 撤销结果
-   */
   async revokeBadge(badgeId, userId) {
-    const db = getDB();
+    const userBadge = await UserBadge.findOne({
+      where: { userId, badgeId }
+    });
 
-    const userBadgeIndex = db.data.userBadges.findIndex(
-      ub => ub.userId === parseInt(userId) && ub.badgeId === parseInt(badgeId)
-    );
+    if (!userBadge) throw new Error('用户未拥有该徽章');
 
-    if (userBadgeIndex === -1) {
-      throw new Error('用户未拥有该徽章');
-    }
+    const revokedData = userBadge.toJSON();
+    await userBadge.destroy();
 
-    const revokedUserBadge = db.data.userBadges[userBadgeIndex];
-    db.data.userBadges.splice(userBadgeIndex, 1);
-    await db.write();
-
-    return {
-      success: true,
-      revokedUserBadge
-    };
+    return { success: true, revokedUserBadge: revokedData };
   }
 
-  /**
-   * 获取用户的所有徽章
-   * @param {number} userId - 用户ID
-   * @returns {Array} 用户徽章列表，按优先级排序
-   */
-  getUserBadges(userId) {
-    const db = getDB();
+  async getUserBadges(userId) {
+    const userBadges = await UserBadge.findAll({
+      where: { userId },
+      include: [{ model: Badge, as: 'badge' }]
+    });
 
-    const userBadges = db.data.userBadges.filter(
-      ub => ub.userId === parseInt(userId)
-    );
-
-    // 关联徽章详情并按优先级排序
-    const badgesWithDetails = userBadges
+    return userBadges
       .map(ub => {
-        const badge = db.data.badges.find(b => b.id === ub.badgeId);
-        if (!badge) return null;
+        if (!ub.badge) return null;
         return {
-          ...badge,
+          ...ub.badge.toJSON(),
           userBadgeId: ub.id,
           grantedBy: ub.grantedBy,
           grantedAt: ub.grantedAt,
@@ -306,86 +200,48 @@ class BadgeService {
       })
       .filter(b => b !== null)
       .sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-    return badgesWithDetails;
   }
 
-  /**
-   * 获取用户的置顶徽章（最多3个）
-   * @param {number} userId - 用户ID
-   * @returns {Array} 置顶徽章列表
-   */
-  getUserPinnedBadges(userId) {
-    const db = getDB();
-    const user = db.data.users.find(u => u.id === parseInt(userId));
+  async getUserPinnedBadges(userId) {
+    const user = await User.findByPk(userId);
+    if (!user) return [];
 
-    if (!user) {
-      return [];
-    }
-
-    // 如果用户设置了置顶徽章
     if (user.pinnedBadges && user.pinnedBadges.length > 0) {
-      const pinnedBadges = user.pinnedBadges
-        .slice(0, 3)
-        .map(badgeId => {
-          const userBadge = db.data.userBadges.find(
-            ub => ub.userId === parseInt(userId) && ub.badgeId === badgeId
-          );
-          if (!userBadge) return null;
-
-          const badge = db.data.badges.find(b => b.id === badgeId);
-          if (!badge) return null;
-
-          return {
-            ...badge,
-            userBadgeId: userBadge.id,
-            grantedAt: userBadge.grantedAt,
-            isNew: userBadge.isNew
-          };
-        })
-        .filter(b => b !== null);
-
+      const pinnedBadges = [];
+      for (const badgeId of user.pinnedBadges.slice(0, 3)) {
+        const userBadge = await UserBadge.findOne({
+          where: { userId, badgeId }
+        });
+        if (!userBadge) continue;
+        const badge = await Badge.findByPk(badgeId);
+        if (!badge) continue;
+        pinnedBadges.push({
+          ...badge.toJSON(),
+          userBadgeId: userBadge.id,
+          grantedAt: userBadge.grantedAt,
+          isNew: userBadge.isNew
+        });
+      }
       return pinnedBadges;
     }
 
-    // 否则返回优先级最高的3个徽章
-    return this.getUserBadges(userId).slice(0, 3);
+    const allBadges = await this.getUserBadges(userId);
+    return allBadges.slice(0, 3);
   }
 
-  /**
-   * 标记徽章为已读
-   * @param {number} userId - 用户ID
-   * @returns {Promise<number>} 标记数量
-   */
   async markBadgesAsRead(userId) {
-    const db = getDB();
-    let markedCount = 0;
-
-    db.data.userBadges.forEach(ub => {
-      if (ub.userId === parseInt(userId) && ub.isNew === true) {
-        ub.isNew = false;
-        markedCount++;
-      }
-    });
-
-    if (markedCount > 0) {
-      await db.write();
-    }
-
+    const [markedCount] = await UserBadge.update(
+      { isNew: false },
+      { where: { userId, isNew: true } }
+    );
     return markedCount;
   }
 
-  /**
-   * 检查是否有未读徽章
-   * @param {number} userId - 用户ID
-   * @returns {boolean} 是否有未读徽章
-   */
-  hasNewBadges(userId) {
-    const db = getDB();
-
-    return db.data.userBadges.some(
-      ub => ub.userId === parseInt(userId) && ub.isNew === true
-    );
+  async hasNewBadges(userId) {
+    const count = await UserBadge.count({
+      where: { userId, isNew: true }
+    });
+    return count > 0;
   }
 }
 

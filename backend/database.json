@@ -5,7 +5,7 @@
       "title": "计算机科学学报",
       "issn": "1000-1234",
       "category": "computer-science",
-      "rating": 4.8,
+      "rating": 3.7,
       "description": "《计算机科学学报》是中国计算机学会主办的学术期刊，主要刊登计算机科学领域的前沿研究成果，包括人工智能、机器学习、大数据分析等方向。1312321",
       "reviews": [
         {
@@ -28,7 +28,7 @@
       "title": "生物医学研究",
       "issn": "2000-5678",
       "category": "biology",
-      "rating": 4.5,
+      "rating": 4.2,
       "description": "《生物医学研究》专注于分子生物学、细胞生物学和遗传学等领域的原创性研究，是生物医学领域的重要学术平台。",
       "reviews": [
         {
@@ -44,7 +44,12 @@
           "createdAt": "2026-02-07T04:24:56.815Z"
         }
       ],
-      "createdAt": "2026-02-07T04:24:56.815Z"
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "dimensionAverages": {
+        "reviewSpeed": 5,
+        "reviewQuality": 3,
+        "overallExperience": 3.5
+      }
     },
     {
       "id": 3,
@@ -67,14 +72,21 @@
           "createdAt": "2026-02-07T04:24:56.815Z"
         }
       ],
-      "createdAt": "2026-02-07T04:24:56.815Z"
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "dimensionAverages": {
+        "reviewSpeed": 5,
+        "editorAttitude": 5,
+        "acceptDifficulty": 5,
+        "reviewQuality": 5,
+        "overallExperience": 5
+      }
     },
     {
       "id": 4,
       "title": "化学学报",
       "issn": "4000-3456",
       "category": "chemistry",
-      "rating": 4,
+      "rating": 3,
       "description": "《化学学报》是中国化学会主办的综合性化学学术期刊，涵盖有机化学、无机化学、分析化学、物理化学等各个分支。",
       "reviews": [
         {
@@ -90,7 +102,14 @@
           "createdAt": "2026-02-07T04:24:56.815Z"
         }
       ],
-      "createdAt": "2026-02-07T04:24:56.815Z"
+      "createdAt": "2026-02-07T04:24:56.815Z",
+      "dimensionAverages": {
+        "reviewSpeed": 1,
+        "editorAttitude": 1,
+        "acceptDifficulty": 1,
+        "reviewQuality": 1,
+        "overallExperience": 1
+      }
     },
     {
       "id": 5,
@@ -241,6 +260,14 @@
       "role": "user",
       "status": "active",
       "createdAt": "2026-02-09T15:19:01.487Z"
+    },
+    {
+      "id": 5,
+      "email": "tester@test.com",
+      "password": "$2a$12$eONexr1fGUc/eL3fuZemSO9wYN2qUxg/G3ceKI87IsUrN2gVzINHa",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2026-03-01T08:11:12.483Z"
     }
   ],
   "comments": [
@@ -253,7 +280,9 @@
       "content": "该期刊在人工智能领域具有很高的学术影响力，审稿严谨，发表的文章质量很高。",
       "rating": 5,
       "createdAt": "2026-02-07T04:24:56.814Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "1-legacy-1-jdw0qc",
@@ -264,7 +293,9 @@
       "content": "投稿周期相对较长，但编辑和审稿人的专业水平很高，对文章质量提升有很大帮助。",
       "rating": 4,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "2-legacy-0-4fr4ss",
@@ -275,7 +306,9 @@
       "content": "期刊的国际影响力不断提升，审稿流程规范，发表周期合理。",
       "rating": 4,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "2-legacy-1-wrzvbe",
@@ -286,7 +319,9 @@
       "content": "实验数据要求严格，但对提升研究质量很有帮助。",
       "rating": 4,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "3-legacy-0-3ho5ka",
@@ -297,7 +332,9 @@
       "content": "国内物理学领域的顶级期刊，发表了许多重要的原创性成果。",
       "rating": 5,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "3-legacy-1-p584c2",
@@ -308,7 +345,9 @@
       "content": "国际化程度高，与国际知名物理学期刊保持良好合作关系。",
       "rating": 5,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "4-legacy-0-4u1lhw",
@@ -319,7 +358,9 @@
       "content": "期刊历史悠久，在化学界享有很高的声誉，审稿标准严格。",
       "rating": 4,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "4-legacy-1-jyincp",
@@ -330,7 +371,9 @@
       "content": "发表的文章质量稳定，是化学领域研究人员的重要参考。",
       "rating": 4,
       "createdAt": "2026-02-07T04:24:56.815Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "5-legacy-0-b6qrtq",
@@ -429,7 +472,9 @@
       "content": "这是一个新的评论测试",
       "rating": 5,
       "createdAt": "2026-02-09T15:19:10.144Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "3-1770650396042-s796nm",
@@ -440,7 +485,12 @@
       "content": "a ?",
       "rating": 5,
       "createdAt": "2026-02-09T15:19:56.042Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 1,
+      "isLikedByMe": true,
+      "likes": [
+        "5"
+      ]
     },
     {
       "id": "3-1770650404765-b220k1",
@@ -450,7 +500,9 @@
       "parentId": "3-1770650396042-s796nm",
       "content": "这是什么评论",
       "createdAt": "2026-02-09T15:20:04.765Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "3-1770650412653-0n1xhz",
@@ -460,7 +512,9 @@
       "parentId": "3-1770650404765-b220k1",
       "content": "好吧",
       "createdAt": "2026-02-09T15:20:12.653Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "2-1770650783491-tsa2fi",
@@ -471,7 +525,9 @@
       "content": "好吧",
       "rating": 5,
       "createdAt": "2026-02-09T15:26:23.491Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "3-1770651581663-7nd0hq",
@@ -482,7 +538,10 @@
       "content": "啊",
       "rating": 5,
       "createdAt": "2026-02-09T15:39:41.663Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false,
+      "likes": []
     },
     {
       "id": "5-1770651733106-gjs46r",
@@ -514,7 +573,9 @@
       "content": "牛逼",
       "rating": 5,
       "createdAt": "2026-02-09T15:57:25.634Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "1-1770652666326-izym1y",
@@ -524,7 +585,9 @@
       "parentId": "1-1770650350144-571w1t",
       "content": "？？？",
       "createdAt": "2026-02-09T15:57:46.326Z",
-      "isDeleted": false
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
     },
     {
       "id": "1-1770824713517-hvspe6",
@@ -535,6 +598,136 @@
       "content": "还不错",
       "rating": 5,
       "createdAt": "2026-02-11T15:45:13.517Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "1-1772352873406-02i360",
+      "userId": 5,
+      "userName": "tester",
+      "journalId": 1,
+      "parentId": null,
+      "content": "Awesome journal! Multi-dimensional rating test.",
+      "rating": 5,
+      "dimensionRatings": {
+        "reviewSpeed": 4,
+        "editorAttitude": 3,
+        "overallExperience": 5
+      },
+      "createdAt": "2026-03-01T08:14:33.407Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "1-1772354221402-lo36s0",
+      "userId": 1,
+      "userName": "1249156074",
+      "journalId": 1,
+      "parentId": null,
+      "content": "11",
+      "rating": 1,
+      "dimensionRatings": {
+        "reviewSpeed": 1,
+        "acceptDifficulty": 2,
+        "overallExperience": 1
+      },
+      "createdAt": "2026-03-01T08:37:01.402Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "1-1772354243551-1bwnfo",
+      "userId": 1,
+      "userName": "1249156074",
+      "journalId": 1,
+      "parentId": null,
+      "content": "？",
+      "rating": 1,
+      "dimensionRatings": {
+        "reviewSpeed": 1,
+        "editorAttitude": 1,
+        "acceptDifficulty": 1,
+        "reviewQuality": 1,
+        "overallExperience": 1
+      },
+      "createdAt": "2026-03-01T08:37:23.551Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "2-1772354262651-gvo3lc",
+      "userId": 1,
+      "userName": "1249156074",
+      "journalId": 2,
+      "parentId": null,
+      "content": "2",
+      "rating": 4,
+      "dimensionRatings": {
+        "reviewSpeed": 5,
+        "overallExperience": 4
+      },
+      "createdAt": "2026-03-01T08:37:42.651Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "3-1772354884433-9ukwjg",
+      "userId": 5,
+      "userName": "tester",
+      "journalId": 3,
+      "parentId": null,
+      "content": "666",
+      "rating": 5,
+      "dimensionRatings": {
+        "reviewSpeed": 5,
+        "editorAttitude": 5,
+        "acceptDifficulty": 5,
+        "reviewQuality": 5,
+        "overallExperience": 5
+      },
+      "createdAt": "2026-03-01T08:48:04.433Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "4-1772354907499-h0vikq",
+      "userId": 5,
+      "userName": "tester",
+      "journalId": 4,
+      "parentId": null,
+      "content": "111",
+      "rating": 1,
+      "dimensionRatings": {
+        "reviewSpeed": 1,
+        "editorAttitude": 1,
+        "acceptDifficulty": 1,
+        "reviewQuality": 1,
+        "overallExperience": 1
+      },
+      "createdAt": "2026-03-01T08:48:27.499Z",
+      "isDeleted": false,
+      "likeCount": 0,
+      "isLikedByMe": false
+    },
+    {
+      "id": "2-1772354933031-13c22p",
+      "userId": 5,
+      "userName": "tester",
+      "journalId": 2,
+      "parentId": null,
+      "content": "22",
+      "rating": 3,
+      "dimensionRatings": {
+        "reviewQuality": 3,
+        "overallExperience": 3
+      },
+      "createdAt": "2026-03-01T08:48:53.031Z",
       "isDeleted": false
     }
   ],
@@ -911,6 +1104,20 @@
       "userId": 2,
       "badgeId": 13,
       "grantedAt": "2026-02-28T16:38:22.414Z",
+      "isNew": true
+    },
+    {
+      "id": 5,
+      "userId": 5,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T08:11:12.701Z",
+      "isNew": true
+    },
+    {
+      "id": 6,
+      "userId": 1,
+      "badgeId": 1,
+      "grantedAt": "2026-03-01T08:37:01.405Z",
       "isNew": true
     }
   ]

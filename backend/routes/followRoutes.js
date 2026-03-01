@@ -6,7 +6,7 @@ const {
   checkFollow,
   getFollowers,
   getFollowing
-} = require('../controllers/followControllerLowdb');
+} = require('../controllers/followController');
 const { protect } = require('../middleware/auth');
 
 // 关注用户（需要登录）
