@@ -98,6 +98,12 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
                 <span className="side-nav-label">账号设置</span>
               </NavLink>
             )}
+            {isAuthenticated && (
+              <NavLink to="/badges" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '荣誉殿堂'}>
+                <Award className="side-nav-icon" size={20} />
+                <span className="side-nav-label">荣誉殿堂</span>
+              </NavLink>
+            )}
             {isAuthenticated && user?.role === 'admin' && (
               <NavLink to="/admin" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '管理后台'}>
                 <Shield className="side-nav-icon" size={20} />

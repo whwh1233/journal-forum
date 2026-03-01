@@ -31,7 +31,7 @@ const PORT = process.env.PORT || 3001;
 
 // CORS配置 - 必须在helmet之前
 const corsOptions = {
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // 开发/测试环境：允许所有localhost
     if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
       // 允许没有origin的请求（如移动应用、桌面应用）和localhost
@@ -61,11 +61,22 @@ app.use(cors(corsOptions));
 // 安全中间件（CORS之后）
 app.use(helmet());
 
-// 速率限制 - 开发环境宽松，生产环境严格
-if (process.env.NODE_ENV !== 'development' || process.env.SKIP_RATE_LIMIT !== 'true') {
+// 速率限制 - 开发环境和测试环境宽松，生产环境严格
+if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test' && process.env.SKIP_RATE_LIMIT !== 'true') {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: process.env.NODE_ENV === 'development' ? 10000 : 100,
+    max: 100, // 生产环境限制
+    message: {
+      success: false,
+      message: '请求过于频繁，请稍后再试'
+    }
+  });
+  app.use(limiter);
+} else {
+  // 开发/测试环境放宽限制
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10000,
     message: {
       success: false,
       message: '请求过于频繁，请稍后再试'

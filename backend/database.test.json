@@ -1,86 +1,1183 @@
 {
   "journals": [
     {
-      "id": "test-journal-001",
-      "title": "计算机科学前沿研究",
-      "issn": "1234-5678",
+      "id": 1,
+      "title": "程序员颈椎保护指南",
+      "issn": "1000-1000",
+      "category": "medicine",
+      "rating": "3.4",
+      "description": "专为久坐人群打造的康复与预防措施，拯救你的脖子。",
+      "reviews": [],
+      "createdAt": "2026-02-24T17:44:42.199Z"
+    },
+    {
+      "id": 2,
+      "title": "深夜外卖品鉴学报",
+      "issn": "1000-1001",
+      "category": "life",
+      "rating": "3.9",
+      "description": "基于大数据分析的城市深夜餐饮质量评估。",
+      "reviews": [],
+      "createdAt": "2026-02-24T10:30:10.176Z"
+    },
+    {
+      "id": 3,
+      "title": "JavaScript 框架发展史",
+      "issn": "1000-1002",
       "category": "computer-science",
-      "publisher": "测试出版社",
-      "description": "这是一个用于演示的测试期刊，涵盖计算机科学各个前沿领域的研究成果。",
-      "impactFactor": 5.2,
-      "avgRating": 4.5,
-      "reviewCount": 10,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "rating": 5,
+      "description": "从 jQuery 到 React/Vue 的演变与技术更迭反思。",
+      "reviews": [],
+      "createdAt": "2026-02-26T16:39:11.695Z"
     },
     {
-      "id": "test-journal-002",
-      "title": "生物医学研究进展",
-      "issn": "2345-6789",
-      "category": "biology",
-      "publisher": "科学出版社",
-      "description": "专注于生物医学领域的创新研究和临床应用。",
-      "impactFactor": 4.8,
-      "avgRating": 4.2,
-      "reviewCount": 8,
-      "createdAt": "2024-01-02T00:00:00.000Z"
-    },
-    {
-      "id": "test-journal-003",
-      "title": "物理学报",
-      "issn": "3456-7890",
+      "id": 4,
+      "title": "量子力学入门与放弃",
+      "issn": "1000-1003",
       "category": "physics",
-      "publisher": "物理学会",
-      "description": "记录物理学最新发现和理论突破。",
-      "impactFactor": 3.9,
-      "avgRating": 4,
-      "reviewCount": 5,
-      "createdAt": "2024-01-03T00:00:00.000Z"
+      "rating": "4.7",
+      "description": "从薛定谔的猫到平行宇宙，通俗易懂的劝退指南。",
+      "reviews": [],
+      "createdAt": "2026-01-23T00:23:49.057Z"
+    },
+    {
+      "id": 5,
+      "title": "摸鱼经济学",
+      "issn": "1000-1004",
+      "category": "economics",
+      "rating": "3.4",
+      "description": "探讨如何在工作时长与个人产出之间取得微妙的平衡。",
+      "reviews": [],
+      "createdAt": "2026-02-13T13:49:32.333Z"
+    },
+    {
+      "id": 6,
+      "title": "AI 绘画提示词工程学",
+      "issn": "1000-1005",
+      "category": "computer-science",
+      "rating": "3.7",
+      "description": "如何用自然语言让 AI 画出你脑海中的画面。",
+      "reviews": [],
+      "createdAt": "2026-02-09T11:07:39.833Z"
+    },
+    {
+      "id": 7,
+      "title": "当代青年熬夜实录",
+      "issn": "1000-1006",
+      "category": "sociology",
+      "rating": "4.4",
+      "description": "对现代人睡眠剥夺现象的社会学调查与反思。",
+      "reviews": [],
+      "createdAt": "2026-02-20T12:25:20.285Z"
+    },
+    {
+      "id": 8,
+      "title": "防脱发洗发水功效评估",
+      "issn": "1000-1007",
+      "category": "biology",
+      "rating": "4.5",
+      "description": "市面常见防脱发产品的活性成分与实际效果盲测。",
+      "reviews": [],
+      "createdAt": "2026-01-31T21:03:24.157Z"
+    },
+    {
+      "id": 9,
+      "title": "开源项目生存指南",
+      "issn": "1000-1008",
+      "category": "computer-science",
+      "rating": "5.0",
+      "description": "如何让你的 Github 项目获得 10k stars。",
+      "reviews": [],
+      "createdAt": "2026-01-19T14:50:38.198Z"
+    },
+    {
+      "id": 10,
+      "title": "人体工程学键盘评测",
+      "issn": "1000-1009",
+      "category": "engineering",
+      "rating": "3.9",
+      "description": "不同配列键盘对程序员手腕健康的影响分析。",
+      "reviews": [],
+      "createdAt": "2026-02-14T08:34:50.232Z"
+    },
+    {
+      "id": 11,
+      "title": "猫咪语言翻译研究",
+      "issn": "1000-1010",
+      "category": "biology",
+      "rating": "4.4",
+      "description": "初步探索猫咪叫声与情绪状态的映射关系。",
+      "reviews": [],
+      "createdAt": "2026-01-26T16:56:04.930Z"
+    },
+    {
+      "id": 12,
+      "title": "互联网行业黑话大全",
+      "issn": "1000-1011",
+      "category": "linguistics",
+      "rating": "5.0",
+      "description": "赋能、抓手、闭环：当代企业词汇的语义解析。",
+      "reviews": [],
+      "createdAt": "2026-03-01T00:51:45.516Z"
+    },
+    {
+      "id": 13,
+      "title": "咖啡因耐受度与工作效率",
+      "issn": "1000-1012",
+      "category": "medicine",
+      "rating": "3.9",
+      "description": "探讨咖啡因摄入量与程序员代码产出之间的非线性关系。",
+      "reviews": [],
+      "createdAt": "2026-01-20T19:51:23.680Z"
+    },
+    {
+      "id": 14,
+      "title": "如何优雅地写 BUG",
+      "issn": "1000-1013",
+      "category": "computer-science",
+      "rating": "4.1",
+      "description": "反向工程：那些让人抓狂的隐蔽代码缺陷是如何产生的。",
+      "reviews": [],
+      "createdAt": "2026-02-24T17:40:25.069Z"
+    },
+    {
+      "id": 15,
+      "title": "下班后的时间管理",
+      "issn": "1000-1014",
+      "category": "management",
+      "rating": "3.8",
+      "description": "拒绝躺平，如何在下班后提升自我的实践探索。",
+      "reviews": [],
+      "createdAt": "2026-01-14T02:29:45.179Z"
     }
   ],
   "users": [
     {
-      "id": "test-admin-001",
-      "email": "admin@test.com",
-      "password": "$2a$10$N9qo8uLOickgx2ZMRZoHK.ZL1qGqVPvr4DLWnL7h8JMp6L5C6qFfW",
-      "name": "测试管理员",
+      "id": 999,
+      "email": "1249156074@qq.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "超级管理员",
+      "avatar": "",
+      "bio": "系统总管",
       "role": "admin",
       "status": "active",
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "createdAt": "2026-03-01T03:43:21.882Z"
     },
     {
-      "id": "test-author-001",
-      "email": "author@test.com",
-      "password": "$2a$10$N9qo8uLOickgx2ZMRZoHK.ZL1qGqVPvr4DLWnL7h8JMp6L5C6qFfW",
-      "name": "期刊作者",
+      "id": 1,
+      "email": "user1@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "代码搬运工",
+      "avatar": "",
+      "bio": "只要 Ctrl+C 不坏，我就能写代码",
+      "institution": "家里蹲大学",
+      "location": "互联网",
+      "website": "",
       "role": "user",
       "status": "active",
-      "bio": "资深学术研究者，专注于计算机科学领域。",
-      "institution": "测试大学",
-      "createdAt": "2024-01-02T00:00:00.000Z"
+      "createdAt": "2025-12-02T05:08:59.783Z"
+    },
+    {
+      "id": 2,
+      "email": "user2@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "深夜撸串",
+      "avatar": "",
+      "bio": "不吃宵夜是没有灵魂的",
+      "institution": "干饭人协会",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2026-02-20T02:14:52.971Z"
     },
     {
       "id": 3,
-      "email": "demo@test.com",
-      "password": "$2a$12$bgYgUJvz5y1vL/DvBLSA7eu0kpKQy8JhMMaA.HdhUqlb6jUCFq7CW",
+      "email": "user3@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "学术垃圾制造机",
+      "avatar": "",
+      "bio": "每天都在制造新的学术垃圾",
+      "institution": "某不知名研究所",
+      "location": "互联网",
+      "website": "",
       "role": "user",
       "status": "active",
-      "createdAt": "2026-02-27T15:44:36.779Z"
+      "createdAt": "2025-11-19T10:06:09.058Z"
+    },
+    {
+      "id": 4,
+      "email": "user4@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "前端切图仔",
+      "avatar": "",
+      "bio": "CSS 才是世界上最好的语言",
+      "institution": "大厂打工仔",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2025-12-29T05:33:36.854Z"
+    },
+    {
+      "id": 5,
+      "email": "user5@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "不掉发的研究僧",
+      "avatar": "",
+      "bio": "只要我不洗头，就没人知道我掉头发",
+      "institution": "家里蹲大学",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2025-12-16T03:35:55.069Z"
+    },
+    {
+      "id": 6,
+      "email": "user6@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "摸鱼大师",
+      "avatar": "",
+      "bio": "只要老板看不见，我就是在工作",
+      "institution": "摸鱼协会",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2025-11-13T19:33:39.858Z"
+    },
+    {
+      "id": 7,
+      "email": "user7@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "早睡早起",
+      "avatar": "",
+      "bio": "从今天起，做一个早睡早起的人",
+      "institution": "养生堂",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2026-01-11T04:00:07.935Z"
+    },
+    {
+      "id": 8,
+      "email": "user8@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "BUG粉碎机",
+      "avatar": "",
+      "bio": "没有我修不好的 BUG，如果有，那就是产品需求",
+      "institution": "大厂打工仔",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2025-11-17T08:02:06.760Z"
+    },
+    {
+      "id": 9,
+      "email": "user9@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "发际线保卫者",
+      "avatar": "",
+      "bio": "誓死保卫最后一道防线",
+      "institution": "防脱发协会",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2026-01-27T21:21:35.259Z"
+    },
+    {
+      "id": 10,
+      "email": "user10@test.com",
+      "password": "$2a$12$ygtFWJal1riVn5FggsKyK.oM.34Srory97V7PcPryUhOQpSaNTXiG",
+      "name": "论文写不完",
+      "avatar": "",
+      "bio": "Deadline 才是第一生产力",
+      "institution": "某不知名研究所",
+      "location": "互联网",
+      "website": "",
+      "role": "user",
+      "status": "active",
+      "createdAt": "2025-11-17T11:40:32.763Z"
     }
   ],
   "comments": [
     {
-      "id": "test-comment-001",
-      "journalId": "test-journal-001",
-      "userId": "test-author-001",
-      "content": "这是一本非常优秀的期刊，审稿速度快，编辑态度专业。",
+      "id": "1-1772336601882-1",
+      "userId": 1,
+      "userName": "代码搬运工",
+      "journalId": 1,
+      "parentId": null,
+      "content": "这篇文章简直是我的救星，照着做了几天感觉脖子舒服多了！",
       "rating": 5,
-      "likes": 3,
-      "createdAt": "2024-01-10T00:00:00.000Z"
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "1-1772336601882-2",
+      "userId": 2,
+      "userName": "深夜撸串",
+      "journalId": 1,
+      "parentId": "1-1772336601882-1",
+      "content": "真的有用吗？我最近脖子也咔咔响，先收藏了。",
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "1-1772336601882-3",
+      "userId": 1,
+      "userName": "代码搬运工",
+      "journalId": 1,
+      "parentId": "1-1772336601882-2",
+      "content": "强烈推荐里面那个热敷的方法。",
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "1-1772336601882-4",
+      "userId": 999,
+      "userName": "超级管理员",
+      "journalId": 1,
+      "parentId": "1-1772336601882-3",
+      "content": "亲身实践，确实有效。大家写代码也要注意休息哦。",
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "2-1772336601882-5",
+      "userId": 8,
+      "userName": "BUG粉碎机",
+      "journalId": 2,
+      "parentId": null,
+      "content": "强烈抗议里面没有评测我最爱的那家烧烤！",
+      "rating": 3,
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "2-1772336601882-6",
+      "userId": 6,
+      "userName": "摸鱼大师",
+      "journalId": 2,
+      "parentId": "2-1772336601882-5",
+      "content": "兄弟哪家烧烤，求推荐指路。",
+      "createdAt": "2026-03-01T03:43:21.882Z",
+      "isDeleted": false
+    },
+    {
+      "id": "3-1772336867775-l4co48",
+      "userId": 1,
+      "userName": "代码搬运工",
+      "journalId": 3,
+      "parentId": null,
+      "content": "啊？？？？",
+      "rating": 5,
+      "createdAt": "2026-03-01T03:47:47.775Z",
+      "isDeleted": false
     }
   ],
-  "favorites": [],
-  "follows": [],
+  "favorites": [
+    {
+      "id": 1,
+      "userId": 1,
+      "journalId": 9,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "journalId": 11,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 4,
+      "userId": 2,
+      "journalId": 10,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 5,
+      "userId": 2,
+      "journalId": 4,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 6,
+      "userId": 3,
+      "journalId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 7,
+      "userId": 3,
+      "journalId": 2,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 8,
+      "userId": 3,
+      "journalId": 5,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 9,
+      "userId": 3,
+      "journalId": 12,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 10,
+      "userId": 3,
+      "journalId": 14,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 11,
+      "userId": 4,
+      "journalId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 12,
+      "userId": 4,
+      "journalId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 13,
+      "userId": 4,
+      "journalId": 10,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 14,
+      "userId": 5,
+      "journalId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 15,
+      "userId": 5,
+      "journalId": 2,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 16,
+      "userId": 5,
+      "journalId": 13,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 17,
+      "userId": 5,
+      "journalId": 14,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 18,
+      "userId": 6,
+      "journalId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 19,
+      "userId": 6,
+      "journalId": 9,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 20,
+      "userId": 6,
+      "journalId": 5,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 21,
+      "userId": 6,
+      "journalId": 10,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 22,
+      "userId": 7,
+      "journalId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 23,
+      "userId": 7,
+      "journalId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 24,
+      "userId": 7,
+      "journalId": 5,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 25,
+      "userId": 7,
+      "journalId": 11,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 26,
+      "userId": 8,
+      "journalId": 13,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 27,
+      "userId": 8,
+      "journalId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 28,
+      "userId": 8,
+      "journalId": 12,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 29,
+      "userId": 9,
+      "journalId": 4,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 30,
+      "userId": 9,
+      "journalId": 10,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 31,
+      "userId": 9,
+      "journalId": 11,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 32,
+      "userId": 9,
+      "journalId": 3,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 33,
+      "userId": 10,
+      "journalId": 13,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 34,
+      "userId": 10,
+      "journalId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 35,
+      "userId": 10,
+      "journalId": 4,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 36,
+      "userId": 10,
+      "journalId": 12,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 37,
+      "userId": 999,
+      "journalId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 38,
+      "userId": 999,
+      "journalId": 3,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 39,
+      "userId": 1,
+      "journalId": 2,
+      "createdAt": "2026-03-01T03:47:32.605Z"
+    }
+  ],
+  "follows": [
+    {
+      "id": 1,
+      "followerId": 1,
+      "followingId": 3,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 2,
+      "followerId": 1,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 5,
+      "followerId": 2,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 6,
+      "followerId": 2,
+      "followingId": 9,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 7,
+      "followerId": 3,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 8,
+      "followerId": 3,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 9,
+      "followerId": 3,
+      "followingId": 6,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 10,
+      "followerId": 4,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 11,
+      "followerId": 4,
+      "followingId": 9,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 12,
+      "followerId": 4,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 13,
+      "followerId": 5,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 14,
+      "followerId": 5,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 15,
+      "followerId": 5,
+      "followingId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 16,
+      "followerId": 6,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 17,
+      "followerId": 6,
+      "followingId": 9,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 18,
+      "followerId": 6,
+      "followingId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 19,
+      "followerId": 7,
+      "followingId": 8,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 20,
+      "followerId": 7,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 21,
+      "followerId": 8,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 22,
+      "followerId": 8,
+      "followingId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 23,
+      "followerId": 8,
+      "followingId": 5,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 24,
+      "followerId": 9,
+      "followingId": 4,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 25,
+      "followerId": 9,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 26,
+      "followerId": 9,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 27,
+      "followerId": 10,
+      "followingId": 999,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 28,
+      "followerId": 10,
+      "followingId": 2,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 29,
+      "followerId": 10,
+      "followingId": 7,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 30,
+      "followerId": 999,
+      "followingId": 1,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 31,
+      "followerId": 999,
+      "followingId": 4,
+      "createdAt": "2026-03-01T03:43:21.882Z"
+    },
+    {
+      "id": 32,
+      "followerId": 2,
+      "followingId": 8,
+      "createdAt": "2026-03-01T04:00:28.638Z"
+    }
+  ],
   "migrated": {
     "comments": true
-  }
+  },
+  "badges": [
+    {
+      "id": 1,
+      "code": "comment_5",
+      "name": "童生",
+      "description": "发表 5 条评论，初入学门",
+      "icon": "BookOpen",
+      "color": "#8B7355",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "commentCount",
+        "threshold": 5
+      },
+      "priority": 10,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 2,
+      "code": "comment_15",
+      "name": "秀才",
+      "description": "发表 15 条评论，学有小成",
+      "icon": "BookOpen",
+      "color": "#6B8E23",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "commentCount",
+        "threshold": 15
+      },
+      "priority": 20,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 3,
+      "code": "comment_30",
+      "name": "举人",
+      "description": "发表 30 条评论，乡试中榜",
+      "icon": "BookOpen",
+      "color": "#4169E1",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "commentCount",
+        "threshold": 30
+      },
+      "priority": 30,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 4,
+      "code": "comment_50",
+      "name": "进士",
+      "description": "发表 50 条评论，金榜题名",
+      "icon": "BookOpen",
+      "color": "#FFD700",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "commentCount",
+        "threshold": 50
+      },
+      "priority": 40,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 5,
+      "code": "favorite_5",
+      "name": "书童",
+      "description": "收藏 5 本期刊，初涉书海",
+      "icon": "Bookmark",
+      "color": "#8B7355",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "favoriteCount",
+        "threshold": 5
+      },
+      "priority": 10,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 6,
+      "code": "favorite_15",
+      "name": "藏书郎",
+      "description": "收藏 15 本期刊，博览群书",
+      "icon": "Bookmark",
+      "color": "#6B8E23",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "favoriteCount",
+        "threshold": 15
+      },
+      "priority": 20,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 7,
+      "code": "favorite_30",
+      "name": "典籍使",
+      "description": "收藏 30 本期刊，掌管典籍",
+      "icon": "Bookmark",
+      "color": "#4169E1",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "favoriteCount",
+        "threshold": 30
+      },
+      "priority": 30,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 8,
+      "code": "favorite_50",
+      "name": "文渊阁士",
+      "description": "收藏 50 本期刊，学富五车",
+      "icon": "Bookmark",
+      "color": "#FFD700",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "favoriteCount",
+        "threshold": 50
+      },
+      "priority": 40,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 9,
+      "code": "follower_5",
+      "name": "助教",
+      "description": "拥有 5 位粉丝，初为人师",
+      "icon": "Users",
+      "color": "#8B7355",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "followerCount",
+        "threshold": 5
+      },
+      "priority": 10,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 10,
+      "code": "follower_15",
+      "name": "讲师",
+      "description": "拥有 15 位粉丝，桃李渐多",
+      "icon": "Users",
+      "color": "#6B8E23",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "followerCount",
+        "threshold": 15
+      },
+      "priority": 20,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 11,
+      "code": "follower_30",
+      "name": "副教授",
+      "description": "拥有 30 位粉丝，声名鹊起",
+      "icon": "Users",
+      "color": "#4169E1",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "followerCount",
+        "threshold": 30
+      },
+      "priority": 30,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 12,
+      "code": "follower_50",
+      "name": "教授",
+      "description": "拥有 50 位粉丝，德高望重",
+      "icon": "Users",
+      "color": "#FFD700",
+      "category": "activity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "followerCount",
+        "threshold": 50
+      },
+      "priority": 40,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 13,
+      "code": "pioneer",
+      "name": "拓荒学者",
+      "description": "平台早期用户，见证成长",
+      "icon": "Compass",
+      "color": "#9370DB",
+      "category": "identity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "earlyUser",
+        "threshold": 1
+      },
+      "priority": 100,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 14,
+      "code": "admin",
+      "name": "学监",
+      "description": "平台管理员，维护学风",
+      "icon": "Shield",
+      "color": "#DC143C",
+      "category": "identity",
+      "type": "auto",
+      "triggerCondition": {
+        "metric": "isAdmin",
+        "threshold": 1
+      },
+      "priority": 200,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 15,
+      "code": "honor_hanlin",
+      "name": "翰林待诏",
+      "description": "学识渊博，待诏金銮",
+      "icon": "Award",
+      "color": "#FF6347",
+      "category": "honor",
+      "type": "manual",
+      "priority": 300,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 16,
+      "code": "honor_taixue",
+      "name": "太学博士",
+      "description": "经学大师，传道授业",
+      "icon": "GraduationCap",
+      "color": "#8A2BE2",
+      "category": "honor",
+      "type": "manual",
+      "priority": 310,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    },
+    {
+      "id": 17,
+      "code": "honor_ledao",
+      "name": "乐道先生",
+      "description": "乐于分享，传播知识",
+      "icon": "Heart",
+      "color": "#FF69B4",
+      "category": "honor",
+      "type": "manual",
+      "priority": 320,
+      "isActive": true,
+      "createdAt": "2026-03-01T03:43:21.679Z"
+    }
+  ],
+  "userBadges": [
+    {
+      "id": 1,
+      "userId": 999,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.884Z",
+      "isNew": true
+    },
+    {
+      "id": 2,
+      "userId": 999,
+      "badgeId": 14,
+      "grantedAt": "2026-03-01T03:43:21.884Z",
+      "isNew": true
+    },
+    {
+      "id": 3,
+      "userId": 999,
+      "badgeId": 9,
+      "grantedAt": "2026-03-01T03:43:21.886Z",
+      "isNew": true
+    },
+    {
+      "id": 4,
+      "userId": 1,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.887Z",
+      "isNew": true
+    },
+    {
+      "id": 5,
+      "userId": 1,
+      "badgeId": 9,
+      "grantedAt": "2026-03-01T03:43:21.887Z",
+      "isNew": true
+    },
+    {
+      "id": 6,
+      "userId": 2,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.888Z",
+      "isNew": true
+    },
+    {
+      "id": 7,
+      "userId": 3,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.889Z",
+      "isNew": true
+    },
+    {
+      "id": 8,
+      "userId": 3,
+      "badgeId": 5,
+      "grantedAt": "2026-03-01T03:43:21.890Z",
+      "isNew": true
+    },
+    {
+      "id": 9,
+      "userId": 4,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.891Z",
+      "isNew": true
+    },
+    {
+      "id": 10,
+      "userId": 5,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.892Z",
+      "isNew": true
+    },
+    {
+      "id": 11,
+      "userId": 6,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.892Z",
+      "isNew": true
+    },
+    {
+      "id": 12,
+      "userId": 7,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.893Z",
+      "isNew": true
+    },
+    {
+      "id": 13,
+      "userId": 8,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.894Z",
+      "isNew": true
+    },
+    {
+      "id": 14,
+      "userId": 9,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.895Z",
+      "isNew": true
+    },
+    {
+      "id": 15,
+      "userId": 10,
+      "badgeId": 13,
+      "grantedAt": "2026-03-01T03:43:21.895Z",
+      "isNew": true
+    }
+  ]
 }

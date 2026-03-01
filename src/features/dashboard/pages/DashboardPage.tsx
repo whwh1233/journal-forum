@@ -3,6 +3,7 @@ import { useAuth } from '../../../hooks/useAuth';
 import { getUserActivity, getUserComments, getUserFavorites } from '../../../services/userService';
 import { getFollowing } from '../../../services/followService';
 import { Link } from 'react-router-dom';
+import { Info } from 'lucide-react';
 import FollowButton from '../../follow/components/FollowButton';
 import PageHeader from '../../../components/layout/PageHeader';
 import './DashboardPage.css';
@@ -17,22 +18,37 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      try {
-        const activityData = await getUserActivity();
-        setActivity(activityData);
+      if (!user?.id) return;
 
-        const commentsData = await getUserComments(1, 5);
-        setComments(commentsData);
+      const results = await Promise.allSettled([
+        getUserActivity(),
+        getUserComments(1, 5),
+        getUserFavorites(1, 5),
+        getFollowing(parseInt(user.id), 1, 20)
+      ]);
 
-        const favoritesData = await getUserFavorites(1, 5);
-        setFavorites(favoritesData);
+      if (results[0].status === 'fulfilled') {
+        setActivity(results[0].value);
+      } else {
+        console.error('Failed to load activity:', results[0].reason);
+      }
 
-        if (user?.id) {
-          const followingData = await getFollowing(parseInt(user.id), 1, 20);
-          setFollowing(followingData);
-        }
-      } catch (error) {
-        console.error('Error loading dashboard:', error);
+      if (results[1].status === 'fulfilled') {
+        setComments(results[1].value);
+      } else {
+        console.error('Failed to load comments:', results[1].reason);
+      }
+
+      if (results[2].status === 'fulfilled') {
+        setFavorites(results[2].value);
+      } else {
+        console.error('Failed to load favorites:', results[2].reason);
+      }
+
+      if (results[3].status === 'fulfilled') {
+        setFollowing(results[3].value);
+      } else {
+        console.error('Failed to load following:', results[3].reason);
       }
     };
 
@@ -85,7 +101,21 @@ const DashboardPage: React.FC = () => {
             <div className="dashboard-stats dashboard-stats-with-points">
               <div className="stat-card points-card">
                 <div className="stat-value points-val">{activity.stats.points}</div>
-                <div className="stat-label">总积分 <span className="profile-level-badge">Lv.{activity.stats.level}</span></div>
+                <div className="stat-label">
+                  总积分 <span className="profile-level-badge">Lv.{activity.stats.level}</span>
+                  <div className="points-info-wrapper">
+                    <Info size={14} className="points-info-icon" />
+                    <div className="points-tooltip">
+                      <h4>积分获取规则</h4>
+                      <ul>
+                        <li><span className="pts">+5</span> 发布一条评论</li>
+                        <li><span className="pts">+2</span> 文章被他人收藏</li>
+                        <li><span className="pts">+10</span> 获得一位新粉丝</li>
+                      </ul>
+                      <div className="points-tooltip-footer">每累积 100 积分提升 1 个等级</div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="stat-card">
                 <div className="stat-value">{activity.stats.commentCount}</div>
