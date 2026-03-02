@@ -9,6 +9,9 @@ const Badge = require('./Badge');
 const UserBadge = require('./UserBadge');
 const DatabaseAuditLog = require('./DatabaseAuditLog');
 const Post = require('./Post');
+const PostLike = require('./PostLike');
+const PostFavorite = require('./PostFavorite');
+const PostFollow = require('./PostFollow');
 
 // ==================== 关联定义 ====================
 
@@ -64,6 +67,21 @@ Post.belongsTo(Journal, {
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
 Journal.hasMany(Post, { foreignKey: 'journalId', as: 'relatedPosts' });
 
+// PostLike 关联
+PostLike.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
+PostLike.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Post.hasMany(PostLike, { foreignKey: 'postId', as: 'likes' });
+
+// PostFavorite 关联
+PostFavorite.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
+PostFavorite.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Post.hasMany(PostFavorite, { foreignKey: 'postId', as: 'favorites' });
+
+// PostFollow 关联
+PostFollow.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
+PostFollow.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Post.hasMany(PostFollow, { foreignKey: 'postId', as: 'follows' });
+
 // ==================== 同步函数 ====================
 
 /**
@@ -94,5 +112,8 @@ module.exports = {
     UserBadge,
     DatabaseAuditLog,
     Post,
+    PostLike,
+    PostFavorite,
+    PostFollow,
     syncDatabase
 };
