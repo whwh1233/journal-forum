@@ -13,6 +13,7 @@ const userRoutes = require('./routes/userRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 const followRoutes = require('./routes/followRoutes');
 const badgeRoutes = require('./routes/badgeRoutes');
+const databaseRoutes = require('./routes/databaseRoutes');
 
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
@@ -108,6 +109,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/follows', followRoutes);
 app.use('/api/badges', badgeRoutes);
+app.use('/api/database', databaseRoutes);
 
 // 404处理
 app.use(notFound);

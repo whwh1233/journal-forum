@@ -7,6 +7,7 @@ const Favorite = require('./Favorite');
 const Follow = require('./Follow');
 const Badge = require('./Badge');
 const UserBadge = require('./UserBadge');
+const DatabaseAuditLog = require('./DatabaseAuditLog');
 
 // ==================== 关联定义 ====================
 
@@ -74,5 +75,6 @@ module.exports = {
     Follow,
     Badge,
     UserBadge,
+    DatabaseAuditLog,
     syncDatabase
 };

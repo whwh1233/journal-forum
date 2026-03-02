@@ -65,7 +65,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role?: 'user' | 'admin';
+  role?: 'user' | 'admin' | 'superadmin';
 }
 
 export interface UserProfile {
@@ -77,7 +77,7 @@ export interface UserProfile {
   location?: string;
   institution?: string;
   website?: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'superadmin';
   createdAt: string;
   pinnedBadges?: number[];      // 置顶徽章ID
   stats?: {
@@ -94,7 +94,7 @@ export interface AdminUser {
   id: number;
   email: string;
   name?: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'superadmin';
   status: 'active' | 'disabled';
   createdAt: string;
   commentCount: number;

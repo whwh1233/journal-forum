@@ -16,7 +16,8 @@ import {
   UserManagement,
   JournalManagement,
   CommentManagement,
-  BadgeManagement
+  BadgeManagement,
+  DatabaseManager
 } from '@/features/admin';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
@@ -43,7 +44,7 @@ const HomeContent: React.FC = () => {
 };
 
 /**
- * 管理员路由保护组件
+ * 管理员路由保护组件（admin 和 superadmin 均可访问）
  */
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { state } = useAuthContext();
@@ -52,8 +53,25 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <Navigate to="/" replace />;
   }
 
-  if (state.user?.role !== 'admin') {
+  if (state.user?.role !== 'admin' && state.user?.role !== 'superadmin') {
     return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+/**
+ * 超级管理员路由保护组件（仅 superadmin 可访问）
+ */
+const SuperAdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { state } = useAuthContext();
+
+  if (!state.isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (state.user?.role !== 'superadmin') {
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;
@@ -149,6 +167,14 @@ const AppContent: React.FC = () => {
               <AdminRoute>
                 <BadgeManagement />
               </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/database"
+            element={
+              <SuperAdminRoute>
+                <DatabaseManager />
+              </SuperAdminRoute>
             }
           />
         </Route>

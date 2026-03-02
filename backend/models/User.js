@@ -65,7 +65,7 @@ const User = sequelize.define('User', {
     field: 'pinned_badges'
   },
   role: {
-    type: DataTypes.ENUM('user', 'admin'),
+    type: DataTypes.ENUM('user', 'admin', 'superadmin'),
     defaultValue: 'user'
   },
   status: {

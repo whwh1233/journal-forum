@@ -80,13 +80,23 @@
 - 后端: `backend/routes/adminRoutes.js`, `backend/controllers/adminController.js`
 - 中间件: `backend/middleware/adminAuth.js`
 
-### 🏅 积分与荣誉系统 (New)
+### 🏅 积分与荣誉系统
 **状态**: ✅ 已完成
 **功能**: 动态积分与等级计算、自动/手动触发徽章、全局荣誉图鉴、管理端直签
 **关键文件**:
 - 前端: `src/features/badges/`, `src/features/admin/components/BadgeManagement.tsx`
 - 后端: `backend/routes/badgeRoutes.js`, `backend/controllers/badgeController.js`, `backend/services/badgeService.js`
 - 模型: `backend/models/Badge.js`, `backend/models/UserBadge.js`
+
+### 🗄️ 数据库管理 (New)
+**状态**: ✅ 已完成
+**功能**: 表列表/结构/数据浏览、行内编辑、删除、搜索排序分页、操作审计日志
+**权限**: 仅 superadmin 可访问
+**关键文件**:
+- 前端: `src/features/admin/components/DatabaseManager.tsx`, `src/services/databaseService.ts`
+- 后端: `backend/routes/databaseRoutes.js`, `backend/controllers/databaseController.js`
+- 中间件: `backend/middleware/superAdminAuth.js`
+- 模型: `backend/models/DatabaseAuditLog.js`
 
 ### 🧪 测试系统
 **状态**: 🚧 进行中
@@ -143,7 +153,7 @@ journal-forum/
 │   ├── controllers/              # 路由处理器
 │   │   ├── *Controller.js        # MySQL Sequelize 控制器
 │   │   └── *ControllerLowdb.js   # 遗留 LowDB 控制器（参考归档）
-│   ├── middleware/               # auth.js, adminAuth.js, error.js
+│   ├── middleware/               # auth.js, adminAuth.js, superAdminAuth.js, error.js
 │   ├── routes/                   # API 路由（*Routes.js 命名）
 │   ├── services/                 # 业务逻辑层（badgeService.js）
 │   ├── models/                   # 数据模型 (Sequelize)
@@ -216,6 +226,7 @@ journal-forum/
 | 关注 | `/api/follows/*` |
 | 荣誉 | `/api/badges/*` |
 | 管理 | `/api/admin/*` |
+| 数据库 | `/api/database/*` (superadmin) |
 
 完整 API 文档见 `API_ROUTES.md`。
 
@@ -267,7 +278,8 @@ npm run test:e2e:demo:all       # 运行所有模块
 - **端口冲突**: `netstat -ano | findstr :3001` 查看占用进程
 - **控制器命名**: 现所有活跃的控制器文件为 `*Controller.js`，带有 `Lowdb.js` 后缀的为已弃用的遗留代码
 - **路由命名**: 所有后端路由文件以 `Routes.js` 结尾（如 `authRoutes.js`）
-- **中间件命名**: `auth.js`（JWT 认证）、`adminAuth.js`（管理员认证）、`error.js`（错误处理）
+- **中间件命名**: `auth.js`（JWT 认证）、`adminAuth.js`（管理员认证）、`superAdminAuth.js`（超级管理员认证）、`error.js`（错误处理）
+- **用户角色**: `user`（普通用户）、`admin`（管理员）、`superadmin`（超级管理员，可访问数据库管理）
 - **评论系统**: 支持嵌套（最多 3 层），删除后显示为"[该评论已被删除]"
 - **用户数据结构**: 包含 name, avatar, bio, location, institution, website 等字段
 - **测试覆盖**: 后端集成测试完整，前端组件测试完整，单元测试待补充
@@ -283,6 +295,7 @@ npm run test:e2e:demo:all       # 运行所有模块
 - **荣誉徽章系统**（图鉴与后台管理）
 - 个人主页与仪表盘
 - 管理后台（用户/期刊/评论/徽章管理）
+- **数据库管理**（表浏览、数据编辑/删除、审计日志，仅 superadmin）
 - 速率限制、CORS、Helmet 安全头
 - **多主题系统**（6 个预设主题，可自由切换）
 - **E2E 自动化测试**（Playwright，支持可视化演示和猴子测试）
@@ -322,12 +335,14 @@ src/
 ---
 
 ## 当前状态与待办事项
-> **最后更新**: 2026-02-26
+> **最后更新**: 2026-03-02
 > **规则**: 仅记录当前最新状态和最优先问题，每次改动后更新此区域
 
 ### ✅ 当前状态
 
-- **数据库升级**：已完整从 LowDB 迁移至 MySQL 8.0。包括 8 大 Sequelize 模型构建（支持高并发）、数据平滑迁移（支持 UUID）、所有控制器与服务层的彻底重写。目前完全抛弃 LowDB 提供服务，遗留代码已做归档处理。
+- **数据库升级**：已完整从 LowDB 迁移至 MySQL 8.0。包括 9 大 Sequelize 模型构建（支持高并发）、数据平滑迁移（支持 UUID）、所有控制器与服务层的彻底重写。
+- **权限体系**：三级角色（user/admin/superadmin），superadmin 可访问数据库管理功能。
+- **数据库管理**：新增完整的数据库管理工具（表浏览、结构查看、数据编辑/删除、审计日志）。
 - **核心功能**: 补充了完整的积分（Points）与体系化荣誉徽章（Badges）功能。
 - **代码质量**: 图标系统已统一使用 Lucide React，UI 组件已优化（SearchAndFilter）
 - **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试部分完成（5/15+）
@@ -351,7 +366,18 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
-### 2026-03-01 (Session 4 - Current)
+### 2026-03-02 (Session 5 - Current)
+新增数据库管理功能（类 phpMyAdmin）：
+1. **权限体系升级**：User 模型新增 `superadmin` 角色，三级权限（user/admin/superadmin）。新增 `superAdminAuth.js` 中间件。
+2. **数据库管理页面**：管理后台新增「数据库管理」入口（仅 superadmin 可见），支持：
+   - 表列表展示（表名、记录数、数据大小）
+   - 表结构查看（字段、类型、约束、索引）
+   - 数据浏览（分页、搜索、排序）
+   - 行内编辑、删除（带确认弹窗）
+3. **审计日志**：新增 `DatabaseAuditLog` 模型，记录所有数据编辑/删除操作（操作者、时间、变更内容）。
+4. **前端实现**：`DatabaseManager.tsx` + `databaseService.ts`，玻璃拟态 UI 风格与现有管理后台一致。
+
+### 2026-03-01 (Session 4)
 全面迁移至 MySQL 数据库架构：
 1. **数据层重构**：引入 Sequelize ORM 构建 8 个数据模型，实现复杂表间关联（一对多、多对多、自关联），支持细粒度的约束和外键连级管理。
 2. **控制器完全替换**：将全部 Controller、Service 及 Middleware 从基于 LowDB 的 JSON 操作改写为异步 SQL 查询，优化内存占用与并发性能（如 COUNT/SUM 替代数组遍历）。
@@ -362,21 +388,6 @@ src/
 1. **多维期刊排序**：首页 `SearchAndFilter` 新增排序下拉菜单，支持按综合评分及 5 个评价维度排序。后端 `getJournals` 接收 `sortBy` 参数，排序基于缓存在 `journal.dimensionAverages` 中的实时均值。
 2. **评论有用性点赞**：新增 `POST /api/comments/:id/like` Toggle 接口，`CommentItem` 增加点赞按钮（本地即时反馈），`CommentList` 排序增加"最有用"选项。
 3. **性能优化**：`createComment`/`deleteComment` 时自动将 `dimensionAverages` 持久化到 `journal` 对象，避免排序时实时遍历评论。
-
-### 2026-03-01 (Session 2)
-实现结构化多维评价系统：
-1. **5 维度评分系统**：将单一 rating 升级为审稿速度/编辑态度/录用难度/审稿质量/综合体验 5 维评价，完全向后兼容旧评论。
-2. **新增组件**：`DimensionRatingInput`（评分输入）和 `DimensionRatingDisplay`（compact/summary 两种模式的视觉化展示）。
-3. **期刊详情页多维汇总**：新增 `GET /api/comments/journal/:id/ratings` 接口，期刊详情页展示各维度均分条形图。
-4. **CLAUDE.md 修正**：修正了 7 个路由文件名、中间件命名、缺失的 Context/E2E 测试文件等文档不精确处。
-
-### 2026-03-01 (Session 1)
-实现动态积分与徽章系统及独立测试环境：
-1. **测试数据环境构建**：增加 `database.test.json` 和 `npm run seed:test`，实现自动生成带有社交网络（关注、粉丝、收藏）和盖楼评论的复杂测试数据集，并支持 `cross-env NODE_ENV=test` 隔离运行。
-2. **核心 Bug 修复**：修复了 AuthContext 和 authService 长期存在的邮箱错误当作 userId 存储导致查不到关注列表的 bug，并兼容修正了测试环境的 Rate Limit 放行。
-3. **积分与等级**：基于用户评论、收藏、被关注数据实时动态计算总积分与 Level 等级，并在 Dashboard / Profile 分发展示。
-4. **荣誉殿堂 (Badge Gallery)**：创建面向全站用户的自动/手动徽章规则公示与导览页。
-5. **Admin UI 升级**：为 Admin 侧边栏注入徽章管理台（BadgeManagement），采用高质感玻璃拟态 UI 提供一键授勋能力。
 
 ---
 **维护说明**: 每次会话结束时更新此区域，保留最近 3 次会话记录。

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
-import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award } from 'lucide-react';
+import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award, Database } from 'lucide-react';
 import './SideNav.css';
 
 interface SideNavProps {
@@ -71,6 +71,12 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
               <Award className="side-nav-icon" size={20} />
               <span className="side-nav-label">荣誉系统</span>
             </NavLink>
+            {user?.role === 'superadmin' && (
+              <NavLink to="/admin/database" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '数据库管理'}>
+                <Database className="side-nav-icon" size={20} />
+                <span className="side-nav-label">数据库管理</span>
+              </NavLink>
+            )}
             <div className="side-nav-divider" />
             <NavLink to="/" className="side-nav-item" title={expanded ? undefined : '返回首页'}>
               <Home className="side-nav-icon" size={20} />
@@ -104,7 +110,7 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
                 <span className="side-nav-label">荣誉殿堂</span>
               </NavLink>
             )}
-            {isAuthenticated && user?.role === 'admin' && (
+            {isAuthenticated && (user?.role === 'admin' || user?.role === 'superadmin') && (
               <NavLink to="/admin" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '管理后台'}>
                 <Shield className="side-nav-icon" size={20} />
                 <span className="side-nav-label">管理后台</span>

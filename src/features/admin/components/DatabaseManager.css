@@ -1,0 +1,730 @@
+/* DatabaseManager.css - 与管理后台风格一致 */
+
+.database-manager {
+  min-height: 100%;
+}
+
+/* 导航栏 */
+.db-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.db-nav-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.db-nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.db-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--gray-600);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.db-nav-btn:hover {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.db-nav-btn.active {
+  background: linear-gradient(135deg, var(--indigo-500), var(--purple-500));
+  color: white;
+  border-color: transparent;
+}
+
+.db-nav-sep {
+  color: var(--gray-300);
+  font-size: 1.2rem;
+}
+
+.db-nav-table {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 1rem;
+}
+
+.db-view-tabs {
+  display: flex;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  margin-left: var(--space-4);
+}
+
+.db-view-tabs button {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  background: transparent;
+  color: var(--gray-600);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.db-view-tabs button:hover {
+  color: var(--gray-800);
+}
+
+.db-view-tabs button.active {
+  background: white;
+  color: var(--indigo-600);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 内容区域 */
+.db-content {
+  position: relative;
+  min-height: 400px;
+}
+
+.db-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius-lg);
+}
+
+/* 表卡片网格 */
+.db-tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+}
+
+.db-table-card {
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.db-table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--indigo-200);
+}
+
+.db-table-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  color: var(--indigo-500);
+}
+
+.db-table-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--gray-800);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.db-table-card-stats {
+  display: flex;
+  gap: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+.db-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-stat-label {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.db-stat-value {
+  font-weight: 600;
+  color: var(--gray-800);
+  font-size: 1rem;
+}
+
+.db-table-comment {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--gray-100);
+}
+
+/* 通用表格样式 */
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.db-table th,
+.db-table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.db-table th {
+  background: var(--gray-50);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.db-table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.db-table tbody tr.editing {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+/* 结构视图 */
+.db-structure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.db-section {
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.db-section h3 {
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-100);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gray-700);
+}
+
+.db-structure-table-container {
+  overflow-x: auto;
+}
+
+/* 徽章样式 */
+.db-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.db-badge.nullable {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.db-badge.not-null {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.db-badge.key-pri {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.db-badge.key-uni {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.db-badge.key-mul {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.db-badge.unique {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.db-badge.non-unique {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.db-badge.op-update {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.db-badge.op-delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* 数据视图 */
+.db-data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.db-data-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+}
+
+.db-search-group {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.db-select,
+.db-input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  background: white;
+}
+
+.db-select:focus,
+.db-input:focus {
+  outline: none;
+  border-color: var(--indigo-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.db-select-sm {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.db-page-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.db-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.db-btn-search {
+  background: var(--indigo-500);
+  color: white;
+}
+
+.db-btn-search:hover {
+  background: var(--indigo-600);
+}
+
+.db-btn-primary {
+  background: linear-gradient(135deg, var(--indigo-500), var(--purple-500));
+  color: white;
+}
+
+.db-btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.db-btn-cancel {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.db-data-table-container {
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.db-data-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.db-data-table th.sortable:hover {
+  background: var(--gray-100);
+}
+
+.db-data-table th span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.db-data-table th svg {
+  opacity: 0.5;
+}
+
+.db-data-table th svg.desc {
+  transform: rotate(180deg);
+}
+
+.db-cell-value {
+  display: block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.null-value {
+  color: var(--gray-400);
+  font-style: italic;
+}
+
+.actions-col {
+  width: 100px;
+  text-align: center;
+}
+
+.db-row-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.db-btn-icon {
+  padding: var(--space-2);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.db-btn-icon.edit {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.db-btn-icon.edit:hover {
+  background: var(--indigo-100);
+  color: var(--indigo-600);
+}
+
+.db-btn-icon.delete {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.db-btn-icon.delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.db-btn-icon.save {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.db-btn-icon.save:hover {
+  background: #a7f3d0;
+}
+
+.db-btn-icon.cancel {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.db-btn-icon.cancel:hover {
+  background: var(--gray-200);
+}
+
+.db-edit-input {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--indigo-300);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  background: white;
+}
+
+.db-edit-input:focus {
+  outline: none;
+  border-color: var(--indigo-500);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* 分页 */
+.db-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+}
+
+.db-pagination-info {
+  font-size: 0.9rem;
+  color: var(--gray-600);
+}
+
+.db-pagination-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.db-btn-page {
+  padding: var(--space-2);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.db-btn-page:hover:not(:disabled) {
+  background: var(--gray-50);
+  border-color: var(--gray-300);
+}
+
+.db-btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 审计日志 */
+.db-logs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.db-logs-table-container {
+  background: var(--color-surface);
+  border: 1px solid var(--gray-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.db-log-details {
+  cursor: pointer;
+}
+
+.db-log-details summary {
+  color: var(--indigo-500);
+  font-size: 0.85rem;
+}
+
+.db-log-diff {
+  margin-top: var(--space-2);
+  font-size: 0.8rem;
+}
+
+.db-log-diff pre {
+  background: var(--gray-50);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  max-width: 400px;
+  font-size: 0.75rem;
+}
+
+.diff-old {
+  margin-bottom: var(--space-2);
+}
+
+.diff-old strong {
+  color: #dc2626;
+}
+
+.diff-new strong {
+  color: #059669;
+}
+
+/* 确认弹窗 */
+.db-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.db-modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.db-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.db-modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.db-modal-header .warning-icon {
+  color: #f59e0b;
+}
+
+.db-modal-body {
+  padding: var(--space-5);
+}
+
+.db-modal-body p {
+  margin: 0;
+  color: var(--gray-600);
+  line-height: 1.6;
+}
+
+.db-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-100);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* 工具类 */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-sm {
+  font-size: 0.85rem;
+}
+
+.text-muted {
+  color: var(--gray-500);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .db-nav {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .db-nav-left,
+  .db-nav-right {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .db-data-toolbar {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .db-search-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .db-select,
+  .db-input {
+    flex: 1;
+    min-width: 120px;
+  }
+}
