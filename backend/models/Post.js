@@ -10,13 +10,7 @@ const Post = sequelize.define('Post', {
   userId: {
     type: DataTypes.CHAR(36),
     allowNull: false,
-    field: 'user_id',
-    references: {
-      model: 'users',
-      key: 'id'
-    },
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
+    field: 'user_id'
   },
   title: {
     type: DataTypes.STRING(200),
@@ -46,18 +40,12 @@ const Post = sequelize.define('Post', {
   tags: {
     type: DataTypes.JSON,
     allowNull: true,
-    defaultValue: null
+    defaultValue: []
   },
   journalId: {
     type: DataTypes.INTEGER,
     allowNull: true,
-    field: 'journal_id',
-    references: {
-      model: 'journals',
-      key: 'id'
-    },
-    onDelete: 'SET NULL',
-    onUpdate: 'CASCADE'
+    field: 'journal_id'
   },
   viewCount: {
     type: DataTypes.INTEGER,

@@ -49,8 +49,18 @@ User.hasMany(UserBadge, { foreignKey: 'userId', as: 'userBadges' });
 UserBadge.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 // Post 关联
-Post.belongsTo(User, { foreignKey: 'userId', as: 'author' });
-Post.belongsTo(Journal, { foreignKey: 'journalId', as: 'journal' });
+Post.belongsTo(User, {
+    foreignKey: 'userId',
+    as: 'author',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+});
+Post.belongsTo(Journal, {
+    foreignKey: 'journalId',
+    as: 'journal',
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE'
+});
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
 Journal.hasMany(Post, { foreignKey: 'journalId', as: 'relatedPosts' });
 
