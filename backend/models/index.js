@@ -12,6 +12,8 @@ const Post = require('./Post');
 const PostLike = require('./PostLike');
 const PostFavorite = require('./PostFavorite');
 const PostFollow = require('./PostFollow');
+const PostComment = require('./PostComment');
+const PostCommentLike = require('./PostCommentLike');
 
 // ==================== 关联定义 ====================
 
@@ -82,6 +84,18 @@ PostFollow.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
 PostFollow.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Post.hasMany(PostFollow, { foreignKey: 'postId', as: 'follows' });
 
+// PostComment 关联
+PostComment.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
+PostComment.belongsTo(User, { foreignKey: 'userId' });
+PostComment.belongsTo(PostComment, { foreignKey: 'parentId', as: 'parent' });
+Post.hasMany(PostComment, { foreignKey: 'postId', as: 'comments' });
+PostComment.hasMany(PostComment, { foreignKey: 'parentId', as: 'replies' });
+
+// PostCommentLike 关联
+PostCommentLike.belongsTo(PostComment, { foreignKey: 'commentId', onDelete: 'CASCADE' });
+PostCommentLike.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+PostComment.hasMany(PostCommentLike, { foreignKey: 'commentId', as: 'likes' });
+
 // ==================== 同步函数 ====================
 
 /**
@@ -115,5 +129,7 @@ module.exports = {
     PostLike,
     PostFavorite,
     PostFollow,
+    PostComment,
+    PostCommentLike,
     syncDatabase
 };
