@@ -8,6 +8,7 @@ const Follow = require('./Follow');
 const Badge = require('./Badge');
 const UserBadge = require('./UserBadge');
 const DatabaseAuditLog = require('./DatabaseAuditLog');
+const Post = require('./Post');
 
 // ==================== 关联定义 ====================
 
@@ -47,6 +48,12 @@ UserBadge.belongsTo(Badge, { foreignKey: 'badgeId', as: 'badge' });
 User.hasMany(UserBadge, { foreignKey: 'userId', as: 'userBadges' });
 UserBadge.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+// Post 关联
+Post.belongsTo(User, { foreignKey: 'userId', as: 'author' });
+Post.belongsTo(Journal, { foreignKey: 'journalId', as: 'journal' });
+User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
+Journal.hasMany(Post, { foreignKey: 'journalId', as: 'relatedPosts' });
+
 // ==================== 同步函数 ====================
 
 /**
@@ -76,5 +83,6 @@ module.exports = {
     Badge,
     UserBadge,
     DatabaseAuditLog,
+    Post,
     syncDatabase
 };
