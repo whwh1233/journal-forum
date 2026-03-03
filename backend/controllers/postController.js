@@ -1,4 +1,4 @@
-const { Post, User, Journal, PostLike, PostFavorite, PostFollow } = require('../models');
+const { Post, User, Journal, PostLike, PostFavorite, PostFollow, PostReport } = require('../models');
 const { Op } = require('sequelize');
 
 // 获取帖子列表（带筛选、排序、分页）
@@ -285,5 +285,233 @@ exports.incrementViewCount = async (req, res) => {
     } catch (error) {
         console.error('更新浏览计数失败:', error);
         res.status(500).json({ error: '更新浏览计数失败' });
+    }
+};
+
+// 点赞/取消点赞 (Toggle)
+exports.toggleLike = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const post = await Post.findByPk(id);
+        if (!post) {
+            return res.status(404).json({ error: '帖子不存在' });
+        }
+
+        const existingLike = await PostLike.findOne({
+            where: { postId: id, userId: req.user.id }
+        });
+
+        if (existingLike) {
+            // 取消点赞
+            await existingLike.destroy();
+            await post.decrement('likeCount');
+            res.json({ liked: false, likeCount: post.likeCount - 1 });
+        } else {
+            // 点赞
+            await PostLike.create({ postId: id, userId: req.user.id });
+            await post.increment('likeCount');
+            res.json({ liked: true, likeCount: post.likeCount + 1 });
+        }
+    } catch (error) {
+        console.error('点赞操作失败:', error);
+        res.status(500).json({ error: '点赞操作失败' });
+    }
+};
+
+// 收藏/取消收藏 (Toggle)
+exports.toggleFavorite = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const post = await Post.findByPk(id);
+        if (!post) {
+            return res.status(404).json({ error: '帖子不存在' });
+        }
+
+        const existingFavorite = await PostFavorite.findOne({
+            where: { postId: id, userId: req.user.id }
+        });
+
+        if (existingFavorite) {
+            await existingFavorite.destroy();
+            await post.decrement('favoriteCount');
+            res.json({ favorited: false, favoriteCount: post.favoriteCount - 1 });
+        } else {
+            await PostFavorite.create({ postId: id, userId: req.user.id });
+            await post.increment('favoriteCount');
+            res.json({ favorited: true, favoriteCount: post.favoriteCount + 1 });
+        }
+    } catch (error) {
+        console.error('收藏操作失败:', error);
+        res.status(500).json({ error: '收藏操作失败' });
+    }
+};
+
+// 关注/取消关注 (Toggle)
+exports.toggleFollow = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const post = await Post.findByPk(id);
+        if (!post) {
+            return res.status(404).json({ error: '帖子不存在' });
+        }
+
+        const existingFollow = await PostFollow.findOne({
+            where: { postId: id, userId: req.user.id }
+        });
+
+        if (existingFollow) {
+            await existingFollow.destroy();
+            await post.decrement('followCount');
+            res.json({ followed: false, followCount: post.followCount - 1 });
+        } else {
+            await PostFollow.create({ postId: id, userId: req.user.id });
+            await post.increment('followCount');
+            res.json({ followed: true, followCount: post.followCount + 1 });
+        }
+    } catch (error) {
+        console.error('关注操作失败:', error);
+        res.status(500).json({ error: '关注操作失败' });
+    }
+};
+
+// 举报帖子
+exports.reportPost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+
+        if (!reason) {
+            return res.status(400).json({ error: '请提供举报原因' });
+        }
+
+        const post = await Post.findByPk(id);
+        if (!post) {
+            return res.status(404).json({ error: '帖子不存在' });
+        }
+
+        await PostReport.create({
+            postId: id,
+            reporterId: req.user.id,
+            reason
+        });
+
+        res.json({ message: '举报已提交，我们会尽快处理' });
+    } catch (error) {
+        console.error('举报失败:', error);
+        res.status(500).json({ error: '举报失败' });
+    }
+};
+
+// 获取我的帖子
+exports.getMyPosts = async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+
+        const { count, rows: posts } = await Post.findAndCountAll({
+            where: { userId: req.user.id, isDeleted: false },
+            include: [
+                { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit),
+            offset
+        });
+
+        res.json({
+            posts,
+            pagination: {
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(count / limit)
+            }
+        });
+    } catch (error) {
+        console.error('获取我的帖子失败:', error);
+        res.status(500).json({ error: '获取我的帖子失败' });
+    }
+};
+
+// 获取我收藏的帖子
+exports.getMyFavorites = async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+
+        const { count, rows: favorites } = await PostFavorite.findAndCountAll({
+            where: { userId: req.user.id },
+            include: [
+                {
+                    model: Post,
+                    where: { isDeleted: false },
+                    include: [
+                        { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
+                        { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                    ]
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit),
+            offset
+        });
+
+        const posts = favorites.map(f => ({ ...f.Post.toJSON(), userFavorited: true }));
+
+        res.json({
+            posts,
+            pagination: {
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(count / limit)
+            }
+        });
+    } catch (error) {
+        console.error('获取收藏列表失败:', error);
+        res.status(500).json({ error: '获取收藏列表失败' });
+    }
+};
+
+// 获取我关注的帖子
+exports.getMyFollows = async (req, res) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (page - 1) * limit;
+
+        const { count, rows: follows } = await PostFollow.findAndCountAll({
+            where: { userId: req.user.id },
+            include: [
+                {
+                    model: Post,
+                    where: { isDeleted: false },
+                    include: [
+                        { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
+                        { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                    ]
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            limit: parseInt(limit),
+            offset
+        });
+
+        const posts = follows.map(f => ({ ...f.Post.toJSON(), userFollowed: true }));
+
+        res.json({
+            posts,
+            pagination: {
+                total: count,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(count / limit)
+            }
+        });
+    } catch (error) {
+        console.error('获取关注列表失败:', error);
+        res.status(500).json({ error: '获取关注列表失败' });
     }
 };
