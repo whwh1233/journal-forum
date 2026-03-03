@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/auth');
 const postController = require('../controllers/postController');
+const postCommentController = require('../controllers/postCommentController');
 
 // 用户相关（必须在 /:id 之前）
 router.get('/my/posts', protect, postController.getMyPosts);
@@ -23,5 +24,11 @@ router.post('/:id/favorite', protect, postController.toggleFavorite);
 router.post('/:id/follow', protect, postController.toggleFollow);
 router.post('/:id/report', protect, postController.reportPost);
 router.post('/:id/view', postController.incrementViewCount);
+
+// 评论相关路由
+router.get('/:postId/comments', postCommentController.getComments);
+router.post('/:postId/comments', protect, postCommentController.createComment);
+router.delete('/comments/:commentId', protect, postCommentController.deleteComment);
+router.post('/comments/:commentId/like', protect, postCommentController.toggleCommentLike);
 
 module.exports = router;
