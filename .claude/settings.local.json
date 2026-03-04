@@ -98,7 +98,15 @@
       "Bash(git -C \"D:\\\\claude\\\\journal-forum\" add src/features/badges/components/NewBadgeToast.tsx src/features/badges/components/NewBadgeToast.css src/features/badges/index.ts src/App.tsx)",
       "Bash(git -C \"D:\\\\claude\\\\journal-forum\" commit -m \"$\\(cat <<''EOF''\nfeat\\(badges\\): add NewBadgeToast notification component\n\n- Toast appears when user earns new badges\n- Auto-dismisses after 5 seconds\n- Click navigates to profile edit page\n- Animated slide-in and icon bounce effects\nEOF\n\\)\")",
       "Bash(git -C:*)",
-      "Bash(git -C \"D:\\\\claude\\\\journal-forum\" commit -m \"$\\(cat <<''EOF''\nfeat\\(badges\\): integrate badges into profile page\n\n- Display pinned badges next to username\n- Show BadgeWall with all earned badges below stats\n- Add CSS for badge layout in profile\nEOF\n\\)\")"
+      "Bash(git -C \"D:\\\\claude\\\\journal-forum\" commit -m \"$\\(cat <<''EOF''\nfeat\\(badges\\): integrate badges into profile page\n\n- Display pinned badges next to username\n- Show BadgeWall with all earned badges below stats\n- Add CSS for badge layout in profile\nEOF\n\\)\")",
+      "Bash(cmd //c \"taskkill /PID 16152 /F\")",
+      "Bash(cmd //c \"taskkill /PID 23612 /F\")",
+      "Bash(cmd //c \"taskkill /PID 1672 /F\")",
+      "Bash(cmd //c \"taskkill /PID 4872 /F\")",
+      "Bash(cmd //c \"taskkill /PID 27816 /F\")",
+      "Bash(cmd //c \"taskkill /PID 16092 /F\")",
+      "Bash(cmd //c \"taskkill /PID 26740 /F\")",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -6,6 +6,7 @@ import { ToastProvider } from '@/contexts/ToastContext';
 import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { BadgeProvider } from '@/contexts/BadgeContext';
+import { PostProvider } from '@/contexts/PostContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
@@ -215,11 +216,13 @@ function App() {
         <BadgeProvider>
           <JournalProvider>
             <ToastProvider>
-              <AuthModalProvider>
-                <div className="app">
-                  <AppContent />
-                </div>
-              </AuthModalProvider>
+              <PostProvider>
+                <AuthModalProvider>
+                  <div className="app">
+                    <AppContent />
+                  </div>
+                </AuthModalProvider>
+              </PostProvider>
             </ToastProvider>
           </JournalProvider>
         </BadgeProvider>

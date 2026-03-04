@@ -356,10 +356,15 @@ src/
 2. **前端组件测试** - 剩余 10+ 组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
 3. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
 
-### 📋 功能积压
+### 📋 功能积压 (详见 `EXPANSION_PLAN.md`)
 
-* 教育邮箱登录验证
-* 申请制
+* **投稿周期追踪** (Submission Timeline) - 结构化分享录用经验 (v1.1 核心)
+* **学者身份认证** (Edu邮箱/ORCID绑定) - 增强发言背书 (v1.1 核心)
+* **期刊问答专区** (Q&A Section) - 将提问与评价分离聚合
+* **核心指标展示** (JCR分区/IF/APC) - 数据大盘集成
+* **动态订阅提醒** (Dynamic Alerts) - 基于期刊动态的邮件/站内召回
+* 教育邮箱登录验证 (集成至身份认证)
+* 申请制发布权限 (集成至身份认证)
 
 ---
 
