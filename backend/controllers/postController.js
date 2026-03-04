@@ -22,7 +22,8 @@ exports.getPosts = async (req, res) => {
         if (category) where.category = category;
         if (journalId) where.journalId = journalId;
         if (userId) where.userId = userId;
-        if (tag) where.tags = { [Op.contains]: [tag] };
+        // MySQL不支持@>操作符，使用LIKE查询JSON数组
+        if (tag) where.tags = { [Op.like]: `%"${tag}"%` };
         if (search) {
             where[Op.or] = [
                 { title: { [Op.like]: `%${search}%` } },
