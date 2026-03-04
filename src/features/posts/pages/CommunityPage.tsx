@@ -87,6 +87,11 @@ const CommunityPage: React.FC = () => {
     fetchPosts();
   };
 
+  // Handle post click
+  const handlePostClick = (id: number) => {
+    navigate(`/posts/${id}`);
+  };
+
   return (
     <div className="community-page">
       <div className="community-container">
@@ -193,6 +198,7 @@ const CommunityPage: React.FC = () => {
               onLoadMore={handleLoadMore}
               onRetry={handleRetry}
               onCreatePost={handleCreatePost}
+              onPostClick={handlePostClick}
             />
           </main>
 

@@ -12,6 +12,7 @@ interface PostListProps {
   onLoadMore: () => void;
   onRetry: () => void;
   onCreatePost?: () => void;
+  onPostClick?: (id: number) => void;
 }
 
 const PostList: React.FC<PostListProps> = ({
@@ -21,7 +22,8 @@ const PostList: React.FC<PostListProps> = ({
   hasMore,
   onLoadMore,
   onRetry,
-  onCreatePost
+  onCreatePost,
+  onPostClick
 }) => {
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -144,7 +146,7 @@ const PostList: React.FC<PostListProps> = ({
       {/* Posts grid */}
       <div className="post-list-grid">
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} />
+          <PostCard key={post.id} post={post} onClick={onPostClick} />
         ))}
       </div>
 
