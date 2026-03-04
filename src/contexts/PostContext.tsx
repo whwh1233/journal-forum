@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { postService } from '@/features/posts/services/postService';
 import { Post, PostFilters, PostPagination, CreatePostData, UpdatePostData } from '@/features/posts/types/post';
-import { useToast } from './ToastContext';
+import { useToastContext } from './ToastContext';
 
 interface PostContextState {
   // Data
@@ -41,7 +41,7 @@ interface PostProviderProps {
 }
 
 export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
-  const { showToast } = useToast();
+  const toast = useToastContext();
 
   // State
   const [posts, setPosts] = useState<Post[]>([]);
@@ -86,11 +86,11 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     } catch (err) {
       const message = err instanceof Error ? err.message : '加载帖子失败';
       setError(message);
-      showToast(message, 'error');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [filters, showToast]);
+  }, [filters, toast]);
 
   // Fetch single post by ID
   const fetchPostById = useCallback(async (id: number) => {
@@ -103,11 +103,11 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     } catch (err) {
       const message = err instanceof Error ? err.message : '加载帖子详情失败';
       setError(message);
-      showToast(message, 'error');
+      toast.error(message);
     } finally {
       setLoading(false);
     }
-  }, [showToast]);
+  }, [toast]);
 
   // Create new post
   const createPost = useCallback(async (data: CreatePostData): Promise<Post | null> => {
@@ -116,7 +116,7 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
       setError(null);
 
       const post = await postService.createPost(data);
-      showToast('帖子发布成功', 'success');
+      toast.success('帖子发布成功');
 
       // Clear draft from localStorage if exists
       localStorage.removeItem('post_draft');
@@ -125,12 +125,12 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     } catch (err) {
       const message = err instanceof Error ? err.message : '发布帖子失败';
       setError(message);
-      showToast(message, 'error');
+      toast.error(message);
       return null;
     } finally {
       setSubmitting(false);
     }
-  }, [showToast]);
+  }, [toast]);
 
   // Update existing post
   const updatePost = useCallback(async (id: number, data: UpdatePostData): Promise<boolean> => {
@@ -148,17 +148,17 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
       // Update in posts list if present
       setPosts(prev => prev.map(p => p.id === id ? updated : p));
 
-      showToast('帖子更新成功', 'success');
+      toast.success('帖子更新成功');
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : '更新帖子失败';
       setError(message);
-      showToast(message, 'error');
+      toast.error(message);
       return false;
     } finally {
       setSubmitting(false);
     }
-  }, [currentPost, showToast]);
+  }, [currentPost, toast]);
 
   // Delete post
   const deletePost = useCallback(async (id: number): Promise<boolean> => {
@@ -176,17 +176,17 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
         setCurrentPost(null);
       }
 
-      showToast('帖子已删除', 'success');
+      toast.success('帖子已删除');
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : '删除帖子失败';
       setError(message);
-      showToast(message, 'error');
+      toast.error(message);
       return false;
     } finally {
       setSubmitting(false);
     }
-  }, [currentPost, showToast]);
+  }, [currentPost, toast]);
 
   // Load more posts (pagination)
   const loadMore = useCallback(async () => {
@@ -227,12 +227,12 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
           : p
       ));
 
-      showToast(result.liked ? '已点赞' : '已取消点赞', 'success');
+      toast.success(result.liked ? '已点赞' : '已取消点赞');
     } catch (err) {
       const message = err instanceof Error ? err.message : '操作失败';
-      showToast(message, 'error');
+      toast.error(message);
     }
-  }, [currentPost, showToast]);
+  }, [currentPost, toast]);
 
   // Toggle favorite
   const toggleFavorite = useCallback(async (id: number) => {
@@ -255,12 +255,12 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
           : p
       ));
 
-      showToast(result.favorited ? '已收藏' : '已取消收藏', 'success');
+      toast.success(result.favorited ? '已收藏' : '已取消收藏');
     } catch (err) {
       const message = err instanceof Error ? err.message : '操作失败';
-      showToast(message, 'error');
+      toast.error(message);
     }
-  }, [currentPost, showToast]);
+  }, [currentPost, toast]);
 
   // Toggle follow
   const toggleFollow = useCallback(async (id: number) => {
@@ -283,25 +283,25 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
           : p
       ));
 
-      showToast(result.followed ? '已关注' : '已取消关注', 'success');
+      toast.success(result.followed ? '已关注' : '已取消关注');
     } catch (err) {
       const message = err instanceof Error ? err.message : '操作失败';
-      showToast(message, 'error');
+      toast.error(message);
     }
-  }, [currentPost, showToast]);
+  }, [currentPost, toast]);
 
   // Report post
   const reportPost = useCallback(async (id: number, reason: string): Promise<boolean> => {
     try {
       await postService.reportPost(id, reason);
-      showToast('举报已提交，感谢您的反馈', 'success');
+      toast.success('举报已提交，感谢您的反馈');
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : '举报失败';
-      showToast(message, 'error');
+      toast.error(message);
       return false;
     }
-  }, [showToast]);
+  }, [toast]);
 
   // Increment view count (silent, no error handling needed)
   const incrementViewCount = useCallback(async (id: number) => {
