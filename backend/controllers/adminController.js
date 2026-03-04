@@ -1,4 +1,4 @@
-const { User, Journal, Comment } = require('../models');
+const { User, Journal, Comment, Post, PostReport } = require('../models');
 const { Op, fn, col, literal } = require('sequelize');
 
 // 获取统计数据
@@ -238,4 +238,172 @@ const deleteComment = async (req, res, next) => {
     }
 };
 
-module.exports = { getStats, getUsers, updateUser, deleteUser, getComments, deleteComment };
+// 获取帖子举报列表
+const getPostReports = async (req, res, next) => {
+    try {
+        const { status, page = 1, limit = 10 } = req.query;
+
+        const where = {};
+        if (status) {
+            where.status = status;
+        }
+
+        const offset = (page - 1) * limit;
+        const { count, rows } = await PostReport.findAndCountAll({
+            where,
+            include: [
+                {
+                    model: Post,
+                    as: 'post',
+                    attributes: ['id', 'title', 'content', 'userId']
+                },
+                {
+                    model: User,
+                    as: 'reporter',
+                    attributes: ['id', 'name', 'email']
+                }
+            ],
+            order: [['createdAt', 'DESC']],
+            offset: Number(offset),
+            limit: Number(limit)
+        });
+
+        const reports = rows.map(report => ({
+            id: report.id,
+            postId: report.postId,
+            postTitle: report.post?.title || '[帖子已删除]',
+            postContent: report.post?.content?.substring(0, 100) || '',
+            reporterId: report.reporterId,
+            reporterName: report.reporter?.name || '[用户已删除]',
+            reporterEmail: report.reporter?.email || '',
+            reason: report.reason,
+            status: report.status,
+            adminNote: report.adminNote,
+            createdAt: report.createdAt,
+            reviewedAt: report.reviewedAt
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: {
+                reports,
+                pagination: {
+                    currentPage: Number(page),
+                    totalPages: Math.ceil(count / limit),
+                    totalItems: count,
+                    itemsPerPage: Number(limit)
+                }
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// 更新举报状态
+const updatePostReportStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { status, adminNote, action } = req.body;
+
+        const report = await PostReport.findByPk(id, {
+            include: [{ model: Post, as: 'post' }]
+        });
+
+        if (!report) {
+            return res.status(404).json({ success: false, message: '举报记录未找到' });
+        }
+
+        // 更新举报状态
+        await report.update({
+            status,
+            adminNote,
+            reviewedAt: new Date(),
+            reviewedBy: req.user.id
+        });
+
+        // 执行相应操作
+        if (action === 'delete_post' && report.post) {
+            // 删除被举报的帖子
+            await report.post.update({ isDeleted: true });
+        } else if (action === 'warn_author' && report.post) {
+            // 可以在这里添加警告用户的逻辑（发送通知等）
+            // TODO: Implement warning system
+        }
+
+        res.status(200).json({
+            success: true,
+            message: '举报处理成功',
+            data: {
+                report: {
+                    id: report.id,
+                    status: report.status,
+                    adminNote: report.adminNote
+                }
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// 批量处理举报
+const batchProcessReports = async (req, res, next) => {
+    try {
+        const { reportIds, status, action } = req.body;
+
+        if (!reportIds || !Array.isArray(reportIds) || reportIds.length === 0) {
+            return res.status(400).json({ success: false, message: '请提供有效的举报ID列表' });
+        }
+
+        const reports = await PostReport.findAll({
+            where: { id: { [Op.in]: reportIds } },
+            include: [{ model: Post, as: 'post' }]
+        });
+
+        if (reports.length === 0) {
+            return res.status(404).json({ success: false, message: '未找到有效的举报记录' });
+        }
+
+        // 批量更新状态
+        await PostReport.update(
+            {
+                status,
+                reviewedAt: new Date(),
+                reviewedBy: req.user.id
+            },
+            { where: { id: { [Op.in]: reportIds } } }
+        );
+
+        // 批量执行操作
+        if (action === 'delete_posts') {
+            const postIds = reports.map(r => r.postId).filter(Boolean);
+            if (postIds.length > 0) {
+                await Post.update(
+                    { isDeleted: true },
+                    { where: { id: { [Op.in]: postIds } } }
+                );
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `成功处理 ${reports.length} 条举报`,
+            data: { processed: reports.length }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = {
+    getStats,
+    getUsers,
+    updateUser,
+    deleteUser,
+    getComments,
+    deleteComment,
+    getPostReports,
+    updatePostReportStatus,
+    batchProcessReports
+};

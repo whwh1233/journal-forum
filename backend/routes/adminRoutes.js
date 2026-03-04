@@ -7,7 +7,10 @@ const {
   updateUser,
   deleteUser,
   getComments,
-  deleteComment
+  deleteComment,
+  getPostReports,
+  updatePostReportStatus,
+  batchProcessReports
 } = require('../controllers/adminController');
 const {
   createJournal,
@@ -34,5 +37,10 @@ router.delete('/journals/:id', deleteJournal);
 // 评论管理
 router.get('/comments', getComments);
 router.delete('/comments/:id', deleteComment);
+
+// 帖子举报管理
+router.get('/post-reports', getPostReports);
+router.put('/post-reports/:id', updatePostReportStatus);
+router.post('/post-reports/batch', batchProcessReports);
 
 module.exports = router;
