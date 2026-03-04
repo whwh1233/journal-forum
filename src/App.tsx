@@ -24,6 +24,9 @@ import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
 import FollowListPage from '@/features/follow/pages/FollowListPage';
 import { NewBadgeToast, BadgeGalleryPage } from '@/features/badges';
+import CommunityPage from '@/features/posts/pages/CommunityPage';
+import PostDetailPage from '@/features/posts/pages/PostDetailPage';
+import NewPostPage from '@/features/posts/pages/NewPostPage';
 import './App.css';
 
 /**
@@ -103,6 +106,10 @@ const AppContent: React.FC = () => {
           {/* 首页 */}
           <Route path="/" element={<HomeContent />} />
 
+          {/* 社区讨论 */}
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/posts/:id" element={<PostDetailPage />} />
+
           {/* 用户资料页 */}
           <Route path="/profile/:userId" element={<ProfilePage />} />
           <Route path="/profile/:userId/follows" element={<FollowListPage />} />
@@ -111,6 +118,14 @@ const AppContent: React.FC = () => {
           <Route path="/badges" element={<BadgeGalleryPage />} />
 
           {/* 需要登录的页面 */}
+          <Route
+            path="/posts/new"
+            element={
+              <ProtectedRoute>
+                <NewPostPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/profile/edit"
             element={
