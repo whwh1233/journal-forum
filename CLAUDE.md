@@ -88,7 +88,94 @@
 - 后端: `backend/routes/badgeRoutes.js`, `backend/controllers/badgeController.js`, `backend/services/badgeService.js`
 - 模型: `backend/models/Badge.js`, `backend/models/UserBadge.js`
 
-### 🗄️ 数据库管理 (New)
+### 📝 社区帖子系统 (New)
+**状态**: ✅ 已完成
+**功能**: 学术交流社区，支持发帖、评论、互动（点赞/收藏/关注）、内容举报
+**特性**:
+- **Markdown 编辑器**: 支持粗体、斜体、标题、链接、引用、代码块、列表、图片等
+- **视图模式**: 编辑/预览/分屏三种模式
+- **草稿自动保存**: 每 30 秒自动保存到 localStorage，支持恢复
+- **分类标签**: 6 大预设分类（投稿经验/学术讨论/求助问答/资讯分享/文献评述/其他）+ 自由标签
+- **嵌套评论**: 3 层嵌套回复
+- **多维排序**: 热门/最新/浏览量/点赞数/评论数
+- **无限滚动**: Intersection Observer 实现懒加载
+- **期刊关联**: 可选关联期刊，关联帖子显示徽章
+- **内容举报**: 用户可举报不当内容，管理员后台审核
+- **XSS 防护**: DOMPurify 清理用户输入的 Markdown
+- **外链保护**: 外部链接自动添加 target="_blank" 和 rel="noopener"
+
+**数据库设计**:
+- 独立表设计（方案 B）：不修改现有期刊评论系统
+- 7 个数据表：Post, PostLike, PostFavorite, PostFollow, PostComment, PostCommentLike, PostReport
+- 软删除模式：isDeleted 标记
+- 自引用外键：3 层嵌套评论结构
+
+**关键文件**:
+- **前端**:
+  - 页面: `src/features/posts/pages/` (CommunityPage, PostDetailPage, NewPostPage)
+  - 组件: `src/features/posts/components/` (PostCard, PostList, PostDetail, PostForm, PostComment*)
+  - 上下文: `src/contexts/PostContext.tsx`
+  - 类型: `src/features/posts/types/post.ts`
+  - 服务: `src/features/posts/services/postService.ts`
+- **后端**:
+  - 路由: `backend/routes/postRoutes.js` (17 个路由)
+  - 控制器: `backend/controllers/postController.js`, `backend/controllers/postCommentController.js`
+  - 模型: `backend/models/Post.js`, `backend/models/PostComment.js`, `backend/models/PostLike.js`, `backend/models/PostFavorite.js`, `backend/models/PostFollow.js`, `backend/models/PostReport.js`, `backend/models/PostCommentLike.js`
+  - 管理: `backend/controllers/adminController.js` (举报管理)
+- **测试**:
+  - 后端集成: `backend/__tests__/integration/post.test.js`, `postComment.test.js`
+  - 前端组件: `src/__tests__/components/PostCard.test.tsx`, `PostForm.test.tsx`, `PostDetail.test.tsx`
+  - E2E: `e2e/tests/community-posts.spec.ts`
+
+**API 路由**:
+```
+GET    /api/posts                    # 获取帖子列表（支持过滤/排序/分页）
+GET    /api/posts/:id                # 获取单个帖子详情
+POST   /api/posts                    # 创建新帖子（需登录）
+PUT    /api/posts/:id                # 更新帖子（仅作者）
+DELETE /api/posts/:id                # 删除帖子（作者/管理员）
+POST   /api/posts/:id/like           # 点赞/取消点赞
+POST   /api/posts/:id/favorite       # 收藏/取消收藏
+POST   /api/posts/:id/follow         # 关注/取消关注
+POST   /api/posts/:id/report         # 举报帖子
+POST   /api/posts/:id/view           # 增加浏览量
+GET    /api/posts/my/posts           # 我的帖子
+GET    /api/posts/my/favorites       # 我收藏的帖子
+GET    /api/posts/my/follows         # 我关注的帖子
+
+GET    /api/posts/:postId/comments           # 获取评论（3 层嵌套）
+POST   /api/posts/:postId/comments           # 发表评论
+DELETE /api/posts/comments/:commentId        # 删除评论
+POST   /api/posts/comments/:commentId/like   # 点赞/取消点赞评论
+
+GET    /api/admin/post-reports       # 获取举报列表（管理员）
+PUT    /api/admin/post-reports/:id   # 处理举报（管理员）
+POST   /api/admin/post-reports/batch # 批量处理举报（管理员）
+```
+
+**使用示例**:
+```typescript
+// 使用 PostContext
+import { usePost } from '@/contexts/PostContext';
+
+const { posts, loading, fetchPosts, createPost, toggleLike } = usePost();
+
+// 获取帖子列表
+await fetchPosts({ category: 'discussion', sortBy: 'hot', page: 1 });
+
+// 创建帖子
+const post = await createPost({
+  title: '学术讨论',
+  content: '# 标题\n内容',
+  category: 'discussion',
+  tags: ['tag1', 'tag2']
+});
+
+// 点赞
+await toggleLike(postId);
+```
+
+### 🗄️ 数据库管理
 **状态**: ✅ 已完成
 **功能**: 表列表/结构/数据浏览、行内编辑、删除、搜索排序分页、操作审计日志
 **权限**: 仅 superadmin 可访问
@@ -99,13 +186,12 @@
 - 模型: `backend/models/DatabaseAuditLog.js`
 
 ### 🧪 测试系统
-**状态**: 🚧 进行中
-**已完成**: E2E 测试、后端集成测试、部分前端组件测试
-**待补充**: 前端单元测试、后端单元测试
+**状态**: ✅ 已完成
+**已完成**: E2E 测试（社区帖子完整流程）、后端集成测试（帖子+评论）、前端组件测试（PostCard/PostForm/PostDetail）
 **关键文件**:
-- E2E: `e2e/tests/`
-- 后端测试: `backend/__tests__/`
-- 前端测试: `src/__tests__/`
+- E2E: `e2e/tests/` (含 `community-posts.spec.ts`)
+- 后端测试: `backend/__tests__/integration/post.test.js`, `postComment.test.js`
+- 前端测试: `src/__tests__/components/PostCard.test.tsx`, `PostForm.test.tsx`, `PostDetail.test.tsx`
 
 ## 启动项目
 
@@ -193,8 +279,9 @@ journal-forum/
 │   │   └── ToastContext.tsx      # Toast 通知上下文
 │   ├── features/                 # 功能模块
 │   │   ├── auth/                 # 认证
-│   │   ├── comments/             # 评论
+│   │   ├── comments/             # 期刊评论
 │   │   ├── journals/             # 期刊
+│   │   ├── posts/                # 社区帖子
 │   │   ├── profile/              # 个人资料
 │   │   ├── favorite/             # 收藏
 │   │   ├── follow/               # 关注
@@ -221,7 +308,8 @@ journal-forum/
 | 认证 | `/api/auth/*` |
 | 用户 | `/api/users/*` |
 | 期刊 | `/api/journals/*` |
-| 评论 | `/api/comments/*` |
+| 期刊评论 | `/api/comments/*` |
+| 社区帖子 | `/api/posts/*` |
 | 收藏 | `/api/favorites/*` |
 | 关注 | `/api/follows/*` |
 | 荣誉 | `/api/badges/*` |
@@ -288,9 +376,10 @@ npm run test:e2e:demo:all       # 运行所有模块
 
 - 用户注册/登录（JWT）
 - 期刊浏览、搜索、筛选
-- 嵌套评论系统（含评分）
-- 收藏期刊
-- 关注用户
+- 期刊评论系统（嵌套 3 层、多维评分）
+- **社区帖子系统**（Markdown 编辑、草稿自动保存、嵌套评论、点赞/收藏/关注、内容举报）
+- 收藏期刊与帖子
+- 关注用户与帖子
 - **积分与等级系统**（动态计算）
 - **荣誉徽章系统**（图鉴与后台管理）
 - 个人主页与仪表盘
