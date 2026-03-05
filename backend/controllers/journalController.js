@@ -75,6 +75,59 @@ const getJournals = async (req, res, next) => {
     }
 };
 
+// 搜索期刊（用于投稿追踪期刊选择器）
+const searchJournals = async (req, res, next) => {
+    try {
+        const { q, category, page = 1, limit = 10 } = req.query;
+
+        // 验证查询字符串长度
+        if (!q || q.trim().length < 2) {
+            return res.status(400).json({
+                success: false,
+                error: 'Search query must be at least 2 characters'
+            });
+        }
+
+        // 构建查询条件
+        const where = {
+            [Op.or]: [
+                { title: { [Op.like]: `%${q}%` } },
+                { issn: { [Op.like]: `%${q}%` } }
+            ]
+        };
+
+        // 可选分类过滤
+        if (category) {
+            where.category = category;
+        }
+
+        // 计算分页
+        const offset = (Number(page) - 1) * Number(limit);
+
+        // 执行查询（获取 limit + 1 条记录以判断是否有更多数据）
+        const journals = await Journal.findAll({
+            where,
+            limit: Number(limit) + 1,
+            offset: Number(offset),
+            order: [['title', 'ASC']]
+        });
+
+        // 判断是否有更多数据
+        const hasMore = journals.length > Number(limit);
+        const results = hasMore ? journals.slice(0, Number(limit)) : journals;
+
+        res.status(200).json({
+            success: true,
+            data: {
+                journals: results.map(j => j.toJSON()),
+                hasMore
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // 获取单个期刊详情
 const getJournalById = async (req, res, next) => {
     try {
@@ -249,4 +302,4 @@ const deleteJournal = async (req, res, next) => {
     }
 };
 
-module.exports = { getJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
+module.exports = { getJournals, searchJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };

@@ -62,6 +62,56 @@ const getJournals = async (req, res, next) => {
   }
 };
 
+// 搜索期刊（用于投稿追踪期刊选择器）
+const searchJournals = async (req, res, next) => {
+  try {
+    const { q, category, page = 1, limit = 10 } = req.query;
+    const db = getDB();
+
+    // 验证查询字符串长度
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query must be at least 2 characters'
+      });
+    }
+
+    // 获取所有期刊
+    let journalList = [...db.data.journals];
+
+    // 模糊搜索（title 和 ISSN）
+    const searchTerm = q.toLowerCase();
+    journalList = journalList.filter(journal =>
+      journal.title.toLowerCase().includes(searchTerm) ||
+      journal.issn.toLowerCase().includes(searchTerm)
+    );
+
+    // 可选分类过滤
+    if (category) {
+      journalList = journalList.filter(journal => journal.category === category);
+    }
+
+    // 按标题排序
+    journalList.sort((a, b) => a.title.localeCompare(b.title));
+
+    // 计算分页
+    const offset = (Number(page) - 1) * Number(limit);
+    const total = journalList.length;
+    const paginatedJournals = journalList.slice(offset, offset + Number(limit));
+    const hasMore = total > offset + Number(limit);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        journals: paginatedJournals,
+        hasMore
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // 获取单个期刊详情
 const getJournalById = async (req, res, next) => {
   try {
@@ -261,4 +311,4 @@ const deleteJournal = async (req, res, next) => {
   }
 };
 
-module.exports = { getJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
+module.exports = { getJournals, searchJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
