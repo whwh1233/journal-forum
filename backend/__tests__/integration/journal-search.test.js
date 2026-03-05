@@ -3,6 +3,39 @@ const express = require('express');
 const { TestDatabase } = require('../helpers/testDb');
 const { errorHandler } = require('../../middleware/error');
 
+// 创建测试专用的分类控制器（使用 databaseTest）
+const createCategoriesController = () => {
+  return async (req, res, next) => {
+    try {
+      const { getDB } = require('../../config/databaseTest');
+      const db = getDB();
+
+      // 统计各分类的期刊数量
+      const categoryMap = {};
+      db.data.journals.forEach(journal => {
+        const cat = journal.category;
+        if (cat) {
+          categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+        }
+      });
+
+      // 转换为数组并按数量降序排序
+      const categories = Object.entries(categoryMap)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          categories
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
 // 创建测试专用的搜索控制器（使用 databaseTest）
 const createSearchController = () => {
   return async (req, res, next) => {
@@ -59,8 +92,9 @@ const createSearchController = () => {
 const createTestApp = () => {
   const app = express();
   app.use(express.json());
-  // 注册搜索路由
+  // 注册搜索和分类路由
   app.get('/api/journals/search', createSearchController());
+  app.get('/api/journals/categories', createCategoriesController());
   app.use(errorHandler);
   return app;
 };
@@ -176,6 +210,40 @@ describe('Journal Search API', () => {
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data.journals)).toBe(true);
       expect(response.body.data.journals[0].issn).toBe('2041-1723');
+    });
+  });
+
+  describe('GET /api/journals/categories', () => {
+    it('should return categories list', async () => {
+      const response = await request(app)
+        .get('/api/journals/categories')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data).toHaveProperty('categories');
+      expect(Array.isArray(response.body.data.categories)).toBe(true);
+      expect(response.body.data.categories.length).toBeGreaterThan(0);
+
+      // 验证每个分类都有 name 和 count 字段
+      response.body.data.categories.forEach(category => {
+        expect(category).toHaveProperty('name');
+        expect(category).toHaveProperty('count');
+        expect(typeof category.count).toBe('number');
+      });
+    });
+
+    it('should return categories sorted by count descending', async () => {
+      const response = await request(app)
+        .get('/api/journals/categories')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      const categories = response.body.data.categories;
+
+      // 验证按数量降序排序
+      for (let i = 0; i < categories.length - 1; i++) {
+        expect(categories[i].count).toBeGreaterThanOrEqual(categories[i + 1].count);
+      }
     });
   });
 });

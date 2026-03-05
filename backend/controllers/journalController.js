@@ -75,6 +75,36 @@ const getJournals = async (req, res, next) => {
     }
 };
 
+// 获取期刊分类列表（用于投稿追踪期刊选择器）
+const getCategories = async (req, res, next) => {
+    try {
+        const { sequelize } = require('../models');
+
+        // 使用 GROUP BY 统计各分类的期刊数量
+        const categories = await Journal.findAll({
+            attributes: [
+                'category',
+                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+            ],
+            group: ['category'],
+            order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
+            raw: true
+        });
+
+        res.status(200).json({
+            success: true,
+            data: {
+                categories: categories.map(c => ({
+                    name: c.category,
+                    count: parseInt(c.count)
+                }))
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // 搜索期刊（用于投稿追踪期刊选择器）
 const searchJournals = async (req, res, next) => {
     try {
@@ -302,4 +332,4 @@ const deleteJournal = async (req, res, next) => {
     }
 };
 
-module.exports = { getJournals, searchJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
+module.exports = { getJournals, searchJournals, getCategories, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };

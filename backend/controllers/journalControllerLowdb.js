@@ -62,6 +62,36 @@ const getJournals = async (req, res, next) => {
   }
 };
 
+// 获取期刊分类列表（用于投稿追踪期刊选择器）
+const getCategories = async (req, res, next) => {
+  try {
+    const db = getDB();
+
+    // 统计各分类的期刊数量
+    const categoryMap = {};
+    db.data.journals.forEach(journal => {
+      const cat = journal.category;
+      if (cat) {
+        categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+      }
+    });
+
+    // 转换为数组并按数量降序排序
+    const categories = Object.entries(categoryMap)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        categories
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // 搜索期刊（用于投稿追踪期刊选择器）
 const searchJournals = async (req, res, next) => {
   try {
@@ -311,4 +341,4 @@ const deleteJournal = async (req, res, next) => {
   }
 };
 
-module.exports = { getJournals, searchJournals, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
+module.exports = { getJournals, searchJournals, getCategories, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
