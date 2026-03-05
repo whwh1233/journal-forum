@@ -1,0 +1,230 @@
+/* Journal Picker Component Styles */
+.journal-picker {
+  position: relative;
+  width: 100%;
+}
+
+/* 分类标签 */
+.category-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-tabs button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.category-tabs button.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.category-tabs button:hover:not(.active) {
+  background: var(--color-bg-secondary);
+}
+
+/* 搜索框 */
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.selected-journal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.selected-journal .journal-name {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
+.selected-journal .clear-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selected-journal .clear-btn:hover {
+  color: var(--color-danger);
+}
+
+/* 下拉列表 */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 450px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 维度选择器 */
+.dimension-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.selector-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.dimension-btn {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.dimension-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.dimension-btn:hover:not(.active) {
+  background: var(--color-bg-secondary);
+}
+
+/* 结果列表 */
+.results-list {
+  overflow-y: auto;
+  max-height: 350px;
+}
+
+.journal-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.journal-item:hover {
+  background: var(--color-bg-secondary);
+}
+
+.journal-item:last-child {
+  border-bottom: none;
+}
+
+.journal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.journal-title {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.journal-rating {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.journal-meta {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.75rem;
+}
+
+.separator {
+  margin: 0 0.5rem;
+}
+
+.journal-dimensions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dimension-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.dimension-label {
+  width: 80px;
+  color: var(--color-text-muted);
+}
+
+.dimension-dots {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.dot {
+  font-size: 0.875rem;
+  color: var(--color-text-lightest);
+}
+
+.dot.filled {
+  color: var(--color-primary);
+}
+
+/* 消息 */
+.loading-message,
+.empty-message,
+.error-message {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.error-message {
+  color: var(--color-danger);
+}
