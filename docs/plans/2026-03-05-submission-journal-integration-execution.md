@@ -643,7 +643,7 @@ Task 15, 16 (文档与验证)
 - ⚠️ 遇到问题
 - 🚫 已跳过
 
-**当前进度**: 8/16 (50%)
+**当前进度**: 9/16 (56.25%)
 
 ---
 
@@ -828,7 +828,7 @@ onSubmit({
 - ✅ Dev server 正常运行 (http://localhost:3000)
 - ⏳ 待功能测试：打开新增稿件弹窗，验证 JournalPicker 交互
 
-**当前进度**: 8/16 (50%)
+**当前进度**: 9/16 (56.25%)
 
 ---
 
@@ -866,5 +866,98 @@ onSubmit({
 - ⏳ 待功能测试：访问 `/submissions?journalId=1` 验证预填充
 
 **下一步**: Task 9 - 集成 JournalInfoCard 显示关联期刊信息
+
+---
+
+### Task 9: SubmissionTracker - 集成 JournalInfoCard ✅
+**开始时间**: 2026-03-06
+**完成时间**: 2026-03-06
+**状态**: 已完成
+**实际工作量**: 约 25 分钟
+
+**执行步骤**:
+
+1. ✅ 导入必要的组件和服务
+   - JournalInfoCard 组件
+   - toggleFavorite from favoriteService
+2. ✅ 添加 handleFavoriteToggle 函数（乐观 UI 更新）
+   - 查找当前收藏状态
+   - 乐观更新本地状态
+   - 调用 API
+   - 失败时回滚
+3. ✅ 修改组件 Props 接口传递 onFavoriteToggle
+   - ManuscriptCardProps 添加 onFavoriteToggle
+   - SubmissionItemProps 添加 onFavoriteToggle
+4. ✅ 修改 SubmissionItem 组件
+   - 有 journal 对象时显示 JournalInfoCard
+   - 只有 journalName 时显示 "关联到期刊库" 按钮
+5. ✅ 添加 CSS 样式
+   - .submission-journal-card 容器样式
+   - .unlinked-journal 未关联期刊样式
+   - .btn-link-journal 关联按钮样式
+
+**关键代码**:
+```typescript
+// 乐观 UI 收藏切换
+const handleFavoriteToggle = async (journalId: number) => {
+    let currentFavorited = false;
+    manuscripts.forEach(m => {
+        m.submissions?.forEach(s => {
+            if (s.journal?.id === journalId) {
+                currentFavorited = s.journal.isFavorited || false;
+            }
+        });
+    });
+
+    setManuscripts(prev => prev.map(m => ({
+        ...m,
+        submissions: m.submissions?.map(s =>
+            s.journal?.id === journalId
+                ? { ...s, journal: { ...s.journal, isFavorited: !currentFavorited } }
+                : s
+        )
+    })));
+
+    try {
+        await toggleFavorite(journalId);
+    } catch (err) {
+        // 回滚
+        setManuscripts(prev => prev.map(m => ({
+            ...m,
+            submissions: m.submissions?.map(s =>
+                s.journal?.id === journalId
+                    ? { ...s, journal: { ...s.journal, isFavorited: currentFavorited } }
+                    : s
+            )
+        })));
+    }
+};
+
+// SubmissionItem 条件渲染
+{submission.journal ? (
+    <div className="submission-journal-card">
+        <JournalInfoCard
+            journal={submission.journal}
+            onFavoriteToggle={() => onFavoriteToggle(submission.journal!.id)}
+        />
+    </div>
+) : submission.journalName ? (
+    <div className="unlinked-journal">
+        <span>📌 期刊：{submission.journalName}</span>
+        <button className="btn-link-journal">🔗 关联到期刊库</button>
+    </div>
+) : null}
+```
+
+**修改文件**:
+- `src/features/submissions/SubmissionTracker.tsx` (集成 JournalInfoCard 和收藏功能)
+- `src/features/submissions/SubmissionTracker.css` (新增样式)
+
+**验证结果**:
+- ✅ 编译通过，无 TypeScript 错误
+- ✅ HMR 热更新成功
+- ⏳ 待功能测试：查看有关联期刊的投稿，验证 JournalInfoCard 显示和收藏功能
+
+**下一步**: Task 10 - JournalDetailPage 添加"记录投稿"按钮
 
 ---

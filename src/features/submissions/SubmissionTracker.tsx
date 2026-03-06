@@ -4,8 +4,10 @@ import { getUserManuscripts, createManuscript, deleteManuscript, addSubmission, 
 import type { Manuscript, SubmissionRecord, SubmissionStatusHistory } from '../../types';
 import { SUBMISSION_STATUS_OPTIONS, getStatusLabel, getStatusColor } from '../../types';
 import JournalPicker from '../../components/common/JournalPicker';
+import JournalInfoCard from '../../components/common/JournalInfoCard';
 import type { JournalSearchResult } from '../../services/journalSearchService';
 import { getJournalById } from '../../services/journalSearchService';
+import { toggleFavorite } from '../../services/favoriteService';
 import './SubmissionTracker.css';
 
 // ==================== 主组件 ====================
@@ -119,6 +121,45 @@ const SubmissionTracker: React.FC = () => {
         }
     };
 
+    // 收藏切换（乐观 UI 更新）
+    const handleFavoriteToggle = async (journalId: number) => {
+        // 1. 找到当前收藏状态
+        let currentFavorited = false;
+        manuscripts.forEach(m => {
+            m.submissions?.forEach(s => {
+                if (s.journal?.id === journalId) {
+                    currentFavorited = s.journal.isFavorited || false;
+                }
+            });
+        });
+
+        // 2. 乐观更新 UI
+        setManuscripts(prev => prev.map(m => ({
+            ...m,
+            submissions: m.submissions?.map(s =>
+                s.journal?.id === journalId
+                    ? { ...s, journal: { ...s.journal, isFavorited: !currentFavorited } }
+                    : s
+            )
+        })));
+
+        try {
+            // 3. 调用 API
+            await toggleFavorite(journalId);
+        } catch (err) {
+            // 4. 失败回滚
+            console.error('Error toggling favorite:', err);
+            setManuscripts(prev => prev.map(m => ({
+                ...m,
+                submissions: m.submissions?.map(s =>
+                    s.journal?.id === journalId
+                        ? { ...s, journal: { ...s.journal, isFavorited: currentFavorited } }
+                        : s
+                )
+            })));
+        }
+    };
+
     if (loading) {
         return (
             <div className="submission-section">
@@ -155,6 +196,7 @@ const SubmissionTracker: React.FC = () => {
                         onAddSubmission={() => setShowAddSubmissionModal(m.id)}
                         onDeleteSubmission={handleDeleteSubmission}
                         onAddStatus={(submissionId) => setShowAddStatusModal(submissionId)}
+                        onFavoriteToggle={handleFavoriteToggle}
                     />
                 ))
             )}
@@ -200,10 +242,11 @@ interface ManuscriptCardProps {
     onAddSubmission: () => void;
     onDeleteSubmission: (id: number) => void;
     onAddStatus: (submissionId: number) => void;
+    onFavoriteToggle: (journalId: number) => void;
 }
 
 const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
-    manuscript, expanded, onToggle, onDelete, onAddSubmission, onDeleteSubmission, onAddStatus
+    manuscript, expanded, onToggle, onDelete, onAddSubmission, onDeleteSubmission, onAddStatus, onFavoriteToggle
 }) => {
     const submissionCount = manuscript.submissions?.length || 0;
     const statusColor = getStatusColor(manuscript.currentStatus);
@@ -243,6 +286,7 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
                                 submission={sub}
                                 onDelete={() => onDeleteSubmission(sub.id)}
                                 onAddStatus={() => onAddStatus(sub.id)}
+                                onFavoriteToggle={onFavoriteToggle}
                             />
                         ))
                     ) : (
@@ -261,9 +305,10 @@ interface SubmissionItemProps {
     submission: SubmissionRecord;
     onDelete: () => void;
     onAddStatus: () => void;
+    onFavoriteToggle: (journalId: number) => void;
 }
 
-const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, onDelete, onAddStatus }) => {
+const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, onDelete, onAddStatus, onFavoriteToggle }) => {
     const journalDisplayName = submission.journal?.title || submission.journalName || '未知期刊';
     const statusColor = getStatusColor(submission.status);
 
@@ -280,6 +325,21 @@ const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, onDelete, o
                     <button title="删除此投稿" onClick={onDelete}>🗑️</button>
                 </div>
             </div>
+
+            {/* 期刊信息卡片或关联按钮 */}
+            {submission.journal ? (
+                <div className="submission-journal-card">
+                    <JournalInfoCard
+                        journal={submission.journal}
+                        onFavoriteToggle={() => onFavoriteToggle(submission.journal!.id)}
+                    />
+                </div>
+            ) : submission.journalName ? (
+                <div className="unlinked-journal">
+                    <span>📌 期刊：{submission.journalName}</span>
+                    <button className="btn-link-journal">🔗 关联到期刊库</button>
+                </div>
+            ) : null}
 
             {/* 时间轴 */}
             <div className="submission-timeline">

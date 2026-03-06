@@ -1,0 +1,645 @@
+/* ==================== 投稿记录模块 ==================== */
+
+.submission-section {
+    margin-top: var(--space-6);
+}
+
+.submission-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-5);
+}
+
+.submission-section-header h2 {
+    font-size: 1.3rem;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.submission-section-header h2 .section-icon {
+    font-size: 1.4rem;
+}
+
+.btn-add-manuscript {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-btn-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-add-manuscript:hover {
+    background: var(--color-btn-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ==================== 稿件卡片 ==================== */
+
+.manuscript-list-empty {
+    text-align: center;
+    padding: var(--space-8);
+    color: var(--color-text-muted);
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.manuscript-list-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-3);
+    opacity: 0.5;
+}
+
+.manuscript-list-empty p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.manuscript-card {
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--space-4);
+    overflow: hidden;
+    transition: all var(--duration-fast) var(--ease-out);
+    border: 1px solid var(--color-border);
+}
+
+.manuscript-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.manuscript-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--duration-fast) var(--ease-out);
+}
+
+.manuscript-card-header:hover {
+    background: var(--color-surface);
+}
+
+.manuscript-card-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex: 1;
+    min-width: 0;
+}
+
+.manuscript-expand-icon {
+    font-size: 1.2rem;
+    transition: transform var(--duration-normal) var(--ease-out);
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+}
+
+.manuscript-expand-icon.expanded {
+    transform: rotate(90deg);
+}
+
+.manuscript-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.manuscript-card-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-shrink: 0;
+}
+
+.manuscript-status-badge {
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+}
+
+.manuscript-submission-count {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.manuscript-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.manuscript-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-1);
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-fast);
+    font-size: 1rem;
+}
+
+.manuscript-actions button:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.manuscript-actions .btn-delete:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ==================== 展开的投稿列表 ==================== */
+
+.manuscript-body {
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface);
+    animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 2000px;
+    }
+}
+
+.manuscript-body-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: var(--space-3);
+}
+
+.btn-add-submission {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    color: var(--color-link);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.btn-add-submission:hover {
+    border-color: var(--color-link);
+    background: rgba(var(--primary-rgb, 79, 70, 229), 0.05);
+}
+
+/* ==================== 单次投稿记录 ==================== */
+
+.submission-item {
+    background: var(--color-background);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    border: 1px solid var(--color-border);
+    transition: all var(--duration-fast);
+}
+
+.submission-item:last-child {
+    margin-bottom: 0;
+}
+
+.submission-item:hover {
+    border-color: var(--color-link);
+    box-shadow: var(--shadow-sm);
+}
+
+.submission-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-3);
+}
+
+.submission-journal-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.submission-journal-name {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.submission-date {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.submission-item-actions {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.submission-item-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-fast);
+    font-size: 0.85rem;
+}
+
+.submission-item-actions button:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* ==================== 时间轴 ==================== */
+
+.submission-timeline {
+    position: relative;
+    padding-left: var(--space-7);
+}
+
+.submission-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-border) 0%, var(--color-link) 50%, var(--color-border) 100%);
+    border-radius: 1px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: var(--space-4);
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: calc(-1 * var(--space-7) + 4px);
+    top: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid currentColor;
+    background: var(--color-background);
+    z-index: 1;
+}
+
+.timeline-dot.latest {
+    width: 16px;
+    height: 16px;
+    left: calc(-1 * var(--space-7) + 3px);
+    top: 2px;
+    border-width: 4px;
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb, 79, 70, 229), 0.15);
+}
+
+.timeline-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.timeline-info {
+    flex: 1;
+}
+
+.timeline-status {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+}
+
+.timeline-date {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.timeline-note {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-surface);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-border);
+    line-height: 1.5;
+}
+
+.timeline-add-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    margin-left: calc(-1 * var(--space-2));
+}
+
+.timeline-add-btn:hover {
+    border-color: var(--color-link);
+    color: var(--color-link);
+    background: rgba(var(--primary-rgb, 79, 70, 229), 0.05);
+}
+
+/* ==================== 弹窗通用 ==================== */
+
+.submission-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.submission-modal {
+    background: var(--color-background);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
+    width: 90%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: modalSlideUp 0.25s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.submission-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.submission-modal-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--color-text);
+}
+
+.submission-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: var(--space-1);
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-fast);
+}
+
+.submission-modal-close:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.submission-modal-body {
+    padding: var(--space-5);
+}
+
+.submission-form-group {
+    margin-bottom: var(--space-4);
+}
+
+.submission-form-group label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+.submission-form-group input,
+.submission-form-group select,
+.submission-form-group textarea {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-background);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    transition: border-color var(--duration-fast);
+    box-sizing: border-box;
+}
+
+.submission-form-group input:focus,
+.submission-form-group select:focus,
+.submission-form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-link);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.12);
+}
+
+.submission-form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+.submission-form-group .status-input-row {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.submission-form-group .status-input-row select {
+    flex: 1;
+}
+
+.submission-form-group .status-input-row input {
+    flex: 1;
+}
+
+.submission-form-hint {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-top: var(--space-1);
+}
+
+.submission-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-top: 1px solid var(--color-border);
+}
+
+.btn-modal-cancel {
+    padding: var(--space-2) var(--space-5);
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.btn-modal-cancel:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.btn-modal-submit {
+    padding: var(--space-2) var(--space-5);
+    background: var(--color-btn-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.btn-modal-submit:hover {
+    background: var(--color-btn-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-modal-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== 响应式 ==================== */
+
+@media (max-width: 768px) {
+    .submission-section-header {
+        flex-direction: column;
+        gap: var(--space-3);
+        align-items: flex-start;
+    }
+
+    .manuscript-card-header {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .manuscript-card-right {
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .manuscript-body {
+        padding: var(--space-3) var(--space-4);
+    }
+
+    .submission-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+}
+/* ==================== 期刊信息卡片集成 ==================== */
+
+.submission-journal-card {
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.unlinked-journal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    margin: var(--space-3) 0;
+    background: var(--color-bg-secondary);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.unlinked-journal span {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.btn-link-journal {
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-link-journal:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
