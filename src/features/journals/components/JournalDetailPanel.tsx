@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Journal, RatingSummary } from '@/types';
 import { categoryMap } from '@/services/journalService';
 import { getRatingSummary } from '@/services/commentService';
 import StarRating from '@/components/common/StarRating';
 import DimensionRatingDisplay from '@/features/comments/components/DimensionRatingDisplay';
 import CommentList from '@/features/comments/components/CommentList';
-import { X } from 'lucide-react';
+import { X, FileEdit } from 'lucide-react';
 import './JournalDetailPanel.css';
 
 interface JournalDetailPanelProps {
@@ -15,7 +16,15 @@ interface JournalDetailPanelProps {
 }
 
 const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
+
+  const handleRecordSubmission = () => {
+    if (journal) {
+      onClose(); // 关闭面板
+      navigate(`/submissions?journalId=${journal.id}`); // 跳转到投稿追踪页并传递期刊 ID
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -66,13 +75,24 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
       >
         <div className="journal-panel-header">
           <h2 className="journal-panel-title">{journal?.title}</h2>
-          <button
-            className="journal-panel-close"
-            onClick={onClose}
-            aria-label="关闭"
-          >
-            <X size={24} aria-hidden="true" />
-          </button>
+          <div className="journal-panel-actions">
+            <button
+              className="btn-record-submission"
+              onClick={handleRecordSubmission}
+              aria-label="记录投稿"
+              title="记录到投稿追踪"
+            >
+              <FileEdit size={18} aria-hidden="true" />
+              <span>记录投稿</span>
+            </button>
+            <button
+              className="journal-panel-close"
+              onClick={onClose}
+              aria-label="关闭"
+            >
+              <X size={24} aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
         {journal && (

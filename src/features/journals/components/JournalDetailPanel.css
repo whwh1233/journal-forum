@@ -146,3 +146,36 @@
     width: 100vw;
   }
 }
+
+/* ==================== 记录投稿按钮 ==================== */
+
+.journal-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.btn-record-submission {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn-record-submission:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-record-submission:active {
+  transform: translateY(0);
+}

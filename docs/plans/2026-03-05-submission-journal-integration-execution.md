@@ -643,7 +643,7 @@ Task 15, 16 (文档与验证)
 - ⚠️ 遇到问题
 - 🚫 已跳过
 
-**当前进度**: 9/16 (56.25%)
+**当前进度**: 10/16 (62.5%)
 
 ---
 
@@ -828,7 +828,7 @@ onSubmit({
 - ✅ Dev server 正常运行 (http://localhost:3000)
 - ⏳ 待功能测试：打开新增稿件弹窗，验证 JournalPicker 交互
 
-**当前进度**: 9/16 (56.25%)
+**当前进度**: 10/16 (62.5%)
 
 ---
 
@@ -959,5 +959,72 @@ const handleFavoriteToggle = async (journalId: number) => {
 - ⏳ 待功能测试：查看有关联期刊的投稿，验证 JournalInfoCard 显示和收藏功能
 
 **下一步**: Task 10 - JournalDetailPage 添加"记录投稿"按钮
+
+---
+
+### Task 10: JournalDetailPage - 添加记录投稿按钮 ✅
+**开始时间**: 2026-03-06
+**完成时间**: 2026-03-06
+**状态**: 已完成
+**实际工作量**: 约 15 分钟
+
+**执行步骤**:
+
+1. ✅ 导入必要的依赖
+   - useNavigate from react-router-dom
+   - FileEdit icon from lucide-react
+2. ✅ 添加 handleRecordSubmission 处理函数
+   - 关闭详情面板
+   - 导航到 /submissions?journalId={journal.id}
+3. ✅ 修改 header 布局
+   - 创建 journal-panel-actions 容器
+   - 添加"记录投稿"按钮（带 FileEdit 图标）
+   - 保留原有关闭按钮
+4. ✅ 添加 CSS 样式
+   - .journal-panel-actions 横向布局
+   - .btn-record-submission 主色按钮样式
+   - hover 和 active 交互效果
+
+**关键代码**:
+```typescript
+// 导航处理
+const navigate = useNavigate();
+
+const handleRecordSubmission = () => {
+  if (journal) {
+    onClose(); // 关闭面板
+    navigate(`/submissions?journalId=${journal.id}`); // 跳转并传参
+  }
+};
+
+// 按钮UI
+<div className="journal-panel-actions">
+  <button
+    className="btn-record-submission"
+    onClick={handleRecordSubmission}
+    title="记录到投稿追踪"
+  >
+    <FileEdit size={18} />
+    <span>记录投稿</span>
+  </button>
+  <button className="journal-panel-close" onClick={onClose}>
+    <X size={24} />
+  </button>
+</div>
+```
+
+**修改文件**:
+- `src/features/journals/components/JournalDetailPanel.tsx` (添加按钮和导航逻辑)
+- `src/features/journals/components/JournalDetailPanel.css` (按钮样式)
+
+**验证结果**:
+- ✅ 编译通过，无 TypeScript 错误
+- ✅ HMR 热更新成功
+- ⏳ 待功能测试：点击"记录投稿"按钮，验证跳转到投稿追踪页并预填充期刊
+
+**数据流闭环完成**: 
+期刊库 → 点击"记录投稿" → 投稿追踪(URL 参数) → 自动打开弹窗 → 预填充期刊 → 创建稿件 → 显示 JournalInfoCard
+
+**下一步**: Phase 4 - 测试验证（后端集成测试、前端组件测试、E2E 测试）
 
 ---
