@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { getUserManuscripts, createManuscript, deleteManuscript, addSubmission, deleteSubmission, addStatusHistory } from '../../services/submissionService';
 import type { Manuscript, SubmissionRecord, SubmissionStatusHistory } from '../../types';
 import { SUBMISSION_STATUS_OPTIONS, getStatusLabel, getStatusColor } from '../../types';
 import JournalPicker from '../../components/common/JournalPicker';
 import type { JournalSearchResult } from '../../services/journalSearchService';
+import { getJournalById } from '../../services/journalSearchService';
 import './SubmissionTracker.css';
 
 // ==================== 主组件 ====================
@@ -11,11 +13,13 @@ const SubmissionTracker: React.FC = () => {
     const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+    const [searchParams, setSearchParams] = useSearchParams();
 
     // 弹窗状态
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showAddSubmissionModal, setShowAddSubmissionModal] = useState<number | null>(null); // manuscriptId
     const [showAddStatusModal, setShowAddStatusModal] = useState<number | null>(null); // submissionId
+    const [prefilledJournal, setPrefilledJournal] = useState<JournalSearchResult | null>(null);
 
     const loadData = useCallback(async () => {
         try {
@@ -31,6 +35,23 @@ const SubmissionTracker: React.FC = () => {
     useEffect(() => {
         loadData();
     }, [loadData]);
+
+    // 处理 URL 参数（从期刊详情页跳转过来）
+    useEffect(() => {
+        const journalIdParam = searchParams.get('journalId');
+        if (journalIdParam) {
+            getJournalById(journalIdParam)
+                .then(journal => {
+                    setPrefilledJournal(journal);
+                    setShowCreateModal(true);
+                })
+                .catch(err => {
+                    console.error('Error loading journal:', err);
+                    // 清除无效的 URL 参数
+                    setSearchParams({}, { replace: true });
+                });
+        }
+    }, [searchParams, setSearchParams]);
 
     const toggleExpand = (id: number) => {
         setExpandedIds(prev => {
@@ -68,6 +89,8 @@ const SubmissionTracker: React.FC = () => {
         try {
             const result = await createManuscript(data);
             setShowCreateModal(false);
+            setPrefilledJournal(null); // 清除预填充数据
+            setSearchParams({}, { replace: true }); // 清除 URL 参数
             await loadData();
             // 自动展开新创建的稿件
             setExpandedIds(prev => new Set(prev).add(result.id));
@@ -139,8 +162,13 @@ const SubmissionTracker: React.FC = () => {
             {/* 弹窗 */}
             {showCreateModal && (
                 <CreateManuscriptModal
-                    onClose={() => setShowCreateModal(false)}
+                    onClose={() => {
+                        setShowCreateModal(false);
+                        setPrefilledJournal(null);
+                        setSearchParams({}, { replace: true });
+                    }}
                     onSubmit={handleCreateManuscript}
+                    prefilledJournal={prefilledJournal}
                 />
             )}
 

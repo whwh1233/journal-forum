@@ -86,3 +86,25 @@ export const getCategories = async (): Promise<CategoriesResponse> => {
   const response = await axios.get('/api/journals/categories');
   return response.data.data;
 };
+
+/**
+ * 根据ID获取期刊详情（转换为 JournalSearchResult 格式）
+ * @param id 期刊ID
+ * @returns 期刊搜索结果
+ */
+export const getJournalById = async (id: string | number): Promise<JournalSearchResult> => {
+  const response = await axios.get(`/api/journals/${id}`);
+  const journal = response.data.data.journal;
+
+  // 转换为 JournalSearchResult 格式
+  return {
+    id: journal.id,
+    title: journal.title,
+    issn: journal.issn,
+    category: journal.category,
+    rating: journal.rating,
+    reviews: Array.isArray(journal.reviews) ? journal.reviews.length : 0,
+    description: journal.description,
+    dimensionAverages: journal.dimensionAverages || {}
+  };
+};

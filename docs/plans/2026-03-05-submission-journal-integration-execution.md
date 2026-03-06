@@ -643,7 +643,7 @@ Task 15, 16 (文档与验证)
 - ⚠️ 遇到问题
 - 🚫 已跳过
 
-**当前进度**: 7/16 (43.75%)
+**当前进度**: 8/16 (50%)
 
 ---
 
@@ -828,7 +828,43 @@ onSubmit({
 - ✅ Dev server 正常运行 (http://localhost:3000)
 - ⏳ 待功能测试：打开新增稿件弹窗，验证 JournalPicker 交互
 
-**当前进度**: 7/16 (43.75%)
+**当前进度**: 8/16 (50%)
 
 ---
 
+
+### Task 8: SubmissionTracker - URL 参数处理 ✅
+**开始时间**: 2026-03-06
+**完成时间**: 2026-03-06
+**状态**: 已完成
+**实际工作量**: 约 20 分钟
+
+**执行步骤**:
+
+1. ✅ 扩展 journalSearchService.ts 添加 getJournalById 函数
+   - 调用 `/api/journals/:id` 获取期刊详情
+   - 转换 Journal 类型为 JournalSearchResult 格式
+   - 处理 reviews 数组转换为数量
+2. ✅ 修改 SubmissionTracker.tsx 添加 URL 参数处理
+   - 导入 useSearchParams 和 getJournalById
+   - 添加 prefilledJournal 状态
+   - 添加 useEffect 监听 journalId URL 参数
+   - 参数有效时自动打开弹窗并预填充期刊
+   - 参数无效时清除 URL 参数
+3. ✅ 修改弹窗关闭和提交逻辑
+   - onClose 时清除 URL 参数和 prefilledJournal
+   - onSubmit 成功后清除 URL 参数和 prefilledJournal
+   - 传递 prefilledJournal 给 CreateManuscriptModal
+
+**修改文件**:
+- `src/services/journalSearchService.ts` (新增 getJournalById 函数)
+- `src/features/submissions/SubmissionTracker.tsx` (URL 参数处理逻辑)
+
+**验证结果**:
+- ✅ 编译通过，无 TypeScript 错误
+- ✅ HMR 热更新成功
+- ⏳ 待功能测试：访问 `/submissions?journalId=1` 验证预填充
+
+**下一步**: Task 9 - 集成 JournalInfoCard 显示关联期刊信息
+
+---
