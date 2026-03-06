@@ -643,7 +643,7 @@ Task 15, 16 (文档与验证)
 - ⚠️ 遇到问题
 - 🚫 已跳过
 
-**当前进度**: 10/16 (62.5%)
+**当前进度**: 11/16 (68.75%)
 
 ---
 
@@ -828,7 +828,7 @@ onSubmit({
 - ✅ Dev server 正常运行 (http://localhost:3000)
 - ⏳ 待功能测试：打开新增稿件弹窗，验证 JournalPicker 交互
 
-**当前进度**: 10/16 (62.5%)
+**当前进度**: 11/16 (68.75%)
 
 ---
 
@@ -1026,5 +1026,63 @@ const handleRecordSubmission = () => {
 期刊库 → 点击"记录投稿" → 投稿追踪(URL 参数) → 自动打开弹窗 → 预填充期刊 → 创建稿件 → 显示 JournalInfoCard
 
 **下一步**: Phase 4 - 测试验证（后端集成测试、前端组件测试、E2E 测试）
+
+---
+
+### Task 11: 后端集成测试验证 ✅
+**开始时间**: 2026-03-06
+**完成时间**: 2026-03-06
+**状态**: 已完成
+**实际工作量**: 约 5 分钟
+
+**执行步骤**:
+
+1. ✅ 运行期刊搜索集成测试
+   - `npm test -- journal-search.test.js`
+   - 7 个测试用例全部通过
+
+**测试结果**:
+```
+PASS __tests__/integration/journal-search.test.js
+  Journal Search API
+    GET /api/journals/search
+      ✓ should search journals by title (19 ms)
+      ✓ should return 400 if query is too short (3 ms)
+      ✓ should filter by category (2 ms)
+      ✓ should support pagination (3 ms)
+      ✓ should search by ISSN (2 ms)
+    GET /api/journals/categories
+      ✓ should return categories list (5 ms)
+      ✓ should return categories sorted by count descending (3 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       7 passed, 7 total
+Time:        0.39 s
+```
+
+**测试覆盖**:
+- ✅ 标题搜索功能
+- ✅ ISSN 搜索功能
+- ✅ 查询长度验证（最少 2 字符）
+- ✅ 分类过滤功能
+- ✅ 分页功能
+- ✅ 分类列表接口
+- ✅ 分类按数量降序排序
+
+**技术说明**:
+- 测试使用独立的 databaseTest 配置（避免污染生产数据）
+- 控制器在测试中动态创建（确保隔离性）
+- 使用 supertest 进行 HTTP 接口测试
+
+**已知问题**:
+- 项目存在预先存在的测试基础设施问题（其他测试文件的数据库连接管理）
+- 不影响本次新增的期刊搜索测试
+- 超出本任务范围
+
+**验证结果**:
+- ✅ 所有新增后端集成测试通过
+- ✅ API 功能验证完成
+
+**下一步**: Task 12 - 前端组件测试 (JournalPicker)
 
 ---
