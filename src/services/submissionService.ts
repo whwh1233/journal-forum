@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:3001/api/submissions';
+const API_BASE = import.meta.env.VITE_API_URL + '/api/submissions';
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('authToken');

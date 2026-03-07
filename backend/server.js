@@ -42,12 +42,15 @@ const corsOptions = {
         callback(new Error('Not allowed by CORS'));
       }
     } else {
-      // 生产环境：只允许指定域名
-      const allowedOrigins = ['https://your-frontend-domain.com'];
+      // 生产环境：极度收缩白名单
+      const allowedOrigins = [
+        'http://8.130.26.87',
+        'http://8.130.26.87:3000' // 为防止带端口访问，可一并添加
+      ];
       if (allowedOrigins.includes(origin) || !origin) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error('生产环境跨域请求被 CORS 策略阻止'));
       }
     }
   },

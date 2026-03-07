@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Comment, DimensionRatings, RatingSummary } from '../types';
 
-const API_URL = 'http://localhost:3001/api/comments';
+const API_URL = import.meta.env.VITE_API_URL + '/api/comments';
 
 // 获取期刊的所有评论
 export const getCommentsByJournalId = async (

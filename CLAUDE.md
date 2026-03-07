@@ -384,7 +384,18 @@ npm run test:e2e:demo:all       # 运行所有模块
 - **`backend/.env`**: 后端生产环境变量（JWT_SECRET, PORT 等）
 - **`backend/.env.test`**: 后端测试环境变量（已加入 `.gitignore`，不要提交）
 - **`.env.local`**: 前端环境变量（位于项目根目录）
+- **`.env.production`**: 前端生产环境变量（部署用）
 - **`.env.example`**: 环境变量示例模板
+
+## 开发工作流与端口规范
+
+- **前端开发端口**: 默认 **3000**
+  - **启动方式**: 在根目录执行 `npm run dev`
+  - **环境加载**: Vite 会自动读取 `.env` / `.env.local`，默认 `VITE_API_URL` 指向 `http://localhost:3001`
+- **后端服务端口**: 默认 **3001**
+  - **启动方式**: 在 `backend` 目录执行 `npm start`
+- **跨域安全 (CORS)**
+  - 根据 `NODE_ENV` 区分：`development` 或 `test` 允许 `localhost` 访问；`production` 仅允许生产环境指定前端 IP 获取数据。
 
 ## 重要注意事项
 

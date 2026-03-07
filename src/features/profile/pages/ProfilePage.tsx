@@ -74,7 +74,7 @@ const ProfilePage: React.FC = () => {
         <div className="profile-header">
           <div className="profile-avatar">
             {profile.avatar ? (
-              <img src={`http://localhost:3001${profile.avatar}`} alt={profile.name} />
+              <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${profile.avatar}`} alt={profile.name} />
             ) : (
               <div className="profile-avatar-placeholder">
                 {(profile.name || profile.email)[0].toUpperCase()}

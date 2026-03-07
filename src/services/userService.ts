@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { UserProfile } from '../types';
 
-const API_URL = 'http://localhost:3001/api/users';
+const API_URL = import.meta.env.VITE_API_URL + '/api/users';
 
 // 获取用户资料
 export const getUserProfile = async (userId: number): Promise<UserProfile> => {

@@ -56,7 +56,7 @@ const PostReportManagement: React.FC = () => {
       }
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/admin/post-reports?${params}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/post-reports?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -91,7 +91,7 @@ const PostReportManagement: React.FC = () => {
       setProcessingReport(reportId);
 
       const token = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/admin/post-reports/${reportId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/admin/post-reports/${reportId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ const PostReportManagement: React.FC = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('http://localhost:3001/api/admin/post-reports/batch', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/admin/post-reports/batch', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
