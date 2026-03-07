@@ -19,6 +19,7 @@ const submissionRoutes = require('./routes/submissionRoutes');
 
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
+const { requestLogger } = require('./middleware/logger');
 
 // 导入数据库连接 (MySQL + Sequelize)
 const { connectDB } = require('./config/database');
@@ -29,16 +30,6 @@ const app = express();
 app.set('trust proxy', 1);
 // 设置端口
 const PORT = process.env.PORT || 3001;
-
-// 请求日志中间件
-app.use((req, res, next) => {
-  console.log('--- 收到请求 ---');
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Origin Header:', req.headers.origin);
-  console.log('Host Header:', req.headers.host);
-  next();
-});
 
 // CORS配置 - 必须在helmet之前
 const corsOptions = {
@@ -102,6 +93,9 @@ if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test' &&
 // 解析JSON请求体
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// 请求日志中间件（放在 body parser 之后以记录请求体）
+app.use(requestLogger);
 
 // 提供静态文件访问（用于头像等上传文件）
 app.use('/uploads', express.static('uploads'));
