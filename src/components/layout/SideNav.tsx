@@ -34,7 +34,7 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
 
       {/* 展开/折叠切换按钮 */}
       <button className="side-nav-toggle" onClick={onToggle} title={expanded ? '收起侧边栏' : '展开侧边栏'}>
-        {expanded && <span className="side-nav-brand">期刊论坛</span>}
+        {expanded && <span className="side-nav-brand">投哪儿</span>}
         <ChevronRight
           className="side-nav-toggle-icon"
           size={20}

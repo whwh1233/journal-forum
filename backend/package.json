@@ -1,7 +1,7 @@
 {
   "name": "journal-forum-backend",
   "version": "1.0.0",
-  "description": "Backend service for Journal Forum application",
+  "description": "Backend service for pubWhere",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -39,6 +39,6 @@
     "express",
     "lowdb"
   ],
-  "author": "Journal Forum Team",
+  "author": "pubWhere Team",
   "license": "MIT"
 }

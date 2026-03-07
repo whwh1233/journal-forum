@@ -57,10 +57,10 @@
 }
 
 .side-nav-brand {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--nav-brand-color);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   white-space: nowrap;
 }
 

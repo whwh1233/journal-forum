@@ -4,7 +4,7 @@ import { selectors, searchTerms, testUsers } from '../fixtures/test-data';
 /**
  * 用户流程测试 - 基于实际项目功能
  */
-test.describe('期刊论坛 - 用户流程测试', () => {
+test.describe('投哪儿 - 用户流程测试', () => {
 
   test.describe('首页和期刊浏览', () => {
 

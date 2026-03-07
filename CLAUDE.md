@@ -1,4 +1,4 @@
-# Journal Forum - Claude 项目指南
+# 投哪儿 (pubWhere) - Claude 项目指南
 
 ## 项目概述
 
