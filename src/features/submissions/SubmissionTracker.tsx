@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Trash2, Plus, ChevronRight } from 'lucide-react';
 import { getUserManuscripts, createManuscript, deleteManuscript, addSubmission, deleteSubmission, addStatusHistory } from '../../services/submissionService';
 import type { Manuscript, SubmissionRecord, SubmissionStatusHistory } from '../../types';
 import { SUBMISSION_STATUS_OPTIONS, getStatusLabel, getStatusColor } from '../../types';
@@ -176,7 +177,8 @@ const SubmissionTracker: React.FC = () => {
                     我的投稿记录
                 </h2>
                 <button className="btn-add-manuscript" onClick={() => setShowCreateModal(true)}>
-                    ＋ 新增稿件
+                    <Plus size={16} />
+                    新增稿件
                 </button>
             </div>
 
@@ -255,7 +257,9 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
         <div className="manuscript-card">
             <div className="manuscript-card-header" onClick={onToggle}>
                 <div className="manuscript-card-left">
-                    <span className={`manuscript-expand-icon ${expanded ? 'expanded' : ''}`}>▶</span>
+                    <span className={`manuscript-expand-icon ${expanded ? 'expanded' : ''}`}>
+                        <ChevronRight size={18} />
+                    </span>
                     <span className="manuscript-title">{manuscript.title}</span>
                 </div>
                 <div className="manuscript-card-right">
@@ -266,7 +270,9 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
                         {submissionCount} 次投稿
                     </span>
                     <div className="manuscript-actions" onClick={(e) => e.stopPropagation()}>
-                        <button title="删除稿件" className="btn-delete" onClick={onDelete}>🗑️</button>
+                        <button title="删除稿件" className="btn-delete" onClick={onDelete}>
+                            <Trash2 size={16} />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -275,15 +281,17 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
                 <div className="manuscript-body">
                     <div className="manuscript-body-actions">
                         <button className="btn-add-submission" onClick={onAddSubmission}>
-                            ＋ 转投其他期刊
+                            <Plus size={14} />
+                            转投其他期刊
                         </button>
                     </div>
 
                     {manuscript.submissions && manuscript.submissions.length > 0 ? (
-                        manuscript.submissions.map(sub => (
+                        manuscript.submissions.map((sub, idx) => (
                             <SubmissionItem
                                 key={sub.id}
                                 submission={sub}
+                                isLatest={idx === 0}
                                 onDelete={() => onDeleteSubmission(sub.id)}
                                 onAddStatus={() => onAddStatus(sub.id)}
                                 onFavoriteToggle={onFavoriteToggle}
@@ -303,62 +311,80 @@ const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
 // ==================== 单次投稿 ====================
 interface SubmissionItemProps {
     submission: SubmissionRecord;
+    isLatest?: boolean;
     onDelete: () => void;
     onAddStatus: () => void;
     onFavoriteToggle: (journalId: number) => void;
+    defaultExpanded?: boolean;
 }
 
-const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, onDelete, onAddStatus, onFavoriteToggle }) => {
+const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, isLatest = true, onDelete, onAddStatus, onFavoriteToggle, defaultExpanded = false }) => {
+    const [expanded, setExpanded] = useState(defaultExpanded);
     const journalDisplayName = submission.journal?.title || submission.journalName || '未知期刊';
     const statusColor = getStatusColor(submission.status);
+    const historyCount = submission.statusHistory?.length || 0;
 
     return (
-        <div className="submission-item">
-            <div className="submission-item-header">
-                <div className="submission-journal-info">
-                    <span className="submission-journal-name">📰 {journalDisplayName}</span>
-                    <span className="manuscript-status-badge" style={{ background: statusColor, fontSize: '0.72rem' }}>
+        <div className={`submission-item ${expanded ? 'expanded' : 'collapsed'} ${isLatest ? 'latest' : 'archived'}`}>
+            <div className="submission-item-header" onClick={() => setExpanded(!expanded)}>
+                <div className="submission-item-left">
+                    <span className={`submission-expand-icon ${expanded ? 'expanded' : ''}`}>
+                        <ChevronRight size={16} />
+                    </span>
+                    <span className="submission-journal-name">{journalDisplayName}</span>
+                </div>
+                <div className="submission-item-right">
+                    <span className="manuscript-status-badge" style={{ background: statusColor }}>
                         {getStatusLabel(submission.status)}
                     </span>
-                </div>
-                <div className="submission-item-actions">
-                    <button title="删除此投稿" onClick={onDelete}>🗑️</button>
+                    <span className="submission-history-count">{historyCount} 条记录</span>
+                    <div className="submission-item-actions" onClick={(e) => e.stopPropagation()}>
+                        <button title="删除此投稿" className="btn-delete-submission" onClick={onDelete}>
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            {/* 期刊信息卡片或关联按钮 */}
-            {submission.journal ? (
-                <div className="submission-journal-card">
-                    <JournalInfoCard
-                        journal={submission.journal}
-                        onFavoriteToggle={() => onFavoriteToggle(submission.journal!.id)}
-                    />
-                </div>
-            ) : submission.journalName ? (
-                <div className="unlinked-journal">
-                    <span>📌 期刊：{submission.journalName}</span>
-                    <button className="btn-link-journal">🔗 关联到期刊库</button>
-                </div>
-            ) : null}
+            {expanded && (
+                <div className="submission-item-body">
+                    {/* 期刊信息卡片或关联按钮 */}
+                    {submission.journal ? (
+                        <div className="submission-journal-card">
+                            <JournalInfoCard
+                                journal={submission.journal}
+                                onFavoriteToggle={() => onFavoriteToggle(submission.journal!.id)}
+                            />
+                        </div>
+                    ) : submission.journalName ? (
+                        <div className="unlinked-journal">
+                            <span>📌 期刊：{submission.journalName}</span>
+                            <button className="btn-link-journal">🔗 关联到期刊库</button>
+                        </div>
+                    ) : null}
 
-            {/* 时间轴 */}
-            <div className="submission-timeline">
-                {submission.statusHistory && submission.statusHistory.length > 0 ? (
-                    submission.statusHistory.map((h, idx) => (
-                        <TimelineItem
-                            key={h.id}
-                            history={h}
-                            isLatest={idx === submission.statusHistory!.length - 1}
-                        />
-                    ))
-                ) : (
-                    <div style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>暂无状态记录</div>
-                )}
-            </div>
-
-            <button className="timeline-add-btn" onClick={onAddStatus}>
-                ＋ 添加状态更新
-            </button>
+                    {/* 进度时间轴 */}
+                    <div className="submission-timeline">
+                        <div className="timeline-list">
+                            {submission.statusHistory && submission.statusHistory.length > 0 ? (
+                                submission.statusHistory.map((h, idx) => (
+                                    <TimelineItem
+                                        key={h.id}
+                                        history={h}
+                                        isLatest={idx === submission.statusHistory!.length - 1}
+                                    />
+                                ))
+                            ) : (
+                                <div className="timeline-empty">暂无状态记录</div>
+                            )}
+                        </div>
+                        <button className="timeline-add-btn" onClick={onAddStatus}>
+                            <Plus size={14} />
+                            添加状态更新
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -377,10 +403,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ history, isLatest }) => {
             <div className={`timeline-dot ${isLatest ? 'latest' : ''}`} style={{ color: statusColor }} />
             <div className="timeline-content">
                 <div className="timeline-info">
-                    <div className="timeline-status" style={{ color: statusColor }}>
-                        {getStatusLabel(history.status)}
+                    <div className="timeline-header">
+                        <span className="timeline-status" style={{ color: statusColor }}>
+                            {getStatusLabel(history.status)}
+                        </span>
+                        <span className="timeline-date">{history.date}</span>
                     </div>
-                    <div className="timeline-date">{history.date}</div>
                     {history.note && (
                         <div className="timeline-note">{history.note}</div>
                     )}

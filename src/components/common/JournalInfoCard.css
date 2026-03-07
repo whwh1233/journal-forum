@@ -1,182 +1,265 @@
-/* Journal Info Card Component Styles */
+/* Journal Info Card - 可折叠期刊信息卡片 */
+
 .journal-info-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 1.5rem;
   background: var(--color-bg);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  height: 300px;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 
-/* 区域1：顶部 */
-.card-header {
+.journal-info-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==================== 头部（始终显示） ==================== */
+
+.journal-info-card .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  user-select: none;
   gap: 1rem;
+  transition: background 0.15s;
 }
 
-.header-left {
+.journal-info-card .card-header:hover {
+  background: var(--color-surface);
+}
+
+.journal-info-card .header-main {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.journal-title {
-  margin: 0 0 0.5rem 0;
+.journal-info-card .journal-title {
+  margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
-  cursor: pointer;
-  color: var(--color-primary);
-  transition: color 0.2s;
+  color: var(--color-text);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
 }
 
-.journal-title:hover {
-  color: var(--color-primary-dark);
-  text-decoration: underline;
-}
-
-.journal-meta {
+.journal-info-card .journal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-text-muted);
 }
 
-.separator {
-  margin: 0 0.5rem;
-}
-
-.category {
+.journal-info-card .category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 10px;
+  font-size: 0.8rem;
   font-weight: 500;
-  color: var(--color-primary);
+  white-space: nowrap;
 }
 
-.header-right {
+.journal-info-card .issn {
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.journal-info-card .header-actions {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-shrink: 0;
 }
 
-.rating {
-  font-size: 1rem;
-  font-weight: 500;
+.journal-info-card .rating-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.6rem;
+  background: rgba(251, 191, 36, 0.15);
+  color: #d97706;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.journal-info-card .review-count {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
-.favorite-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  transition: color 0.2s;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+.journal-info-card .expand-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.favorite-btn:hover {
-  color: var(--color-warning);
+.journal-info-card .expand-toggle:hover {
+  background: var(--color-border);
+  color: var(--color-text);
 }
 
-.favorite-btn.active {
-  color: var(--color-warning);
+/* ==================== 展开内容 ==================== */
+
+.journal-info-card .card-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--color-border);
+  animation: slideDown 0.2s ease-out;
 }
 
-/* 区域2：维度评分 */
-.dimensions-section {
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 维度评分区域 */
+.journal-info-card .dimensions-section {
+  padding-top: 0.875rem;
+}
+
+.journal-info-card .dimensions-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 0.75rem;
+}
+
+.journal-info-card .dimensions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1rem;
+}
+
+@media (max-width: 480px) {
+  .journal-info-card .dimensions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.journal-info-card .dimension-item {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
+  gap: 0.25rem;
 }
 
-.dimension-bar {
+.journal-info-card .dimension-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
 }
 
-.dimension-label {
-  width: 80px;
+.journal-info-card .dimension-label {
   font-size: 0.875rem;
   color: var(--color-text);
-  flex-shrink: 0;
 }
 
-.bar-container {
-  flex: 1;
-  height: 8px;
+.journal-info-card .dimension-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.journal-info-card .bar-container {
+  height: 6px;
   background: var(--color-bg-secondary);
-  border-radius: var(--radius-sm);
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.bar-fill {
+.journal-info-card .bar-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+  border-radius: 3px;
   transition: width 0.3s ease;
 }
 
-.dimension-value {
-  width: 32px;
-  text-align: right;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  flex-shrink: 0;
-}
-
-/* 区域3：底部 */
-.card-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--color-border);
-}
-
-.description {
-  margin: 0;
-  font-size: 0.875rem;
+/* 描述 */
+.journal-info-card .description {
+  margin: 1rem 0 0;
+  padding: 0.75rem;
+  font-size: 0.9rem;
   color: var(--color-text-muted);
   line-height: 1.5;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-primary);
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
-.actions {
+/* 操作按钮 */
+.journal-info-card .card-actions {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.875rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.journal-info-card .action-btn {
+  display: flex;
   align-items: center;
-}
-
-.review-count {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.view-comments-btn {
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: var(--color-primary);
-  color: white;
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 0.875rem;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.9rem;
   font-weight: 500;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.view-comments-btn:hover {
+.journal-info-card .action-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(var(--primary-rgb, 79, 70, 229), 0.05);
+}
+
+.journal-info-card .favorite-btn.active {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.journal-info-card .view-btn {
+  margin-left: auto;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.journal-info-card .view-btn:hover {
   background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: white;
 }
