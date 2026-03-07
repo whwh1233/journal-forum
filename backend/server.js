@@ -26,7 +26,7 @@ const { syncDatabase } = require('./models');
 
 // 初始化Express应用
 const app = express();
-
+app.set('trust proxy', 1);
 // 设置端口
 const PORT = process.env.PORT || 3001;
 
