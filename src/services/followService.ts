@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/follows';
+const API_URL = '/api/follows';
 
 // 关注用户
 export const followUser = async (followingId: number): Promise<void> => {

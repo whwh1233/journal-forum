@@ -71,7 +71,7 @@ const FollowListPage: React.FC = () => {
             <Link to={`/profile/${item.user.id}`} className="follow-user-info">
               <div className="follow-user-avatar">
                 {item.user.avatar ? (
-                  <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${item.user.avatar}`} alt={item.user.name} />
+                  <img src={`${item.user.avatar}`} alt={item.user.name} />
                 ) : (
                   <div className="follow-user-avatar-placeholder">
                     {(item.user.name || item.user.email)[0].toUpperCase()}

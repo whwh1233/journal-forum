@@ -114,7 +114,7 @@ const ProfileEditPage: React.FC = () => {
           <h2 className="avatar-section-title">头像</h2>
           <div className="avatar-preview">
             {user?.avatar ? (
-              <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${user.avatar}`} alt="用户头像" />
+              <img src={`${user.avatar}`} alt="用户头像" />
             ) : (
               <div className="avatar-placeholder">
                 <Camera size={48} />

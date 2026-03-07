@@ -1,7 +1,7 @@
 import { Journal, CategoryMap } from '../types';
 
 // API基础URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = '';
 
 // 学科映射
 export const categoryMap: CategoryMap = {

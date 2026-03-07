@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/favorites';
+const API_URL = '/api/favorites';
 
 // 添加收藏
 export const addFavorite = async (journalId: number): Promise<void> => {

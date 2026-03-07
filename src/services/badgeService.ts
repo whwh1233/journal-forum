@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Badge, UserBadgesResponse, MyBadgesResponse, BadgeStats } from '../types';
 
-const API_URL = import.meta.env.VITE_API_URL + '/api/badges';
+const API_URL = '/api/badges';
 
 // 获取认证头
 const getAuthHeaders = () => {

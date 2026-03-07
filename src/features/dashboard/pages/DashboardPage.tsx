@@ -183,7 +183,7 @@ const DashboardPage: React.FC = () => {
                     <Link to={`/profile/${item.user.id}`} className="following-user-info">
                       <div className="following-avatar">
                         {item.user.avatar ? (
-                          <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${item.user.avatar}`} alt={item.user.name} />
+                          <img src={`${item.user.avatar}`} alt={item.user.name} />
                         ) : (
                           <div className="following-avatar-placeholder">
                             {(item.user.name || item.user.email)[0].toUpperCase()}
