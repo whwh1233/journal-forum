@@ -232,3 +232,61 @@ export interface BadgeStats {
     grantedAt: string;
   }>;
 }
+
+// ==================== 投稿记录系统类型 ====================
+
+export interface SubmissionStatusHistory {
+  id: number;
+  submissionId: number;
+  status: string;
+  date: string;
+  note?: string;
+  createdAt: string;
+}
+
+export interface SubmissionRecord {
+  id: number;
+  userId: string;
+  manuscriptId: number;
+  journalId?: number;
+  journalName?: string;
+  submissionDate: string;
+  status: string;
+  journal?: Journal;
+  statusHistory?: SubmissionStatusHistory[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Manuscript {
+  id: number;
+  userId: string;
+  title: string;
+  currentStatus: string;
+  submissions?: SubmissionRecord[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 预定义投稿状态（也允许用户自定义）
+export const SUBMISSION_STATUS_OPTIONS = [
+  { value: 'submitted', label: '已投递', color: '#3b82f6' },
+  { value: 'with_editor', label: '编辑处理中', color: '#8b5cf6' },
+  { value: 'under_review', label: '外审中', color: '#f59e0b' },
+  { value: 'major_revision', label: '大修', color: '#ef4444' },
+  { value: 'minor_revision', label: '小修', color: '#f97316' },
+  { value: 'revision_submitted', label: '修回已提交', color: '#6366f1' },
+  { value: 'accepted', label: '录用', color: '#10b981' },
+  { value: 'rejected', label: '拒稿', color: '#dc2626' },
+  { value: 'withdrawn', label: '撤稿', color: '#6b7280' },
+] as const;
+
+export const getStatusLabel = (status: string): string => {
+  const found = SUBMISSION_STATUS_OPTIONS.find(s => s.value === status);
+  return found ? found.label : status;
+};
+
+export const getStatusColor = (status: string): string => {
+  const found = SUBMISSION_STATUS_OPTIONS.find(s => s.value === status);
+  return found ? found.color : '#6b7280';
+};

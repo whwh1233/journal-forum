@@ -50,3 +50,21 @@ export const getUserFavorites = async (userId: number, page = 1, limit = 10) => 
   });
   return response.data;
 };
+
+// 切换收藏状态
+export const toggleFavorite = async (journalId: number): Promise<{ favorited: boolean }> => {
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    throw new Error('请先登录');
+  }
+
+  const isFavorited = await checkFavorite(journalId);
+
+  if (isFavorited) {
+    await removeFavorite(journalId);
+    return { favorited: false };
+  } else {
+    await addFavorite(journalId);
+    return { favorited: true };
+  }
+};

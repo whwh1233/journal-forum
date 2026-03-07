@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
-import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award, Database, MessagesSquare } from 'lucide-react';
+import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award, Database, MessagesSquare, FileText } from 'lucide-react';
 import './SideNav.css';
 
 interface SideNavProps {
@@ -97,6 +97,12 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
               <NavLink to="/dashboard" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '个人中心'}>
                 <User className="side-nav-icon" size={20} />
                 <span className="side-nav-label">个人中心</span>
+              </NavLink>
+            )}
+            {isAuthenticated && (
+              <NavLink to="/submissions" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '我的投稿'}>
+                <FileText className="side-nav-icon" size={20} />
+                <span className="side-nav-label">我的投稿</span>
               </NavLink>
             )}
             {isAuthenticated && (

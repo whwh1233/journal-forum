@@ -23,6 +23,7 @@ import {
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
 import DashboardPage from '@/features/dashboard/pages/DashboardPage';
+import SubmissionPage from '@/features/submissions/pages/SubmissionPage';
 import FollowListPage from '@/features/follow/pages/FollowListPage';
 import { NewBadgeToast, BadgeGalleryPage } from '@/features/badges';
 import CommunityPage from '@/features/posts/pages/CommunityPage';
@@ -140,6 +141,14 @@ const AppContent: React.FC = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/submissions"
+            element={
+              <ProtectedRoute>
+                <SubmissionPage />
               </ProtectedRoute>
             }
           />

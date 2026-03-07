@@ -15,8 +15,25 @@ const PostFollow = require('./PostFollow');
 const PostComment = require('./PostComment');
 const PostCommentLike = require('./PostCommentLike');
 const PostReport = require('./PostReport');
+const Manuscript = require('./Manuscript');
+const Submission = require('./Submission');
+const SubmissionStatusHistory = require('./SubmissionStatusHistory');
+const Announcement = require('./Announcement');
+const UserAnnouncementRead = require('./UserAnnouncementRead');// ==================== 关联定义 ====================
 
 // ==================== 关联定义 ====================
+
+// Announcement 关联
+User.hasMany(Announcement, { foreignKey: 'creatorId', as: 'createdAnnouncements' });
+Announcement.belongsTo(User, { foreignKey: 'creatorId', as: 'creator' });
+
+// User N:M Announcement (through UserAnnouncementRead)
+User.belongsToMany(Announcement, { through: UserAnnouncementRead, foreignKey: 'userId', as: 'readAnnouncements' });
+Announcement.belongsToMany(User, { through: UserAnnouncementRead, foreignKey: 'announcementId', as: 'readers' });
+UserAnnouncementRead.belongsTo(User, { foreignKey: 'userId' });
+UserAnnouncementRead.belongsTo(Announcement, { foreignKey: 'announcementId' });
+User.hasMany(UserAnnouncementRead, { foreignKey: 'userId' });
+Announcement.hasMany(UserAnnouncementRead, { foreignKey: 'announcementId' });
 
 // User 1:N Comment
 User.hasMany(Comment, { foreignKey: 'userId', as: 'comments' });
@@ -102,6 +119,24 @@ PostReport.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
 PostReport.belongsTo(User, { foreignKey: 'reporterId', as: 'reporter' });
 Post.hasMany(PostReport, { foreignKey: 'postId', as: 'reports' });
 
+// Manuscript 投稿记录关联
+User.hasMany(Manuscript, { foreignKey: 'userId', as: 'manuscripts' });
+Manuscript.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// Manuscript 1:N Submission
+Manuscript.hasMany(Submission, { foreignKey: 'manuscriptId', as: 'submissions', onDelete: 'CASCADE' });
+Submission.belongsTo(Manuscript, { foreignKey: 'manuscriptId', as: 'manuscript' });
+
+// Submission -> User / Journal
+User.hasMany(Submission, { foreignKey: 'userId', as: 'submissions' });
+Submission.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Journal.hasMany(Submission, { foreignKey: 'journalId', as: 'submissions' });
+Submission.belongsTo(Journal, { foreignKey: 'journalId', as: 'journal' });
+
+// Submission 1:N SubmissionStatusHistory
+Submission.hasMany(SubmissionStatusHistory, { foreignKey: 'submissionId', as: 'statusHistory', onDelete: 'CASCADE' });
+SubmissionStatusHistory.belongsTo(Submission, { foreignKey: 'submissionId', as: 'submission' });
+
 // ==================== 同步函数 ====================
 
 /**
@@ -138,5 +173,10 @@ module.exports = {
     PostComment,
     PostCommentLike,
     PostReport,
+    Manuscript,
+    Submission,
+    SubmissionStatusHistory,
+    Announcement,
+    UserAnnouncementRead,
     syncDatabase
 };

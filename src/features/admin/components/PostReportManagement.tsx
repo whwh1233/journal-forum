@@ -55,7 +55,7 @@ const PostReportManagement: React.FC = () => {
         params.append('status', filterStatus);
       }
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`http://localhost:3001/api/admin/post-reports?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -90,7 +90,7 @@ const PostReportManagement: React.FC = () => {
     try {
       setProcessingReport(reportId);
 
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`http://localhost:3001/api/admin/post-reports/${reportId}`, {
         method: 'PUT',
         headers: {
@@ -125,7 +125,7 @@ const PostReportManagement: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
       const response = await fetch('http://localhost:3001/api/admin/post-reports/batch', {
         method: 'POST',
         headers: {

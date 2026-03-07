@@ -175,6 +175,32 @@ const post = await createPost({
 await toggleLike(postId);
 ```
 
+### 📋 投稿追踪系统
+**状态**: ✅ 已完成（已整合期刊智能关联）
+**功能**: 稿件管理、多次投稿、状态时间轴、期刊智能搜索、数据深度整合
+**新增特性**:
+- **期刊智能搜索**: 支持期刊名称/ISSN 模糊搜索，300ms 防抖，滚动加载更多
+- **JournalPicker 组件**: 分类过滤、自定义维度显示（1-3个）、localStorage 持久化偏好
+- **JournalInfoCard 组件**: 展示 5 维度评分、收藏快捷操作、点击跳转详情页
+- **双向快捷入口**: 期刊详情页 ↔ 投稿记录页
+- **URL 参数传递**: 从期刊页跳转自动预填期刊信息
+- **乐观 UI 更新**: 收藏切换即时响应，失败自动回滚
+
+**关键文件**:
+- **前端组件**: `src/components/common/JournalPicker.*`, `src/components/common/JournalInfoCard.*`
+- **Hook**: `src/hooks/useJournalSearch.ts`
+- **Service**: `src/services/journalSearchService.ts`, `src/services/favoriteService.ts`
+- **页面**: `src/features/submissions/SubmissionTracker.tsx`
+- **后端**: `backend/routes/journalRoutes.js`, `backend/controllers/journalController.js`
+- **模型**: `backend/models/Manuscript.js`, `backend/models/Submission.js`
+- **测试**: `src/__tests__/components/common/JournalPicker.test.tsx`, `src/__tests__/components/common/JournalInfoCard.test.tsx`
+
+**API 路由**:
+```
+GET    /api/journals/search?q=nature&category=SCI&page=1&limit=10  # 期刊搜索
+GET    /api/journals/categories                                     # 获取分类列表
+```
+
 ### 🗄️ 数据库管理
 **状态**: ✅ 已完成
 **功能**: 表列表/结构/数据浏览、行内编辑、删除、搜索排序分页、操作审计日志
@@ -187,11 +213,11 @@ await toggleLike(postId);
 
 ### 🧪 测试系统
 **状态**: ✅ 已完成
-**已完成**: E2E 测试（社区帖子完整流程）、后端集成测试（帖子+评论）、前端组件测试（PostCard/PostForm/PostDetail）
+**已完成**: E2E 测试（社区帖子、期刊投稿整合）、后端集成测试（帖子+评论+期刊搜索）、前端组件测试（JournalPicker/JournalInfoCard/PostCard/PostForm/PostDetail）
 **关键文件**:
-- E2E: `e2e/tests/` (含 `community-posts.spec.ts`)
+- E2E: `e2e/tests/` (含 `community-posts.spec.ts`, `journal-submission-integration.spec.ts`)
 - 后端测试: `backend/__tests__/integration/post.test.js`, `postComment.test.js`
-- 前端测试: `src/__tests__/components/PostCard.test.tsx`, `PostForm.test.tsx`, `PostDetail.test.tsx`
+- 前端测试: `src/__tests__/components/common/JournalPicker.test.tsx`, `JournalInfoCard.test.tsx`, `PostCard.test.tsx`, `PostForm.test.tsx`, `PostDetail.test.tsx`
 
 ## 启动项目
 
@@ -424,30 +450,29 @@ src/
 ---
 
 ## 当前状态与待办事项
-> **最后更新**: 2026-03-02
+> **最后更新**: 2026-03-07
 > **规则**: 仅记录当前最新状态和最优先问题，每次改动后更新此区域
 
 ### ✅ 当前状态
 
+- **投稿追踪系统**：已完成期刊智能关联与数据整合。JournalPicker 组件（分类过滤、防抖搜索、维度显示）、JournalInfoCard 组件（5 维度评分、收藏切换）、双向快捷入口。
 - **数据库升级**：已完整从 LowDB 迁移至 MySQL 8.0。包括 9 大 Sequelize 模型构建（支持高并发）、数据平滑迁移（支持 UUID）、所有控制器与服务层的彻底重写。
 - **权限体系**：三级角色（user/admin/superadmin），superadmin 可访问数据库管理功能。
 - **数据库管理**：新增完整的数据库管理工具（表浏览、结构查看、数据编辑/删除、审计日志）。
 - **核心功能**: 补充了完整的积分（Points）与体系化荣誉徽章（Badges）功能。
 - **代码质量**: 图标系统已统一使用 Lucide React，UI 组件已优化（SearchAndFilter）
-- **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试部分完成（5/15+）
+- **测试覆盖**: E2E 完整、后端集成测试完整、前端组件测试已补充（JournalPicker 17/17, JournalInfoCard 19/19）
 - **UI 架构**: 具备高级拟态面板的 Admin 控制台、TopBar + SideNav + PageHeader 统一布局
 - **主题系统**: 6 个预设主题可用
 - **认证体验**: AuthModalContext 全局管理
 
 ### 🔴 优先待办
 
-1. **测试兼容性恢复** - E2E 测试和 Jest 测试脚本当前仍绑定 LowDB 接口，需重构所有测试数据工厂与钩子以适配全新 MySQL 场景
-2. **前端组件测试** - 剩余 10+ 组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
-3. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
+1. **前端组件测试** - 剩余组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
+2. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
 
 ### 📋 功能积压 (详见 `EXPANSION_PLAN.md`)
 
-* **投稿周期追踪** (Submission Timeline) - 结构化分享录用经验 (v1.1 核心)
 * **学者身份认证** (Edu邮箱/ORCID绑定) - 增强发言背书 (v1.1 核心)
 * **期刊问答专区** (Q&A Section) - 将提问与评价分离聚合
 * **核心指标展示** (JCR分区/IF/APC) - 数据大盘集成

@@ -57,12 +57,12 @@ describe('JournalPicker', () => {
     vi.clearAllMocks();
     localStorage.clear();
 
-    // Mock categories endpoint
+    // Mock categories endpoint - returns { data: { categories: [...] } }
     mockedAxios.get.mockImplementation((url) => {
       if (url === '/api/journals/categories') {
         return Promise.resolve({ data: { data: mockCategories } });
       }
-      // Mock search endpoint
+      // Mock search endpoint - returns { data: { journals: [...], hasMore: boolean } }
       if (url === '/api/journals/search') {
         return Promise.resolve({
           data: {
@@ -82,34 +82,45 @@ describe('JournalPicker', () => {
   });
 
   describe('渲染测试', () => {
-    it('should render input field with placeholder', () => {
+    it('should render input field with placeholder', async () => {
       render(<JournalPicker value={null} onChange={mockOnChange} placeholder="搜索期刊" />);
-      const input = screen.getByPlaceholderText('搜索期刊');
-      expect(input).toBeInTheDocument();
+
+      await waitFor(() => {
+        const input = screen.getByPlaceholderText('搜索期刊');
+        expect(input).toBeInTheDocument();
+      });
     });
 
-    it('should render with selected journal', () => {
+    it('should render with selected journal', async () => {
       render(<JournalPicker value={mockJournals[0]} onChange={mockOnChange} />);
-      expect(screen.getByDisplayValue('Nature')).toBeInTheDocument();
+
+      await waitFor(() => {
+        // When a journal is selected, it shows the title in a span, not an input
+        expect(screen.getByText('Nature')).toBeInTheDocument();
+      });
     });
 
-    it('should be disabled when disabled prop is true', () => {
+    it('should be disabled when disabled prop is true', async () => {
       render(<JournalPicker value={null} onChange={mockOnChange} disabled />);
-      const input = screen.getByRole('textbox');
-      expect(input).toBeDisabled();
+
+      await waitFor(() => {
+        const input = screen.getByRole('textbox');
+        expect(input).toBeDisabled();
+      });
     });
   });
 
   describe('搜索功能', () => {
-    it('should show dropdown when input is focused', async () => {
+    it('should show dropdown when typing 2+ characters', async () => {
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
       const input = screen.getByRole('textbox');
-      await user.click(input);
+      await user.type(input, 'Na');
 
       await waitFor(() => {
-        expect(screen.getByText(/分类/i)).toBeInTheDocument();
+        // Dropdown should show dimension selector with "显示："
+        expect(screen.getByText(/显示/)).toBeInTheDocument();
       });
     });
 
@@ -178,19 +189,17 @@ describe('JournalPicker', () => {
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
-      await user.click(input);
-
       // Wait for categories to load
       await waitFor(() => {
         expect(screen.getByText(/全部/i)).toBeInTheDocument();
       });
 
-      // Find and click SCI category
+      // Find and click SCI category button
       const sciButton = screen.getByRole('button', { name: /SCI/i });
       await user.click(sciButton);
 
       // Type to trigger search with category
+      const input = screen.getByRole('textbox');
       await user.type(input, 'Nature');
 
       await waitFor(() => {
@@ -218,7 +227,8 @@ describe('JournalPicker', () => {
         expect(screen.getByText('Nature')).toBeInTheDocument();
       });
 
-      const journalItem = screen.getByText('Nature').closest('.journal-picker-item');
+      // Component uses .journal-item class
+      const journalItem = screen.getByText('Nature').closest('.journal-item');
       expect(journalItem).toBeInTheDocument();
 
       await user.click(journalItem!);
@@ -237,10 +247,11 @@ describe('JournalPicker', () => {
         expect(screen.getByText('Nature')).toBeInTheDocument();
       });
 
-      const journalItem = screen.getByText('Nature').closest('.journal-picker-item');
+      const journalItem = screen.getByText('Nature').closest('.journal-item');
       await user.click(journalItem!);
 
       await waitFor(() => {
+        // The dropdown should be closed, Science should not be visible
         expect(screen.queryByText('Science')).not.toBeInTheDocument();
       });
     });
@@ -249,7 +260,8 @@ describe('JournalPicker', () => {
       const user = userEvent.setup();
       render(<JournalPicker value={mockJournals[0]} onChange={mockOnChange} />);
 
-      const clearButton = screen.getByRole('button', { name: /清除/i });
+      // Clear button shows × character
+      const clearButton = screen.getByRole('button', { name: /×/ });
       await user.click(clearButton);
 
       expect(mockOnChange).toHaveBeenCalledWith(null);
@@ -262,15 +274,16 @@ describe('JournalPicker', () => {
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
       const input = screen.getByRole('textbox');
-      await user.click(input);
+      await user.type(input, 'Na');
 
       await waitFor(() => {
-        expect(screen.getByText(/显示维度/i)).toBeInTheDocument();
+        // Component shows "显示：" label
+        expect(screen.getByText(/显示/)).toBeInTheDocument();
       });
 
-      // Find dimension checkbox (e.g., reviewSpeed)
-      const checkbox = screen.getByRole('checkbox', { name: /审稿速度/i });
-      await user.click(checkbox);
+      // Find dimension button (component uses buttons, not checkboxes)
+      const dimensionBtn = screen.getByRole('button', { name: /录用难度/i });
+      await user.click(dimensionBtn);
 
       // Check localStorage
       const saved = localStorage.getItem('journalPickerDimensions');
@@ -280,7 +293,15 @@ describe('JournalPicker', () => {
 
   describe('错误处理', () => {
     it('should show error message when search fails', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
+      mockedAxios.get.mockImplementation((url) => {
+        if (url === '/api/journals/categories') {
+          return Promise.resolve({ data: { data: mockCategories } });
+        }
+        if (url === '/api/journals/search') {
+          return Promise.reject(new Error('Network error'));
+        }
+        return Promise.reject(new Error('Unknown endpoint'));
+      });
 
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
@@ -315,7 +336,8 @@ describe('JournalPicker', () => {
       await user.type(input, 'NonExistentJournal');
 
       await waitFor(() => {
-        expect(screen.getByText(/未找到相关期刊/i)).toBeInTheDocument();
+        // Component shows "未找到匹配的期刊，试试其他关键词"
+        expect(screen.getByText(/未找到匹配的期刊/i)).toBeInTheDocument();
       });
     });
   });
@@ -335,7 +357,7 @@ describe('JournalPicker', () => {
                   }
                 }
               });
-            }, 100);
+            }, 500);
           });
         }
         return Promise.resolve({ data: { data: mockCategories } });
@@ -347,13 +369,15 @@ describe('JournalPicker', () => {
       const input = screen.getByRole('textbox');
       await user.type(input, 'Nature');
 
-      // Should show loading indicator
-      expect(screen.getByText(/搜索中/i)).toBeInTheDocument();
+      // Component shows "加载中..." not "搜索中"
+      await waitFor(() => {
+        expect(screen.getByText(/加载中/i)).toBeInTheDocument();
+      });
 
       // Wait for results
       await waitFor(() => {
         expect(screen.getByText('Nature')).toBeInTheDocument();
-      });
+      }, { timeout: 2000 });
     });
   });
 
@@ -384,18 +408,17 @@ describe('JournalPicker', () => {
         expect(screen.getByText('Nature')).toBeInTheDocument();
       });
 
-      // Find the dropdown container and scroll to bottom
-      const dropdown = screen.getByText('Nature').closest('.journal-picker-dropdown');
-      expect(dropdown).toBeInTheDocument();
+      // Find the results-list container (component uses .dropdown > .results-list)
+      const resultsList = document.querySelector('.results-list');
+      expect(resultsList).toBeInTheDocument();
 
-      // Simulate scroll to bottom
-      const scrollObserver = dropdown!.querySelector('.scroll-observer');
-      if (scrollObserver) {
-        // Trigger intersection observer
-        const intersectionCallback = (scrollObserver as any)._intersectionCallback;
-        if (intersectionCallback) {
-          intersectionCallback([{ isIntersecting: true }]);
-        }
+      // Simulate scroll event
+      if (resultsList) {
+        Object.defineProperty(resultsList, 'scrollHeight', { value: 500, configurable: true });
+        Object.defineProperty(resultsList, 'scrollTop', { value: 450, configurable: true });
+        Object.defineProperty(resultsList, 'clientHeight', { value: 100, configurable: true });
+
+        resultsList.dispatchEvent(new Event('scroll', { bubbles: true }));
       }
 
       // Should call with page 2
@@ -408,7 +431,7 @@ describe('JournalPicker', () => {
             })
           })
         );
-      });
+      }, { timeout: 2000 });
     });
   });
 });

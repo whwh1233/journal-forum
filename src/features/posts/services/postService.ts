@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // 获取授权 token
 const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('authToken');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

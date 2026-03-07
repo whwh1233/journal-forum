@@ -192,7 +192,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
               >
                 <div className="journal-header">
                   <span className="journal-title">{journal.title}</span>
-                  <span className="journal-rating">⭐ {journal.rating.toFixed(1)} ({journal.reviews})</span>
+                  <span className="journal-rating">⭐ {journal.rating.toFixed(1)} ({Array.isArray(journal.reviews) ? journal.reviews.length : journal.reviews})</span>
                 </div>
                 <div className="journal-meta">
                   <span>ISSN: {journal.issn}</span>
