@@ -4,7 +4,7 @@ import type { UserProfile } from '../types';
 const API_URL = '/api/users';
 
 // 获取用户资料
-export const getUserProfile = async (userId: number): Promise<UserProfile> => {
+export const getUserProfile = async (userId: string | number): Promise<UserProfile> => {
   const token = localStorage.getItem('authToken');
   const response = await axios.get(`${API_URL}/${userId}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {}

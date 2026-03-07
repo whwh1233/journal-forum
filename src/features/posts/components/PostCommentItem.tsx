@@ -94,7 +94,7 @@ const PostCommentItem: React.FC<PostCommentItemProps> = ({
           </Link>
           {user && comment.userId !== user.id && (
             <div className="post-comment-follow-btn-wrapper">
-              <FollowButton userId={parseInt(comment.userId)} />
+              <FollowButton userId={comment.userId} />
             </div>
           )}
         </div>

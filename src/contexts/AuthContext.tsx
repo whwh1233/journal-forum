@@ -101,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         type: 'LOGIN_FAILURE',
         payload: error instanceof Error ? error.message : '登录失败'
       });
+      throw error; // 抛出错误，阻止 onSuccess 被调用
     }
   };
 

@@ -2,17 +2,21 @@
 const API_URL = '';
 
 import { localStorageUtils } from '../utils/localStorage';
+import { hashPassword } from '../utils/crypto';
 
 // 认证服务
 export const authService = {
   // 注册用户
   register: async (email: string, password: string): Promise<void> => {
+    // 前端哈希密码，防止明文传输
+    const hashedPassword = await hashPassword(password, email);
+
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password: hashedPassword }),
     });
 
     if (!response.ok) {
@@ -27,12 +31,15 @@ export const authService = {
 
   // 用户登录
   login: async (email: string, password: string): Promise<{ token: string; role: string; id: number | string }> => {
+    // 前端哈希密码，防止明文传输
+    const hashedPassword = await hashPassword(password, email);
+
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password: hashedPassword }),
     });
 
     if (!response.ok) {

@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = '/api/follows';
 
 // 关注用户
-export const followUser = async (followingId: number): Promise<void> => {
+export const followUser = async (followingId: string | number): Promise<void> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('请先登录');
@@ -15,7 +15,7 @@ export const followUser = async (followingId: number): Promise<void> => {
 };
 
 // 取消关注
-export const unfollowUser = async (followingId: number): Promise<void> => {
+export const unfollowUser = async (followingId: string | number): Promise<void> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('请先登录');
@@ -27,7 +27,7 @@ export const unfollowUser = async (followingId: number): Promise<void> => {
 };
 
 // 检查是否已关注
-export const checkFollow = async (followingId: number): Promise<boolean> => {
+export const checkFollow = async (followingId: string | number): Promise<boolean> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     return false;
@@ -44,7 +44,7 @@ export const checkFollow = async (followingId: number): Promise<boolean> => {
 };
 
 // 获取粉丝列表
-export const getFollowers = async (userId: number, page = 1, limit = 20) => {
+export const getFollowers = async (userId: string | number, page = 1, limit = 20) => {
   const response = await axios.get(`${API_URL}/followers/${userId}`, {
     params: { page, limit }
   });
@@ -52,7 +52,7 @@ export const getFollowers = async (userId: number, page = 1, limit = 20) => {
 };
 
 // 获取关注列表
-export const getFollowing = async (userId: number, page = 1, limit = 20) => {
+export const getFollowing = async (userId: string | number, page = 1, limit = 20) => {
   const response = await axios.get(`${API_URL}/following/${userId}`, {
     params: { page, limit }
   });

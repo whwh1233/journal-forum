@@ -40,11 +40,11 @@ const FollowListPage: React.FC = () => {
     setLoading(true);
     try {
       if (tab === 'followers') {
-        const data = await getFollowers(parseInt(userId), 1, 20);
+        const data = await getFollowers(userId, 1, 20);
         setFollowers(data.followers);
         setPagination(data.pagination);
       } else {
-        const data = await getFollowing(parseInt(userId), 1, 20);
+        const data = await getFollowing(userId, 1, 20);
         setFollowing(data.following);
         setPagination(data.pagination);
       }

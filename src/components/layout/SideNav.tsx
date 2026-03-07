@@ -94,15 +94,15 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
               <span className="side-nav-label">社区讨论</span>
             </NavLink>
             {isAuthenticated && (
-              <NavLink to="/dashboard" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '个人中心'}>
-                <User className="side-nav-icon" size={20} />
-                <span className="side-nav-label">个人中心</span>
-              </NavLink>
-            )}
-            {isAuthenticated && (
               <NavLink to="/submissions" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '我的投稿'}>
                 <FileText className="side-nav-icon" size={20} />
                 <span className="side-nav-label">我的投稿</span>
+              </NavLink>
+            )}
+            {isAuthenticated && (
+              <NavLink to="/dashboard" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '个人中心'}>
+                <User className="side-nav-icon" size={20} />
+                <span className="side-nav-label">个人中心</span>
               </NavLink>
             )}
             {isAuthenticated && (

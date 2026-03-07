@@ -16,7 +16,7 @@ export const getAllBadges = async (): Promise<Badge[]> => {
 };
 
 // 获取指定用户的徽章
-export const getUserBadges = async (userId: number): Promise<UserBadgesResponse> => {
+export const getUserBadges = async (userId: string | number): Promise<UserBadgesResponse> => {
   const response = await axios.get(`${API_URL}/user/${userId}`);
   return response.data.data;
 };

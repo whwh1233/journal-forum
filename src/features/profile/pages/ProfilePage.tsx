@@ -20,7 +20,7 @@ const ProfilePage: React.FC = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const data = await getUserProfile(parseInt(userId!));
+        const data = await getUserProfile(userId!);
         setProfile(data);
       } catch (error) {
         console.error('Error loading profile:', error);
@@ -38,7 +38,7 @@ const ProfilePage: React.FC = () => {
     const loadBadges = async () => {
       if (userId) {
         try {
-          const data = await getUserBadges(parseInt(userId));
+          const data = await getUserBadges(userId);
           setBadges(data.badges);
           setPinnedBadges(data.pinnedBadges);
         } catch (error) {

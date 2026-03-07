@@ -30,7 +30,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [localLiked, setLocalLiked] = useState(comment.isLikedByMe || false);
   const [localLikeCount, setLocalLikeCount] = useState(comment.likeCount || 0);
 
-  const isAuthor = user && comment.userId === parseInt(user.id);
+  const isAuthor = user && String(comment.userId) === String(user.id);
   const isAdmin = user?.role === 'admin';
   const canEdit = isAuthor && !comment.isDeleted;
   const canDelete = (isAuthor || isAdmin) && !comment.isDeleted;
@@ -112,7 +112,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               {'☆'.repeat(5 - comment.rating)}
             </span>
           )}
-          {user && comment.userId !== parseInt(user.id) && (
+          {user && String(comment.userId) !== String(user.id) && (
             <div className="comment-follow-btn-wrapper">
               <FollowButton userId={comment.userId} />
             </div>

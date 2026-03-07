@@ -16,6 +16,28 @@ const DashboardPage: React.FC = () => {
   const [following, setFollowing] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'comments' | 'favorites' | 'following'>('overview');
 
+  // 加载关注列表
+  const loadFollowing = async () => {
+    if (!user?.id) return;
+    try {
+      const data = await getFollowing(user.id, 1, 20);
+      setFollowing(data);
+    } catch (error) {
+      console.error('Failed to load following:', error);
+    }
+  };
+
+  // 加载活动统计
+  const loadActivity = async () => {
+    if (!user?.id) return;
+    try {
+      const data = await getUserActivity();
+      setActivity(data);
+    } catch (error) {
+      console.error('Failed to load activity:', error);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       if (!user?.id) return;
@@ -24,7 +46,7 @@ const DashboardPage: React.FC = () => {
         getUserActivity(),
         getUserComments(1, 5),
         getUserFavorites(1, 5),
-        getFollowing(parseInt(user.id), 1, 20)
+        getFollowing(user.id, 1, 20)
       ]);
 
       if (results[0].status === 'fulfilled') {
@@ -56,6 +78,19 @@ const DashboardPage: React.FC = () => {
       loadData();
     }
   }, [user]);
+
+  // 切换到关注标签时刷新数据
+  useEffect(() => {
+    if (activeTab === 'following' && user) {
+      loadFollowing();
+    }
+  }, [activeTab]);
+
+  // 关注状态变化时刷新列表和统计
+  const handleFollowChange = () => {
+    loadFollowing();
+    loadActivity();
+  };
 
   if (!user) {
     return (
@@ -199,7 +234,7 @@ const DashboardPage: React.FC = () => {
                       </div>
                     </Link>
                     <div className="following-actions">
-                      <FollowButton userId={item.user.id} />
+                      <FollowButton userId={item.user.id} onFollowChange={handleFollowChange} />
                     </div>
                   </div>
                 ))

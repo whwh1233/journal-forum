@@ -4,16 +4,17 @@ import { followUser, unfollowUser, checkFollow } from '../../../services/followS
 import './FollowButton.css';
 
 interface FollowButtonProps {
-  userId: number;
+  userId: string | number;
+  onFollowChange?: (isFollowing: boolean) => void;
 }
 
-const FollowButton: React.FC<FollowButtonProps> = ({ userId }) => {
+const FollowButton: React.FC<FollowButtonProps> = ({ userId, onFollowChange }) => {
   const { user } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // 不显示关注自己的按钮
-  if (user && parseInt(user.id) === userId) {
+  if (user && String(user.id) === String(userId)) {
     return null;
   }
 
@@ -39,9 +40,11 @@ const FollowButton: React.FC<FollowButtonProps> = ({ userId }) => {
       if (isFollowing) {
         await unfollowUser(userId);
         setIsFollowing(false);
+        onFollowChange?.(false);
       } else {
         await followUser(userId);
         setIsFollowing(true);
+        onFollowChange?.(true);
       }
     } catch (error: any) {
       alert(error.response?.data?.message || '操作失败');

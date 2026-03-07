@@ -398,9 +398,13 @@
   background: var(--color-surface);
   border: 1px solid var(--gray-100);
   border-radius: var(--radius-lg);
-  overflow: hidden;
   max-height: 60vh;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.db-data-table {
+  min-width: max-content;
 }
 
 .db-data-table th.sortable {
