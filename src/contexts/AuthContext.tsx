@@ -17,6 +17,7 @@ type AuthAction =
   | { type: 'LOGIN_SUCCESS'; payload: { user: User; token: string } }
   | { type: 'LOGIN_FAILURE'; payload: string }
   | { type: 'LOGOUT' }
+  | { type: 'CLEAR_ERROR' }
   | { type: 'CHECK_AUTH_STATUS'; payload: { isAuthenticated: boolean; email?: string; role?: string; id?: string | number } };
 
 // 初始状态
@@ -42,6 +43,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
     case 'LOGIN_FAILURE':
       return { ...state, loading: false, error: action.payload };
+    case 'CLEAR_ERROR':
+      return { ...state, error: null };
     case 'LOGOUT':
       return { ...initialState, isAuthenticated: false };
     case 'CHECK_AUTH_STATUS':
@@ -69,12 +72,14 @@ const AuthContext = createContext<{
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  clearError: () => void;
   checkAuthStatus: () => Promise<void>;
 }>({
   state: initialState,
   login: async () => { },
   register: async () => { },
   logout: () => { },
+  clearError: () => { },
   checkAuthStatus: async () => { }
 });
 
@@ -103,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (data: RegisterData) => {
     if (data.password !== data.confirmPassword) {
       dispatch({ type: 'LOGIN_FAILURE', payload: '两次输入的密码不一致' });
-      return;
+      throw new Error('两次输入的密码不一致');
     }
 
     try {
@@ -120,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         type: 'LOGIN_FAILURE',
         payload: error instanceof Error ? error.message : '注册失败'
       });
+      throw error;
     }
   };
 
@@ -128,6 +134,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     authService.logout();
     localStorageUtils.clearUser();
     dispatch({ type: 'LOGOUT' });
+  };
+
+  // 清除错误
+  const clearError = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
   };
 
   // 检查认证状态
@@ -152,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         logout,
+        clearError,
         checkAuthStatus
       }}
     >
