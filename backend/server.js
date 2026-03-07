@@ -30,6 +30,16 @@ const app = express();
 // 设置端口
 const PORT = process.env.PORT || 3001;
 
+// 请求日志中间件
+app.use((req, res, next) => {
+  console.log('--- 收到请求 ---');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Origin Header:', req.headers.origin);
+  console.log('Host Header:', req.headers.host);
+  next();
+});
+
 // CORS配置 - 必须在helmet之前
 const corsOptions = {
   origin: function (origin, callback) {
