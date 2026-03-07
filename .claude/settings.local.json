@@ -106,7 +106,9 @@
       "Bash(cmd //c \"taskkill /PID 27816 /F\")",
       "Bash(cmd //c \"taskkill /PID 16092 /F\")",
       "Bash(cmd //c \"taskkill /PID 26740 /F\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

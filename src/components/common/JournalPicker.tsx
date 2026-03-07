@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus } from 'lucide-react';
 import { useJournalSearch } from '../../hooks/useJournalSearch';
 import { getCategories, CategoryItem, JournalSearchResult } from '../../services/journalSearchService';
 import { DIMENSION_LABELS } from '../../types';
+import { createCustomJournal, isCustomJournal } from './journalPickerUtils';
 import './JournalPicker.css';
 
 interface JournalPickerProps {
@@ -76,6 +78,17 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
     reset();
   };
 
+  // 使用自定义名称
+  const handleUseCustomName = () => {
+    if (inputValue.trim()) {
+      const customJournal = createCustomJournal(inputValue);
+      onChange(customJournal);
+      setIsOpen(false);
+      setInputValue('');
+      reset();
+    }
+  };
+
   // 清除选择
   const handleClear = () => {
     onChange(null);
@@ -126,6 +139,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
       {/* 分类标签 */}
       <div className="category-tabs">
         <button
+          type="button"
           className={selectedCategory === null ? 'active' : ''}
           onClick={() => handleCategoryChange(null)}
         >
@@ -133,6 +147,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
         </button>
         {categories.map(cat => (
           <button
+            type="button"
             key={cat.name}
             className={selectedCategory === cat.name ? 'active' : ''}
             onClick={() => handleCategoryChange(cat.name)}
@@ -145,9 +160,12 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
       {/* 搜索框 */}
       <div className="search-input-wrapper">
         {value ? (
-          <div className="selected-journal">
-            <span className="journal-name">{value.title}</span>
-            <button className="clear-btn" onClick={handleClear} disabled={disabled}>
+          <div className={`selected-journal ${isCustomJournal(value) ? 'custom' : ''}`}>
+            <div className="journal-name-wrapper">
+              <span className="journal-name">{value.title}</span>
+              {isCustomJournal(value) && <span className="custom-badge">自定义</span>}
+            </div>
+            <button type="button" className="clear-btn" onClick={handleClear} disabled={disabled}>
               ×
             </button>
           </div>
@@ -158,6 +176,12 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
             placeholder={placeholder}
             value={inputValue}
             onChange={handleInputChange}
+            onKeyDown={e => {
+              // 阻止 Enter 键触发表单提交
+              if (e.key === 'Enter') {
+                e.preventDefault();
+              }
+            }}
             disabled={disabled}
           />
         )}
@@ -165,12 +189,13 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
 
       {/* 下拉列表 */}
       {isOpen && !value && (
-        <div className="dropdown">
+        <div className="dropdown" onClick={e => e.stopPropagation()} onMouseDown={e => e.stopPropagation()}>
           {/* 维度选择器 */}
           <div className="dimension-selector">
             <span className="selector-label">显示：</span>
             {ALL_DIMENSIONS.map(dim => (
               <button
+                type="button"
                 key={dim.key}
                 className={`dimension-btn ${displayDimensions.includes(dim.key) ? 'active' : ''}`}
                 onClick={() => toggleDimension(dim.key)}
@@ -200,29 +225,49 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
                   <span>{journal.category}</span>
                 </div>
                 <div className="journal-dimensions">
-                  {displayDimensions.map(dimKey => (
-                    <div key={dimKey} className="dimension-row">
-                      <span className="dimension-label">{DIMENSION_LABELS[dimKey as keyof typeof DIMENSION_LABELS]}:</span>
-                      <div className="dimension-dots">
-                        {[1, 2, 3, 4, 5].map(i => (
-                          <span
-                            key={i}
-                            className={`dot ${i <= (journal.dimensionAverages[dimKey as keyof typeof journal.dimensionAverages] || 0) ? 'filled' : ''}`}
-                          >
-                            ●
-                          </span>
-                        ))}
+                  {displayDimensions.map(dimKey => {
+                    const dimValue = journal.dimensionAverages?.[dimKey as keyof typeof journal.dimensionAverages] || 0;
+                    return (
+                      <div key={dimKey} className="dimension-row">
+                        <span className="dimension-label">{DIMENSION_LABELS[dimKey as keyof typeof DIMENSION_LABELS]}:</span>
+                        <div className="dimension-dots">
+                          {[1, 2, 3, 4, 5].map(i => (
+                            <span
+                              key={i}
+                              className={`dot ${i <= dimValue ? 'filled' : ''}`}
+                            >
+                              ●
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
 
             {loading && <div className="loading-message">加载中...</div>}
 
+            {/* 搜索无结果时的提示和自定义选项 */}
             {!loading && results.length === 0 && inputValue.trim().length >= 2 && (
-              <div className="empty-message">未找到匹配的期刊，试试其他关键词</div>
+              <div className="no-results-section">
+                <div className="empty-message">在期刊库中未找到匹配结果</div>
+                <button type="button" className="use-custom-btn" onClick={handleUseCustomName}>
+                  <Plus size={16} />
+                  <span>使用「{inputValue.trim()}」作为期刊名称</span>
+                </button>
+              </div>
+            )}
+
+            {/* 有结果时也显示自定义选项 */}
+            {!loading && results.length > 0 && inputValue.trim().length >= 2 && (
+              <div className="custom-option-footer">
+                <button type="button" className="use-custom-btn secondary" onClick={handleUseCustomName}>
+                  <Plus size={14} />
+                  <span>找不到？使用「{inputValue.trim()}」</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Trash2, Plus, ChevronRight } from 'lucide-react';
+import { Trash2, Plus, ChevronRight, X } from 'lucide-react';
 import { getUserManuscripts, createManuscript, deleteManuscript, addSubmission, deleteSubmission, addStatusHistory } from '../../services/submissionService';
 import type { Manuscript, SubmissionRecord, SubmissionStatusHistory } from '../../types';
 import { SUBMISSION_STATUS_OPTIONS, getStatusLabel, getStatusColor } from '../../types';
 import JournalPicker from '../../components/common/JournalPicker';
+import { isCustomJournal } from '../../components/common/journalPickerUtils';
 import JournalInfoCard from '../../components/common/JournalInfoCard';
 import type { JournalSearchResult } from '../../services/journalSearchService';
 import { getJournalById } from '../../services/journalSearchService';
@@ -441,11 +442,22 @@ const CreateManuscriptModal: React.FC<CreateManuscriptModalProps> = ({ onClose, 
         }
     }, [prefilledJournal]);
 
+    // 防止滚动穿透
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
     const handleSubmit = () => {
         if (!title.trim()) return;
+        // 自定义期刊只传 journalName，不传 journalId
+        const isCustom = isCustomJournal(selectedJournal);
         onSubmit({
             title: title.trim(),
-            journalId: selectedJournal?.id,
+            journalId: isCustom ? undefined : selectedJournal?.id,
             journalName: selectedJournal?.title || undefined,
             submissionDate,
             status: useCustomStatus ? customStatus.trim() : status,
@@ -457,31 +469,49 @@ const CreateManuscriptModal: React.FC<CreateManuscriptModalProps> = ({ onClose, 
         <div className="submission-modal-overlay" onClick={onClose}>
             <div className="submission-modal" onClick={e => e.stopPropagation()}>
                 <div className="submission-modal-header">
-                    <h3>📝 新增稿件</h3>
-                    <button className="submission-modal-close" onClick={onClose}>✕</button>
+                    <h3>新增稿件</h3>
+                    <button className="submission-modal-close" onClick={onClose} aria-label="关闭">
+                        <X size={20} />
+                    </button>
                 </div>
                 <div className="submission-modal-body">
                     <div className="submission-form-group">
                         <label>稿件标题 *</label>
-                        <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="输入你的论文标题" />
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            placeholder="输入你的论文标题"
+                            autoFocus
+                        />
                     </div>
                     <div className="submission-form-group">
                         <label>投稿期刊</label>
                         <JournalPicker
                             value={selectedJournal}
                             onChange={setSelectedJournal}
-                            placeholder="搜索期刊名称或 ISSN"
+                            placeholder="搜索期刊名称或 ISSN..."
                         />
+                        <p className="submission-form-hint">输入至少 2 个字符开始搜索</p>
                     </div>
                     <div className="submission-form-group">
                         <label>投稿日期</label>
-                        <input type="date" value={submissionDate} onChange={e => setSubmissionDate(e.target.value)} />
+                        <input
+                            type="date"
+                            value={submissionDate}
+                            onChange={e => setSubmissionDate(e.target.value)}
+                        />
                     </div>
                     <div className="submission-form-group">
                         <label>当前状态</label>
                         <div className="status-input-row">
                             {useCustomStatus ? (
-                                <input type="text" value={customStatus} onChange={e => setCustomStatus(e.target.value)} placeholder="输入自定义状态" />
+                                <input
+                                    type="text"
+                                    value={customStatus}
+                                    onChange={e => setCustomStatus(e.target.value)}
+                                    placeholder="输入自定义状态"
+                                />
                             ) : (
                                 <select value={status} onChange={e => setStatus(e.target.value)}>
                                     {SUBMISSION_STATUS_OPTIONS.map(opt => (
@@ -491,8 +521,7 @@ const CreateManuscriptModal: React.FC<CreateManuscriptModalProps> = ({ onClose, 
                             )}
                             <button
                                 type="button"
-                                className="btn-modal-cancel"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                className="btn-toggle-custom"
                                 onClick={() => setUseCustomStatus(!useCustomStatus)}
                             >
                                 {useCustomStatus ? '选择预设' : '自定义'}
@@ -501,7 +530,11 @@ const CreateManuscriptModal: React.FC<CreateManuscriptModalProps> = ({ onClose, 
                     </div>
                     <div className="submission-form-group">
                         <label>备注</label>
-                        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="可选，记录一些备忘信息" rows={2} />
+                        <textarea
+                            value={note}
+                            onChange={e => setNote(e.target.value)}
+                            placeholder="可选，记录一些备忘信息..."
+                        />
                     </div>
                 </div>
                 <div className="submission-modal-footer">
@@ -530,9 +563,20 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
     const [note, setNote] = useState('');
     const [useCustomStatus, setUseCustomStatus] = useState(false);
 
+    // 防止滚动穿透
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
     const handleSubmit = () => {
+        // 自定义期刊只传 journalName，不传 journalId
+        const isCustom = isCustomJournal(selectedJournal);
         onSubmit({
-            journalId: selectedJournal?.id,
+            journalId: isCustom ? undefined : selectedJournal?.id,
             journalName: selectedJournal?.title || undefined,
             submissionDate,
             status: useCustomStatus ? customStatus.trim() : status,
@@ -544,8 +588,10 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
         <div className="submission-modal-overlay" onClick={onClose}>
             <div className="submission-modal" onClick={e => e.stopPropagation()}>
                 <div className="submission-modal-header">
-                    <h3>📰 转投其他期刊</h3>
-                    <button className="submission-modal-close" onClick={onClose}>✕</button>
+                    <h3>转投其他期刊</h3>
+                    <button className="submission-modal-close" onClick={onClose} aria-label="关闭">
+                        <X size={20} />
+                    </button>
                 </div>
                 <div className="submission-modal-body">
                     <div className="submission-form-group">
@@ -553,18 +599,28 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
                         <JournalPicker
                             value={selectedJournal}
                             onChange={setSelectedJournal}
-                            placeholder="搜索期刊名称或 ISSN"
+                            placeholder="搜索期刊名称或 ISSN..."
                         />
+                        <p className="submission-form-hint">输入至少 2 个字符开始搜索</p>
                     </div>
                     <div className="submission-form-group">
                         <label>投稿日期</label>
-                        <input type="date" value={submissionDate} onChange={e => setSubmissionDate(e.target.value)} />
+                        <input
+                            type="date"
+                            value={submissionDate}
+                            onChange={e => setSubmissionDate(e.target.value)}
+                        />
                     </div>
                     <div className="submission-form-group">
                         <label>初始状态</label>
                         <div className="status-input-row">
                             {useCustomStatus ? (
-                                <input type="text" value={customStatus} onChange={e => setCustomStatus(e.target.value)} placeholder="输入自定义状态" />
+                                <input
+                                    type="text"
+                                    value={customStatus}
+                                    onChange={e => setCustomStatus(e.target.value)}
+                                    placeholder="输入自定义状态"
+                                />
                             ) : (
                                 <select value={status} onChange={e => setStatus(e.target.value)}>
                                     {SUBMISSION_STATUS_OPTIONS.map(opt => (
@@ -574,8 +630,7 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
                             )}
                             <button
                                 type="button"
-                                className="btn-modal-cancel"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                className="btn-toggle-custom"
                                 onClick={() => setUseCustomStatus(!useCustomStatus)}
                             >
                                 {useCustomStatus ? '选择预设' : '自定义'}
@@ -584,7 +639,11 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
                     </div>
                     <div className="submission-form-group">
                         <label>备注</label>
-                        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="可选" rows={2} />
+                        <textarea
+                            value={note}
+                            onChange={e => setNote(e.target.value)}
+                            placeholder="可选，记录一些备忘信息..."
+                        />
                     </div>
                 </div>
                 <div className="submission-modal-footer">
@@ -610,6 +669,15 @@ const AddStatusModal: React.FC<AddStatusModalProps> = ({ onClose, onSubmit }) =>
     const [note, setNote] = useState('');
     const [useCustomStatus, setUseCustomStatus] = useState(false);
 
+    // 防止滚动穿透
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, []);
+
     const handleSubmit = () => {
         const finalStatus = useCustomStatus ? customStatus.trim() : status;
         if (!finalStatus || !date) return;
@@ -622,15 +690,23 @@ const AddStatusModal: React.FC<AddStatusModalProps> = ({ onClose, onSubmit }) =>
         <div className="submission-modal-overlay" onClick={onClose}>
             <div className="submission-modal" onClick={e => e.stopPropagation()}>
                 <div className="submission-modal-header">
-                    <h3>⏱️ 添加状态更新</h3>
-                    <button className="submission-modal-close" onClick={onClose}>✕</button>
+                    <h3>添加状态更新</h3>
+                    <button className="submission-modal-close" onClick={onClose} aria-label="关闭">
+                        <X size={20} />
+                    </button>
                 </div>
                 <div className="submission-modal-body">
                     <div className="submission-form-group">
                         <label>新状态 *</label>
                         <div className="status-input-row">
                             {useCustomStatus ? (
-                                <input type="text" value={customStatus} onChange={e => setCustomStatus(e.target.value)} placeholder="输入自定义状态" />
+                                <input
+                                    type="text"
+                                    value={customStatus}
+                                    onChange={e => setCustomStatus(e.target.value)}
+                                    placeholder="输入自定义状态"
+                                    autoFocus
+                                />
                             ) : (
                                 <select value={status} onChange={e => setStatus(e.target.value)}>
                                     <option value="">请选择状态</option>
@@ -641,8 +717,7 @@ const AddStatusModal: React.FC<AddStatusModalProps> = ({ onClose, onSubmit }) =>
                             )}
                             <button
                                 type="button"
-                                className="btn-modal-cancel"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                className="btn-toggle-custom"
                                 onClick={() => setUseCustomStatus(!useCustomStatus)}
                             >
                                 {useCustomStatus ? '选择预设' : '自定义'}
@@ -651,11 +726,19 @@ const AddStatusModal: React.FC<AddStatusModalProps> = ({ onClose, onSubmit }) =>
                     </div>
                     <div className="submission-form-group">
                         <label>日期 *</label>
-                        <input type="date" value={date} onChange={e => setDate(e.target.value)} />
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={e => setDate(e.target.value)}
+                        />
                     </div>
                     <div className="submission-form-group">
                         <label>备注</label>
-                        <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="可选，例如审稿意见、修改建议等" rows={3} />
+                        <textarea
+                            value={note}
+                            onChange={e => setNote(e.target.value)}
+                            placeholder="可选，例如审稿意见、修改建议等..."
+                        />
                     </div>
                 </div>
                 <div className="submission-modal-footer">

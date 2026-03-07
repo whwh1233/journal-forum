@@ -601,19 +601,23 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     z-index: 1000;
+    padding: 3rem var(--space-4);
     animation: fadeIn 0.2s ease-out;
+    /* 允许整体滚动 */
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -621,21 +625,23 @@
 
 .submission-modal {
     background: var(--color-background);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl, 0 20px 60px rgba(0, 0, 0, 0.3));
-    width: 90%;
-    max-width: 520px;
-    max-height: 85vh;
-    overflow-y: auto;
-    animation: modalSlideUp 0.25s ease-out;
+    border-radius: var(--radius-xl, 16px);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    /* 允许内容溢出以显示下拉框 */
+    overflow: visible;
+    margin-bottom: 3rem;
 }
 
 @keyframes modalSlideUp {
     from {
         opacity: 0;
-        transform: translateY(20px) scale(0.98);
+        transform: translateY(30px) scale(0.95);
     }
-
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -646,140 +652,234 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-5);
+    padding: 1.5rem 2rem;
     border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
 }
 
 .submission-modal-header h3 {
     margin: 0;
-    font-size: 1.15rem;
+    font-size: 1.35rem;
+    font-weight: 700;
     color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .submission-modal-close {
-    background: none;
-    border: none;
-    font-size: 1.3rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    width: 36px;
+    height: 36px;
+    font-size: 1.25rem;
     color: var(--color-text-muted);
     cursor: pointer;
-    padding: var(--space-1);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     transition: all var(--duration-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .submission-modal-close:hover {
-    background: var(--color-surface);
+    background: var(--color-border);
     color: var(--color-text);
+    transform: scale(1.05);
 }
 
 .submission-modal-body {
-    padding: var(--space-5);
+    padding: 1.75rem 2rem;
+    overflow-y: auto;
+    flex: 1;
+    position: relative;
+    /* 确保下拉框可以正常显示 */
+    overflow: visible;
 }
 
 .submission-form-group {
-    margin-bottom: var(--space-4);
+    margin-bottom: 1.5rem;
+}
+
+.submission-form-group:last-child {
+    margin-bottom: 0;
 }
 
 .submission-form-group label {
     display: block;
-    font-size: 0.88rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text);
-    margin-bottom: var(--space-2);
+    margin-bottom: 0.625rem;
 }
 
-.submission-form-group input,
+.submission-form-group label::after {
+    content: '';
+}
+
+.submission-form-group input[type="text"],
+.submission-form-group input[type="date"],
 .submission-form-group select,
 .submission-form-group textarea {
     width: 100%;
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
+    padding: 0.875rem 1rem;
+    border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
     background: var(--color-background);
     color: var(--color-text);
-    font-size: 0.9rem;
-    transition: border-color var(--duration-fast);
+    font-size: 1rem;
+    transition: all var(--duration-fast);
     box-sizing: border-box;
+    /* 最小触摸目标 44px */
+    min-height: 48px;
 }
 
-.submission-form-group input:focus,
+.submission-form-group input[type="text"]:focus,
+.submission-form-group input[type="date"]:focus,
 .submission-form-group select:focus,
 .submission-form-group textarea:focus {
     outline: none;
-    border-color: var(--color-link);
-    box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.12);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb, 79, 70, 229), 0.15);
+}
+
+.submission-form-group input::placeholder,
+.submission-form-group textarea::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.7;
 }
 
 .submission-form-group textarea {
     resize: vertical;
-    min-height: 60px;
+    min-height: 100px;
+    line-height: 1.6;
 }
 
 .submission-form-group .status-input-row {
     display: flex;
-    gap: var(--space-2);
+    gap: 0.75rem;
+    align-items: stretch;
 }
 
-.submission-form-group .status-input-row select {
-    flex: 1;
-}
-
+.submission-form-group .status-input-row select,
 .submission-form-group .status-input-row input {
     flex: 1;
 }
 
+.submission-form-group .status-input-row .btn-toggle-custom {
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    white-space: nowrap;
+    min-height: 48px;
+}
+
+.submission-form-group .status-input-row .btn-toggle-custom:hover {
+    background: var(--color-border);
+    border-color: var(--color-text-muted);
+}
+
 .submission-form-hint {
-    font-size: 0.78rem;
+    font-size: 0.85rem;
     color: var(--color-text-muted);
-    margin-top: var(--space-1);
+    margin-top: 0.5rem;
+    line-height: 1.4;
 }
 
 .submission-modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: var(--space-3);
-    padding: var(--space-4) var(--space-5);
+    gap: 1rem;
+    padding: 1.25rem 2rem;
     border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: 0 0 var(--radius-xl, 16px) var(--radius-xl, 16px);
+    flex-shrink: 0;
 }
 
 .btn-modal-cancel {
-    padding: var(--space-2) var(--space-5);
+    padding: 0.875rem 1.5rem;
     background: transparent;
     color: var(--color-text-muted);
-    border: 1px solid var(--color-border);
+    border: 1.5px solid var(--color-border);
     border-radius: var(--radius-md);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all var(--duration-fast);
+    min-height: 48px;
 }
 
 .btn-modal-cancel:hover {
     background: var(--color-surface);
     color: var(--color-text);
+    border-color: var(--color-text-muted);
 }
 
 .btn-modal-submit {
-    padding: var(--space-2) var(--space-5);
+    padding: 0.875rem 2rem;
     background: var(--color-btn-primary);
     color: white;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all var(--duration-fast);
+    min-height: 48px;
 }
 
 .btn-modal-submit:hover {
     background: var(--color-btn-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb, 79, 70, 229), 0.35);
 }
 
 .btn-modal-submit:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
+}
+
+/* JournalPicker 在弹窗内的特殊样式 */
+.submission-modal .journal-picker {
+    position: relative;
+    z-index: 10;
+}
+
+.submission-modal .journal-picker .dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    max-height: 350px;
+    z-index: 1200;
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* 确保背景完全不透明 */
+    background-color: #ffffff;
+    border: 2px solid var(--color-border, #e5e7eb);
+}
+
+/* 深色模式支持 */
+[data-theme="dark"] .submission-modal .journal-picker .dropdown,
+.dark .submission-modal .journal-picker .dropdown {
+    background-color: #1f2937;
+    border-color: #374151;
+}
+
+/* 确保期刊选择器的表单组有足够空间 */
+.submission-modal .submission-form-group:has(.journal-picker) {
+    min-height: auto;
+    position: relative;
+    z-index: 10;
 }
 
 /* ==================== 响应式 ==================== */
@@ -804,9 +904,46 @@
         padding: var(--space-3) var(--space-4);
     }
 
+    /* 移动端弹窗全屏 */
+    .submission-modal-overlay {
+        padding: 0;
+    }
+
     .submission-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .submission-modal-header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .submission-modal-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .submission-modal-body {
+        padding: 1.5rem;
+    }
+
+    .submission-modal-footer {
+        padding: 1rem 1.5rem;
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+
+    .btn-modal-cancel,
+    .btn-modal-submit {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 移动端 JournalPicker 下拉 */
+    .submission-modal .journal-picker .dropdown {
         width: 95%;
-        max-height: 90vh;
+        max-height: 60vh;
     }
 }
 /* ==================== 期刊信息卡片集成（蓝色调，与进度追踪样式统一） ==================== */
