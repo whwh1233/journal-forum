@@ -15,9 +15,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/__tests__/setup.js'],
   verbose: true,
   testTimeout: 10000,
-  transformIgnorePatterns: [
-    'node_modules/(?!(lowdb)/)',
-  ],
   transform: {},
   coverageThreshold: {
     global: {
