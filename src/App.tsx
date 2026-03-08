@@ -7,6 +7,7 @@ import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { BadgeProvider } from '@/contexts/BadgeContext';
 import { PostProvider } from '@/contexts/PostContext';
+import { PageProvider } from '@/contexts/PageContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
@@ -227,9 +228,11 @@ function App() {
             <ToastProvider>
               <PostProvider>
                 <AuthModalProvider>
-                  <div className="app">
-                    <AppContent />
-                  </div>
+                  <PageProvider>
+                    <div className="app">
+                      <AppContent />
+                    </div>
+                  </PageProvider>
                 </AuthModalProvider>
               </PostProvider>
             </ToastProvider>
