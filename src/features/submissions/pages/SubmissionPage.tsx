@@ -1,11 +1,12 @@
 import React from 'react';
 import SubmissionTracker from '../SubmissionTracker';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 
 const SubmissionPage: React.FC = () => {
+    usePageTitle('我的投稿记录');
+
     return (
         <div className="submission-page-wrapper">
-            <PageHeader title="我的投稿记录" />
             <div className="page-wrapper" style={{ padding: '20px' }}>
                 <SubmissionTracker />
             </div>

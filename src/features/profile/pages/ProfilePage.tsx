@@ -4,12 +4,14 @@ import { getUserProfile } from '../../../services/userService';
 import { getUserBadges } from '../../../services/badgeService';
 import { useAuth } from '../../../hooks/useAuth';
 import FollowButton from '../../follow/components/FollowButton';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import { BadgeWall, BadgeList } from '../../badges';
 import type { UserProfile, Badge } from '../../../types';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
+  usePageTitle('用户资料');
+
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -69,7 +71,6 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="profile-page">
-      <PageHeader title="用户资料" showBack backTo="/" />
       <div className="page-wrapper">
         <div className="profile-header">
           <div className="profile-avatar">

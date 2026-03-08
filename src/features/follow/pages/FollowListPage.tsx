@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getFollowers, getFollowing } from '../../../services/followService';
 import FollowButton from '../components/FollowButton';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './FollowListPage.css';
 
 interface FollowUser {
@@ -17,6 +17,8 @@ interface FollowUser {
 }
 
 const FollowListPage: React.FC = () => {
+  usePageTitle('关注列表');
+
   const { userId } = useParams<{ userId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = searchParams.get('tab') || 'following';
@@ -100,7 +102,6 @@ const FollowListPage: React.FC = () => {
 
   return (
     <div className="follow-list-page">
-      <PageHeader title="关注列表" showBack />
       <div className="page-wrapper">
         <div className="follow-list-header">
         <div className="follow-list-tabs">

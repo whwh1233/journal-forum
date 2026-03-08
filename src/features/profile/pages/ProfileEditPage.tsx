@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
 import { updateUserProfile, uploadAvatar, updatePassword } from '../../../services/userService';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import { BadgePicker } from '../../badges';
 import { Loader2, Upload, Camera } from 'lucide-react';
 import './ProfileEditPage.css';
 
 const ProfileEditPage: React.FC = () => {
+  usePageTitle('账号设置');
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -102,8 +104,6 @@ const ProfileEditPage: React.FC = () => {
 
   return (
     <div className="profile-edit-page">
-      <PageHeader title="账号设置" showBack />
-
       <div className="page-wrapper">
         {/* 错误/成功提示 */}
         {error && <div className="profile-error">{error}</div>}

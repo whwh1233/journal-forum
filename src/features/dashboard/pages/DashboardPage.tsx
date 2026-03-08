@@ -3,12 +3,14 @@ import { useAuth } from '../../../hooks/useAuth';
 import { getUserActivity, getUserComments, getUserFavorites } from '../../../services/userService';
 import { getFollowing } from '../../../services/followService';
 import { Link } from 'react-router-dom';
-import { Info } from 'lucide-react';
+import { Info, MessageSquare, Star, Users } from 'lucide-react';
 import FollowButton from '../../follow/components/FollowButton';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './DashboardPage.css';
 
 const DashboardPage: React.FC = () => {
+  usePageTitle('个人中心');
+
   const { user } = useAuth();
   const [activity, setActivity] = useState<any>(null);
   const [comments, setComments] = useState<any>(null);
@@ -102,7 +104,6 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard-page">
-      <PageHeader title="个人中心" showBack backTo="/" />
       <div className="page-wrapper">
         <div className="dashboard-tabs">
           <button
@@ -173,35 +174,51 @@ const DashboardPage: React.FC = () => {
 
           {activeTab === 'comments' && comments && (
             <div className="comments-list">
-              {comments.comments.map((comment: any) => (
-                <div key={comment.id} className="comment-item">
-                  <Link to={`/`} className="comment-journal">
-                    {comment.journalTitle}
-                  </Link>
-                  <p className="comment-content">{comment.content}</p>
-                  <span className="comment-date">
-                    {new Date(comment.createdAt).toLocaleDateString('zh-CN')}
-                  </span>
+              {comments.comments.length === 0 ? (
+                <div className="empty-state">
+                  <MessageSquare size={48} strokeWidth={1.5} />
+                  <p>你还没有发表过评论</p>
+                  <Link to="/" className="explore-link">去期刊列表看看</Link>
                 </div>
-              ))}
+              ) : (
+                comments.comments.map((comment: any) => (
+                  <div key={comment.id} className="comment-item">
+                    <Link to={`/`} className="comment-journal">
+                      {comment.journalTitle}
+                    </Link>
+                    <p className="comment-content">{comment.content}</p>
+                    <span className="comment-date">
+                      {new Date(comment.createdAt).toLocaleDateString('zh-CN')}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           )}
 
           {activeTab === 'favorites' && favorites && (
             <div className="favorites-list">
-              {favorites.favorites.map((fav: any) => (
-                <div key={fav.id} className="favorite-item">
-                  {fav.journal && (
-                    <>
-                      <h3>{fav.journal.title}</h3>
-                      <p>{fav.journal.description}</p>
-                      <span className="favorite-date">
-                        收藏于 {new Date(fav.createdAt).toLocaleDateString('zh-CN')}
-                      </span>
-                    </>
-                  )}
+              {favorites.favorites.length === 0 ? (
+                <div className="empty-state">
+                  <Star size={48} strokeWidth={1.5} />
+                  <p>你还没有收藏任何期刊</p>
+                  <Link to="/" className="explore-link">去发现感兴趣的期刊</Link>
                 </div>
-              ))}
+              ) : (
+                favorites.favorites.map((fav: any) => (
+                  <div key={fav.id} className="favorite-item">
+                    {fav.journal && (
+                      <>
+                        <h3>{fav.journal.title}</h3>
+                        <p>{fav.journal.description}</p>
+                        <span className="favorite-date">
+                          收藏于 {new Date(fav.createdAt).toLocaleDateString('zh-CN')}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
           )}
 
@@ -209,6 +226,7 @@ const DashboardPage: React.FC = () => {
             <div className="following-list">
               {following.following.length === 0 ? (
                 <div className="empty-state">
+                  <Users size={48} strokeWidth={1.5} />
                   <p>你还没有关注任何人</p>
                   <Link to="/" className="explore-link">去首页逛逛</Link>
                 </div>

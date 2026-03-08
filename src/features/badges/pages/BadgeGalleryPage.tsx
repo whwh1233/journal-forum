@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { getAllBadges } from '../../../services/badgeService';
 import { Badge as BadgeType } from '../../../types';
 import Badge from '../components/Badge';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import { Trophy, Info } from 'lucide-react';
 import './BadgeGalleryPage.css';
 
 // Icons imported from lucide-react
 
 const BadgeGalleryPage: React.FC = () => {
+    usePageTitle('荣誉殿堂');
+
     const [badges, setBadges] = useState<BadgeType[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -57,8 +59,6 @@ const BadgeGalleryPage: React.FC = () => {
 
     return (
         <div className="dashboard-page badge-gallery-page">
-            <PageHeader title="荣誉殿堂" showBack backTo="/" />
-
             <div className="page-wrapper">
                 <div className="gallery-header-summary">
                     <div className="header-icon">
