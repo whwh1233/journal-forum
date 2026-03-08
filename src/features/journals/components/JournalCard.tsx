@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Journal } from '@/types';
-import StarRating from '@/components/common/StarRating';
 import FavoriteButton from '@/features/favorite/components/FavoriteButton';
-import { BookOpen, MessageSquare } from 'lucide-react';
+import { BookOpen, MessageSquare, Star, TrendingUp } from 'lucide-react';
 import './JournalCard.css';
 
 interface JournalCardProps {
@@ -45,73 +44,89 @@ const JournalCard: React.FC<JournalCardProps> = ({ journal, onClick }) => {
 
   return (
     <article
-      className="journal-card"
+      className="journal-card scheme-e-production"
       onClick={onClick}
       onKeyPress={handleKeyPress}
       role="button"
       tabIndex={0}
       aria-label={`查看期刊: ${journal.name}`}
     >
-      {/* 封面图区域 - 16:9 */}
-      <div className="journal-cover">
-        {hasCover ? (
-          <img
-            src={journal.coverImageUrl}
-            alt={journal.name}
-            className="journal-cover-img"
-            onError={() => setImgError(true)}
-            loading="lazy"
-          />
-        ) : (
-          <DefaultCover name={journal.name} />
-        )}
-        <div className="journal-cover-actions" onClick={(e) => e.stopPropagation()}>
-          <FavoriteButton journalId={journal.journalId} />
-        </div>
-      </div>
-
-      {/* 内容区域 */}
-      <div className="journal-content">
-        <div className="journal-header">
-          <h3 className="journal-title">{journal.name}</h3>
-          {journal.issn && <p className="journal-issn">ISSN: {journal.issn}</p>}
+      <div className="card-layout">
+        {/* 左侧封面 (1/3) */}
+        <div className="card-cover-side">
+          {hasCover ? (
+            <img
+              src={journal.coverImageUrl}
+              alt={journal.name}
+              className="card-cover-img"
+              onError={() => setImgError(true)}
+              loading="lazy"
+            />
+          ) : (
+            <DefaultCover name={journal.name} />
+          )}
         </div>
 
-        {/* 评分 + 影响因子 */}
-        <div className="journal-meta">
-          <div className="journal-rating">
-            <StarRating rating={rating} size="small" />
-            {ratingCount > 0 && (
-              <span className="journal-rating-count">({ratingCount})</span>
-            )}
+        {/* 右侧内容 (2/3) */}
+        <div className="card-content-side">
+          {/* 收藏按钮 - 浮动右上角 */}
+          <div className="card-favorite-float" onClick={(e) => e.stopPropagation()}>
+            <FavoriteButton journalId={journal.journalId} showText={false} />
           </div>
-          {journal.impactFactor !== undefined && journal.impactFactor > 0 && (
-            <div className="journal-impact-factor">
-              <span className="if-label">IF:</span>
-              <span>{journal.impactFactor.toFixed(2)}</span>
-            </div>
-          )}
-          {ratingCount > 0 && (
-            <div className="journal-comments">
-              <MessageSquare size={14} />
-              <span>{ratingCount}</span>
-            </div>
-          )}
-        </div>
 
-        {/* 等级标签 */}
-        {journal.levels && journal.levels.length > 0 && (
-          <div className="journal-levels">
-            {journal.levels.slice(0, 4).map((level, index) => (
-              <span key={index} className="journal-level-tag">
-                {level}
+          {/* 标题 - 最上方，限 2 行 */}
+          <div className="card-header">
+            <h3 className="card-title" title={journal.name}>{journal.name}</h3>
+          </div>
+
+          {/* 标签层 - 限 5 个 */}
+          <div className="card-levels">
+            {journal.levels?.slice(0, 5).map((lvl, index) => (
+              <span key={index} className={`level-tag ${lvl.includes('1') || lvl.includes('TOP') ? 'primary-highlight' : ''}`}>
+                {lvl}
               </span>
             ))}
-            {journal.levels.length > 4 && (
-              <span className="journal-level-more">+{journal.levels.length - 4}</span>
+            {journal.levels && journal.levels.length > 5 && (
+              <span className="level-tag-more">+{journal.levels.length - 5}</span>
             )}
           </div>
-        )}
+
+          {/* 核心指标 - 中文标签 */}
+          <div className="card-stats-row">
+            <div className="journal-stat-box">
+              <span className="journal-stat-label">影响因子</span>
+              <span className="journal-stat-value journal-if-value">
+                <BookOpen size={18} /> {journal.impactFactor?.toFixed(2) || '0.00'}
+              </span>
+            </div>
+            <div className="journal-stat-box">
+              <span className="journal-stat-label">用户评分</span>
+              <span className="journal-stat-value journal-rating-value">
+                <Star size={18} fill="currentColor" /> {rating.toFixed(1)}
+              </span>
+            </div>
+            <div className="journal-stat-box">
+              <span className="journal-stat-label">讨论</span>
+              <span className="journal-stat-value journal-comment-value">
+                <MessageSquare size={18} /> {ratingCount}
+              </span>
+            </div>
+          </div>
+
+          {/* 底部信息 - 分类与 ISSN */}
+          <div className="card-footer">
+            <div className="footer-category">
+              <TrendingUp size={14} className="icon" />
+              <span className="category-text">{journal.category || '综合性期刊'}</span>
+            </div>
+            {journal.issn && (
+              <div className="footer-issn">
+                <span className="issn-label">ISSN:</span>
+                <span>{journal.issn}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </article>
   );

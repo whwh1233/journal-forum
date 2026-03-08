@@ -66,8 +66,11 @@ const getJournals = async (req, res, next) => {
             sortInMemory = true;
         } else if (dimensionFields.includes(sortBy)) {
             sortInMemory = true;
-        } else {
+        } else if (sortBy === 'name') {
             order = [['name', 'ASC']];
+        } else {
+            // 默认或按影响因子排序：从高到低
+            order = [['impactFactor', 'DESC']];
         }
 
         const offset = (page - 1) * limit;
@@ -77,7 +80,8 @@ const getJournals = async (req, res, next) => {
             where,
             include: [
                 { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
-                { model: JournalRatingCache, as: 'ratingCache' }
+                { model: JournalRatingCache, as: 'ratingCache' },
+                { model: Category, as: 'categories', attributes: ['name'], through: { attributes: [] } }
             ],
             order,
             distinct: true
@@ -94,6 +98,8 @@ const getJournals = async (req, res, next) => {
             const data = j.toJSON();
             // 将 levels 数组转换为 levelName 字符串数组
             data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+            // 将 categories 数组格式化为 category 字符串
+            data.category = data.categories ? data.categories.map(c => c.name).join(' / ') : '';
             return data;
         });
 
@@ -252,7 +258,8 @@ const searchJournals = async (req, res, next) => {
             where,
             include: [
                 { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
-                { model: JournalRatingCache, as: 'ratingCache' }
+                { model: JournalRatingCache, as: 'ratingCache' },
+                { model: Category, as: 'categories', attributes: ['name'], through: { attributes: [] } }
             ],
             limit: Number(limit) + 1,
             offset: Number(offset),
@@ -269,6 +276,7 @@ const searchJournals = async (req, res, next) => {
                 journals: results.map(j => {
                     const data = j.toJSON();
                     data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+                    data.category = data.categories ? data.categories.map(c => c.name).join(' / ') : '';
                     return data;
                 }),
                 hasMore
@@ -286,7 +294,8 @@ const getJournalById = async (req, res, next) => {
         const journal = await Journal.findByPk(id, {
             include: [
                 { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
-                { model: JournalRatingCache, as: 'ratingCache' }
+                { model: JournalRatingCache, as: 'ratingCache' },
+                { model: Category, as: 'categories', attributes: ['name'], through: { attributes: [] } }
             ]
         });
 
@@ -299,6 +308,7 @@ const getJournalById = async (req, res, next) => {
 
         const data = journal.toJSON();
         data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+        data.category = data.categories ? data.categories.map(c => c.name).join(' / ') : '';
 
         res.status(200).json({
             success: true,

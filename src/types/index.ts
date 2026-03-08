@@ -30,6 +30,7 @@ export interface Journal {
   indexingHistory?: string[];
   levels?: string[];
   ratingCache?: JournalRatingCache;
+  category?: string;
 }
 
 export interface JournalLevel {

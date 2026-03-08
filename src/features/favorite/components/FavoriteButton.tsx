@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { addFavorite, removeFavorite, checkFavorite } from '../../../services/favoriteService';
+import { Bookmark } from 'lucide-react';
 import './FavoriteButton.css';
 
 interface FavoriteButtonProps {
   journalId: string;
+  showText?: boolean;
 }
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId }) => {
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId, showText = true }) => {
   const { user } = useAuth();
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,13 +53,17 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId }) => {
 
   return (
     <button
-      className={`favorite-btn ${isFavorited ? 'favorited' : ''}`}
+      className={`favorite-btn ${isFavorited ? 'favorited' : ''} ${!showText ? 'icon-only' : ''}`}
       onClick={handleToggleFavorite}
       disabled={loading}
       title={isFavorited ? '取消收藏' : '收藏'}
     >
-      <span className="favorite-icon">{isFavorited ? '★' : '☆'}</span>
-      <span className="favorite-text">{isFavorited ? '已收藏' : '收藏'}</span>
+      <Bookmark
+        className={`favorite-icon-svg ${isFavorited ? 'fill-current' : ''}`}
+        size={showText ? 18 : 20}
+        fill={isFavorited ? "currentColor" : "none"}
+      />
+      {showText && <span className="favorite-text">{isFavorited ? '已收藏' : '收藏'}</span>}
     </button>
   );
 };
