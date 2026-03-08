@@ -5,7 +5,7 @@ const API_URL = '/api/comments';
 
 // 获取期刊的所有评论
 export const getCommentsByJournalId = async (
-  journalId: number,
+  journalId: string,
   sort: 'newest' | 'oldest' | 'rating' | 'helpful' = 'newest'
 ): Promise<Comment[]> => {
   const token = localStorage.getItem('authToken');
@@ -18,7 +18,7 @@ export const getCommentsByJournalId = async (
 
 // 创建评论或回复
 export const createComment = async (data: {
-  journalId: number;
+  journalId: string;
   parentId?: string | null;
   content: string;
   rating?: number;
@@ -80,7 +80,7 @@ export const likeComment = async (commentId: string): Promise<{ liked: boolean; 
 };
 
 // 获取期刊多维评分汇总
-export const getRatingSummary = async (journalId: number): Promise<RatingSummary> => {
+export const getRatingSummary = async (journalId: string): Promise<RatingSummary> => {
   const response = await axios.get(`${API_URL}/journal/${journalId}/ratings`);
   return response.data;
 };

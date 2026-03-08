@@ -24,7 +24,7 @@ const Comment = sequelize.define('Comment', {
         field: 'user_name'
     },
     journalId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(50),
         allowNull: false,
         field: 'journal_id'
     },
@@ -61,7 +61,7 @@ const Comment = sequelize.define('Comment', {
         field: 'like_count'
     }
 }, {
-    tableName: 'comments',
+    tableName: 'online_comments',
     indexes: [
         { fields: ['journal_id'] },
         { fields: ['user_id'] },

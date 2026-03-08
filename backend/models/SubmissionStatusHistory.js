@@ -25,7 +25,7 @@ const SubmissionStatusHistory = sequelize.define('SubmissionStatusHistory', {
         allowNull: true
     }
 }, {
-    tableName: 'submission_status_history',
+    tableName: 'online_submission_status_history',
     indexes: [
         { fields: ['submission_id'] },
         { fields: ['date'] }

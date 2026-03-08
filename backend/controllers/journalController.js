@@ -1,61 +1,124 @@
-const { Journal } = require('../models');
+const { Journal, JournalLevel, JournalRatingCache, Category, JournalCategoryMap, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // 获取所有期刊（支持搜索和筛选）
 const getJournals = async (req, res, next) => {
     try {
-        const { search, category, minRating, sortBy, page = 1, limit = 10 } = req.query;
+        const { search, level, categoryId, minRating, sortBy, page = 1, limit = 10 } = req.query;
 
         // 构建查询条件
         const where = {};
+        const andConditions = [];
 
         if (search) {
             const searchTerm = `%${search}%`;
             where[Op.or] = [
-                { title: { [Op.like]: searchTerm } },
+                { name: { [Op.like]: searchTerm } },
                 { issn: { [Op.like]: searchTerm } },
-                { category: { [Op.like]: searchTerm } }
+                { cn: { [Op.like]: searchTerm } }
             ];
         }
 
-        if (category) {
-            where.category = category;
+        // 按等级筛选 (使用 EXISTS 子查询)
+        if (level) {
+            andConditions.push(sequelize.literal(`EXISTS (
+                SELECT 1 FROM online_journal_levels l
+                WHERE l.journal_id = Journal.journal_id
+                AND l.level_name = ${sequelize.escape(level)}
+            )`));
         }
 
-        if (minRating) {
-            where.rating = { [Op.gte]: Number(minRating) };
+        // 按分类筛选
+        if (categoryId) {
+            const category = await Category.findByPk(categoryId);
+            if (category) {
+                let categoryIds = [Number(categoryId)];
+                if (category.level === 1) {
+                    // 一级分类：获取所有子类ID
+                    const children = await Category.findAll({
+                        where: { parentId: categoryId },
+                        attributes: ['id'],
+                        raw: true
+                    });
+                    categoryIds = children.map(c => c.id);
+                }
+                if (categoryIds.length > 0) {
+                    andConditions.push(sequelize.literal(`EXISTS (
+                        SELECT 1 FROM online_journal_category_map m
+                        WHERE m.journal_id = Journal.journal_id
+                        AND m.category_id IN (${categoryIds.join(',')})
+                    )`));
+                }
+            }
+        }
+
+        if (andConditions.length > 0) {
+            where[Op.and] = andConditions;
         }
 
         // 排序逻辑
-        let order = [['created_at', 'DESC']];
+        let order = [];
         const dimensionFields = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
+        let sortInMemory = false;
 
         if (sortBy === 'rating') {
-            order = [['rating', 'DESC']];
+            // 按评分缓存表排序需要 JOIN
+            sortInMemory = true;
+        } else if (dimensionFields.includes(sortBy)) {
+            sortInMemory = true;
+        } else {
+            order = [['name', 'ASC']];
         }
-        // 维度排序需要在内存中处理（JSON 字段无法直接 ORDER BY）
 
         const offset = (page - 1) * limit;
-        const { count, rows } = await Journal.findAndCountAll({
+
+        // 基础查询，include 关联
+        const queryOptions = {
             where,
+            include: [
+                { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+                { model: JournalRatingCache, as: 'ratingCache' }
+            ],
             order,
-            offset: Number(offset),
-            limit: Number(limit)
+            distinct: true
+        };
+
+        if (!sortInMemory) {
+            queryOptions.offset = Number(offset);
+            queryOptions.limit = Number(limit);
+        }
+
+        const { count, rows } = await Journal.findAndCountAll(queryOptions);
+
+        let journals = rows.map(j => {
+            const data = j.toJSON();
+            // 将 levels 数组转换为 levelName 字符串数组
+            data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+            return data;
         });
 
-        let journals = rows.map(j => j.toJSON());
+        // 如果需要内存排序（按评分或维度排序）
+        if (sortInMemory) {
+            if (sortBy === 'rating') {
+                journals.sort((a, b) =>
+                    ((b.ratingCache && b.ratingCache.rating) || 0) -
+                    ((a.ratingCache && a.ratingCache.rating) || 0)
+                );
+            } else if (dimensionFields.includes(sortBy)) {
+                journals.sort((a, b) =>
+                    ((b.ratingCache && b.ratingCache[sortBy]) || 0) -
+                    ((a.ratingCache && a.ratingCache[sortBy]) || 0)
+                );
+            }
+            // 分页
+            journals = journals.slice(Number(offset), Number(offset) + Number(limit));
+        }
 
-        // 如果按维度排序，需要在内存中重排（因为 JSON 字段排序 MySQL 较复杂）
-        if (sortBy && dimensionFields.includes(sortBy)) {
-            // 需要获取所有数据重排
-            const allJournals = await Journal.findAll({ where });
-            const allData = allJournals.map(j => j.toJSON());
-            allData.sort((a, b) =>
-                ((b.dimensionAverages && b.dimensionAverages[sortBy]) || 0) -
-                ((a.dimensionAverages && a.dimensionAverages[sortBy]) || 0)
+        // 按最低评分筛选
+        if (minRating) {
+            journals = journals.filter(j =>
+                j.ratingCache && j.ratingCache.rating >= Number(minRating)
             );
-            const sliced = allData.slice(Number(offset), Number(offset) + Number(limit));
-            journals = sliced;
         }
 
         res.status(200).json({
@@ -75,30 +138,75 @@ const getJournals = async (req, res, next) => {
     }
 };
 
-// 获取期刊分类列表（用于投稿追踪期刊选择器）
-const getCategories = async (req, res, next) => {
+// 获取等级列表（用于筛选下拉框）
+const getLevels = async (req, res, next) => {
     try {
-        const { sequelize } = require('../models');
-
-        // 使用 GROUP BY 统计各分类的期刊数量
-        const categories = await Journal.findAll({
+        const levels = await JournalLevel.findAll({
             attributes: [
-                'category',
-                [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+                'levelName',
+                [sequelize.fn('COUNT', sequelize.col('journal_id')), 'count']
             ],
-            group: ['category'],
-            order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']],
+            group: ['levelName'],
+            order: [[sequelize.fn('COUNT', sequelize.col('journal_id')), 'DESC']],
             raw: true
         });
 
         res.status(200).json({
             success: true,
             data: {
-                categories: categories.map(c => ({
-                    name: c.category,
-                    count: parseInt(c.count)
+                levels: levels.map(l => ({
+                    name: l.levelName,
+                    count: parseInt(l.count)
                 }))
             }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// 获取分类列表（树形结构）
+const getCategories = async (req, res, next) => {
+    try {
+        // 获取一级分类
+        const parentCategories = await Category.findAll({
+            where: { level: 1 },
+            attributes: ['id', 'name'],
+            order: [['id', 'ASC']],
+            raw: true
+        });
+
+        // 获取所有二级分类及其期刊数量
+        const childCategories = await Category.findAll({
+            where: { level: 2 },
+            attributes: [
+                'id',
+                'name',
+                'parentId',
+                [sequelize.literal(`(
+                    SELECT COUNT(*) FROM online_journal_category_map m
+                    WHERE m.category_id = Category.id
+                )`), 'journalCount']
+            ],
+            order: [['id', 'ASC']],
+            raw: true
+        });
+
+        // 组装树形结构
+        const categories = parentCategories.map(parent => ({
+            ...parent,
+            children: childCategories
+                .filter(child => child.parentId === parent.id)
+                .map(child => ({
+                    id: child.id,
+                    name: child.name,
+                    journalCount: parseInt(child.journalCount) || 0
+                }))
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: { categories }
         });
     } catch (error) {
         next(error);
@@ -108,7 +216,7 @@ const getCategories = async (req, res, next) => {
 // 搜索期刊（用于投稿追踪期刊选择器）
 const searchJournals = async (req, res, next) => {
     try {
-        const { q, category, page = 1, limit = 10 } = req.query;
+        const { q, level, page = 1, limit = 10 } = req.query;
 
         // 验证查询字符串长度
         if (!q || q.trim().length < 2) {
@@ -121,14 +229,19 @@ const searchJournals = async (req, res, next) => {
         // 构建查询条件
         const where = {
             [Op.or]: [
-                { title: { [Op.like]: `%${q}%` } },
-                { issn: { [Op.like]: `%${q}%` } }
+                { name: { [Op.like]: `%${q}%` } },
+                { issn: { [Op.like]: `%${q}%` } },
+                { cn: { [Op.like]: `%${q}%` } }
             ]
         };
 
-        // 可选分类过滤
-        if (category) {
-            where.category = category;
+        // 可选等级过滤
+        if (level) {
+            where[Op.and] = sequelize.literal(`EXISTS (
+                SELECT 1 FROM online_journal_levels l
+                WHERE l.journal_id = Journal.journal_id
+                AND l.level_name = ${sequelize.escape(level)}
+            )`);
         }
 
         // 计算分页
@@ -137,9 +250,13 @@ const searchJournals = async (req, res, next) => {
         // 执行查询（获取 limit + 1 条记录以判断是否有更多数据）
         const journals = await Journal.findAll({
             where,
+            include: [
+                { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+                { model: JournalRatingCache, as: 'ratingCache' }
+            ],
             limit: Number(limit) + 1,
             offset: Number(offset),
-            order: [['title', 'ASC']]
+            order: [['name', 'ASC']]
         });
 
         // 判断是否有更多数据
@@ -149,7 +266,11 @@ const searchJournals = async (req, res, next) => {
         res.status(200).json({
             success: true,
             data: {
-                journals: results.map(j => j.toJSON()),
+                journals: results.map(j => {
+                    const data = j.toJSON();
+                    data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+                    return data;
+                }),
                 hasMore
             }
         });
@@ -162,7 +283,12 @@ const searchJournals = async (req, res, next) => {
 const getJournalById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const journal = await Journal.findByPk(Number(id));
+        const journal = await Journal.findByPk(id, {
+            include: [
+                { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+                { model: JournalRatingCache, as: 'ratingCache' }
+            ]
+        });
 
         if (!journal) {
             return res.status(404).json({
@@ -170,94 +296,67 @@ const getJournalById = async (req, res, next) => {
                 message: '期刊未找到'
             });
         }
+
+        const data = journal.toJSON();
+        data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
 
         res.status(200).json({
             success: true,
-            data: { journal }
+            data: { journal: data }
         });
     } catch (error) {
         next(error);
     }
 };
 
-// 添加期刊评论（旧版：嵌入 reviews 数组）
-const addJournalReview = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const { author, rating, content } = req.body;
-
-        if (!author || !rating || !content) {
-            return res.status(400).json({
-                success: false,
-                message: '评论作者、评分和内容都是必填项'
-            });
-        }
-
-        const journal = await Journal.findByPk(Number(id));
-        if (!journal) {
-            return res.status(404).json({
-                success: false,
-                message: '期刊未找到'
-            });
-        }
-
-        const reviews = journal.reviews || [];
-        const newReview = {
-            author,
-            rating: Number(rating),
-            content,
-            createdAt: new Date().toISOString()
-        };
-        reviews.push(newReview);
-
-        // 更新平均评分
-        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-        const newRating = Math.round((totalRating / reviews.length) * 10) / 10;
-
-        await journal.update({ reviews, rating: newRating });
-
-        res.status(201).json({
-            success: true,
-            data: { journal: journal.toJSON() }
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-// 创建期刊（管理员功能）
+// 创建期刊（管理员功能）- 新结构暂不提供，期刊数据从外部导入
 const createJournal = async (req, res, next) => {
     try {
-        const { title, issn, category, description } = req.body;
+        const { journalId, name, issn, cn, levels = [] } = req.body;
 
-        if (!title || !issn || !category) {
+        if (!journalId || !name) {
             return res.status(400).json({
                 success: false,
-                message: '期刊名称、ISSN和分类是必填项'
+                message: '期刊ID和名称是必填项'
             });
         }
 
-        // 检查ISSN是否已存在
-        const existing = await Journal.findOne({ where: { issn } });
+        // 检查 journalId 是否已存在
+        const existing = await Journal.findByPk(journalId);
         if (existing) {
             return res.status(400).json({
                 success: false,
-                message: '该ISSN已存在'
+                message: '该期刊ID已存在'
             });
         }
 
         const newJournal = await Journal.create({
-            title,
+            journalId,
+            name,
             issn,
-            category,
-            description: description || '',
-            rating: 0,
-            reviews: []
+            cn
         });
+
+        // 创建等级关联
+        if (levels.length > 0) {
+            await JournalLevel.bulkCreate(
+                levels.map(levelName => ({ journalId, levelName }))
+            );
+        }
+
+        // 重新获取完整数据
+        const journal = await Journal.findByPk(journalId, {
+            include: [
+                { model: JournalLevel, as: 'levels', attributes: ['levelName'] }
+            ]
+        });
+
+        const data = journal.toJSON();
+        data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
 
         res.status(201).json({
             success: true,
-            data: { journal: newJournal }
+            data: { journal: data }
         });
     } catch (error) {
         next(error);
@@ -268,9 +367,9 @@ const createJournal = async (req, res, next) => {
 const updateJournal = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { title, issn, category, description } = req.body;
+        const { name, issn, cn, levels } = req.body;
 
-        const journal = await Journal.findByPk(Number(id));
+        const journal = await Journal.findByPk(id);
         if (!journal) {
             return res.status(404).json({
                 success: false,
@@ -278,30 +377,37 @@ const updateJournal = async (req, res, next) => {
             });
         }
 
-        // 如果修改了ISSN，检查是否与其他期刊冲突
-        if (issn && issn !== journal.issn) {
-            const existing = await Journal.findOne({
-                where: { issn, id: { [Op.ne]: Number(id) } }
-            });
-            if (existing) {
-                return res.status(400).json({
-                    success: false,
-                    message: '该ISSN已存在'
-                });
-            }
-        }
-
         const updateData = {};
-        if (title) updateData.title = title;
-        if (issn) updateData.issn = issn;
-        if (category) updateData.category = category;
-        if (description !== undefined) updateData.description = description;
+        if (name) updateData.name = name;
+        if (issn !== undefined) updateData.issn = issn;
+        if (cn !== undefined) updateData.cn = cn;
 
         await journal.update(updateData);
 
+        // 如果提供了新的等级列表，更新关联
+        if (levels !== undefined) {
+            await JournalLevel.destroy({ where: { journalId: id } });
+            if (levels.length > 0) {
+                await JournalLevel.bulkCreate(
+                    levels.map(levelName => ({ journalId: id, levelName }))
+                );
+            }
+        }
+
+        // 重新获取完整数据
+        const updatedJournal = await Journal.findByPk(id, {
+            include: [
+                { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+                { model: JournalRatingCache, as: 'ratingCache' }
+            ]
+        });
+
+        const data = updatedJournal.toJSON();
+        data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+
         res.status(200).json({
             success: true,
-            data: { journal }
+            data: { journal: data }
         });
     } catch (error) {
         next(error);
@@ -313,7 +419,7 @@ const deleteJournal = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const journal = await Journal.findByPk(Number(id));
+        const journal = await Journal.findByPk(id);
         if (!journal) {
             return res.status(404).json({
                 success: false,
@@ -332,4 +438,13 @@ const deleteJournal = async (req, res, next) => {
     }
 };
 
-module.exports = { getJournals, searchJournals, getCategories, getJournalById, addJournalReview, createJournal, updateJournal, deleteJournal };
+module.exports = {
+    getJournals,
+    getLevels,
+    getCategories,
+    searchJournals,
+    getJournalById,
+    createJournal,
+    updateJournal,
+    deleteJournal
+};

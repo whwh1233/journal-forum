@@ -216,7 +216,7 @@ const getUserComments = async (req, res) => {
                 return {
                     id: comment.legacyId || comment.id,
                     journalId: comment.journalId,
-                    journalTitle: journal?.title || '未知期刊',
+                    journalTitle: journal?.name || '未知期刊',
                     content: comment.content,
                     rating: comment.rating,
                     createdAt: comment.createdAt

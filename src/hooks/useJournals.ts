@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useJournalContext } from '@/contexts/JournalContext';
 
 export function useJournals() {
-  const { state, dispatch, refreshJournals } = useJournalContext();
+  const { state, dispatch, refreshJournals, loadMoreJournals } = useJournalContext();
 
   const setSearchQuery = useCallback((query: string) => {
     dispatch({ type: 'SET_SEARCH_QUERY', payload: query });
@@ -10,6 +10,10 @@ export function useJournals() {
 
   const setSelectedCategory = useCallback((category: string) => {
     dispatch({ type: 'SET_SELECTED_CATEGORY', payload: category });
+  }, [dispatch]);
+
+  const setSelectedCategoryId = useCallback((categoryId: number | null) => {
+    dispatch({ type: 'SET_SELECTED_CATEGORY_ID', payload: categoryId });
   }, [dispatch]);
 
   const setMinRating = useCallback((rating: number) => {
@@ -27,17 +31,25 @@ export function useJournals() {
   return {
     journals: state.journals,
     filteredJournals: state.filteredJournals,
+    levels: state.levels,
+    categories: state.categories,
     loading: state.loading,
+    loadingMore: state.loadingMore,
     error: state.error,
     searchQuery: state.searchQuery,
     selectedCategory: state.selectedCategory,
+    selectedCategoryId: state.selectedCategoryId,
     minRating: state.minRating,
     sortBy: state.sortBy,
+    hasMore: state.hasMore,
+    pagination: state.pagination,
     setSearchQuery,
     setSelectedCategory,
+    setSelectedCategoryId,
     setMinRating,
     setSortBy,
     clearFilters,
-    refreshJournals
+    refreshJournals,
+    loadMoreJournals
   };
 }

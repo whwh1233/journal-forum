@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Trash2, Plus, ChevronRight, X } from 'lucide-react';
 import { getUserManuscripts, createManuscript, deleteManuscript, addSubmission, deleteSubmission, addStatusHistory } from '../../services/submissionService';
@@ -124,13 +124,13 @@ const SubmissionTracker: React.FC = () => {
     };
 
     // 收藏切换（乐观 UI 更新）
-    const handleFavoriteToggle = async (journalId: number) => {
+    const handleFavoriteToggle = async (journalId: string) => {
         // 1. 找到当前收藏状态
         let currentFavorited = false;
         manuscripts.forEach(m => {
             m.submissions?.forEach(s => {
-                if (s.journal?.id === journalId) {
-                    currentFavorited = s.journal.isFavorited || false;
+                if (s.journal?.journalId === journalId) {
+                    currentFavorited = (s.journal as any).isFavorited || false;
                 }
             });
         });
@@ -139,8 +139,8 @@ const SubmissionTracker: React.FC = () => {
         setManuscripts(prev => prev.map(m => ({
             ...m,
             submissions: m.submissions?.map(s =>
-                s.journal?.id === journalId
-                    ? { ...s, journal: { ...s.journal, isFavorited: !currentFavorited } }
+                s.journal?.journalId === journalId
+                    ? { ...s, journal: { ...s.journal, isFavorited: !currentFavorited } as any }
                     : s
             )
         })));
@@ -154,8 +154,8 @@ const SubmissionTracker: React.FC = () => {
             setManuscripts(prev => prev.map(m => ({
                 ...m,
                 submissions: m.submissions?.map(s =>
-                    s.journal?.id === journalId
-                        ? { ...s, journal: { ...s.journal, isFavorited: currentFavorited } }
+                    s.journal?.journalId === journalId
+                        ? { ...s, journal: { ...s.journal, isFavorited: currentFavorited } as any }
                         : s
                 )
             })));
@@ -245,7 +245,7 @@ interface ManuscriptCardProps {
     onAddSubmission: () => void;
     onDeleteSubmission: (id: number) => void;
     onAddStatus: (submissionId: number) => void;
-    onFavoriteToggle: (journalId: number) => void;
+    onFavoriteToggle: (journalId: string) => void;
 }
 
 const ManuscriptCard: React.FC<ManuscriptCardProps> = ({
@@ -315,13 +315,13 @@ interface SubmissionItemProps {
     isLatest?: boolean;
     onDelete: () => void;
     onAddStatus: () => void;
-    onFavoriteToggle: (journalId: number) => void;
+    onFavoriteToggle: (journalId: string) => void;
     defaultExpanded?: boolean;
 }
 
 const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, isLatest = true, onDelete, onAddStatus, onFavoriteToggle, defaultExpanded = false }) => {
     const [expanded, setExpanded] = useState(defaultExpanded);
-    const journalDisplayName = submission.journal?.title || submission.journalName || '未知期刊';
+    const journalDisplayName = submission.journal?.name || submission.journalName || '未知期刊';
     const statusColor = getStatusColor(submission.status);
     const historyCount = submission.statusHistory?.length || 0;
 
@@ -354,7 +354,7 @@ const SubmissionItem: React.FC<SubmissionItemProps> = ({ submission, isLatest = 
                         <div className="submission-journal-card">
                             <JournalInfoCard
                                 journal={submission.journal}
-                                onFavoriteToggle={() => onFavoriteToggle(submission.journal!.id)}
+                                onFavoriteToggle={() => onFavoriteToggle(submission.journal!.journalId)}
                             />
                         </div>
                     ) : submission.journalName ? (
@@ -457,8 +457,8 @@ const CreateManuscriptModal: React.FC<CreateManuscriptModalProps> = ({ onClose, 
         const isCustom = isCustomJournal(selectedJournal);
         onSubmit({
             title: title.trim(),
-            journalId: isCustom ? undefined : selectedJournal?.id,
-            journalName: selectedJournal?.title || undefined,
+            journalId: isCustom ? undefined : selectedJournal?.journalId,
+            journalName: selectedJournal?.name || selectedJournal?.title || undefined,
             submissionDate,
             status: useCustomStatus ? customStatus.trim() : status,
             note: note.trim() || undefined
@@ -576,8 +576,8 @@ const AddSubmissionModal: React.FC<AddSubmissionModalProps> = ({ onClose, onSubm
         // 自定义期刊只传 journalName，不传 journalId
         const isCustom = isCustomJournal(selectedJournal);
         onSubmit({
-            journalId: isCustom ? undefined : selectedJournal?.id,
-            journalName: selectedJournal?.title || undefined,
+            journalId: isCustom ? undefined : selectedJournal?.journalId,
+            journalName: selectedJournal?.name || selectedJournal?.title || undefined,
             submissionDate,
             status: useCustomStatus ? customStatus.trim() : status,
             note: note.trim() || undefined

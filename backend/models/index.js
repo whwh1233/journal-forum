@@ -1,6 +1,10 @@
 const { sequelize } = require('../config/database');
 const User = require('./User');
 const Journal = require('./Journal');
+const JournalLevel = require('./JournalLevel');
+const JournalRatingCache = require('./JournalRatingCache');
+const Category = require('./Category');
+const JournalCategoryMap = require('./JournalCategoryMap');
 const Comment = require('./Comment');
 const CommentLike = require('./CommentLike');
 const Favorite = require('./Favorite');
@@ -38,6 +42,34 @@ Announcement.hasMany(UserAnnouncementRead, { foreignKey: 'announcementId' });
 // User 1:N Comment
 User.hasMany(Comment, { foreignKey: 'userId', as: 'comments' });
 Comment.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+// Journal 1:N JournalLevel
+Journal.hasMany(JournalLevel, { foreignKey: 'journalId', as: 'levels' });
+JournalLevel.belongsTo(Journal, { foreignKey: 'journalId' });
+
+// Journal 1:1 JournalRatingCache
+Journal.hasOne(JournalRatingCache, { foreignKey: 'journalId', as: 'ratingCache' });
+JournalRatingCache.belongsTo(Journal, { foreignKey: 'journalId' });
+
+// Category 自关联（父子类）
+Category.hasMany(Category, { foreignKey: 'parentId', as: 'children' });
+Category.belongsTo(Category, { foreignKey: 'parentId', as: 'parent' });
+
+// Journal N:M Category (through JournalCategoryMap)
+Journal.belongsToMany(Category, {
+  through: JournalCategoryMap,
+  foreignKey: 'journalId',
+  otherKey: 'categoryId',
+  as: 'categories'
+});
+Category.belongsToMany(Journal, {
+  through: JournalCategoryMap,
+  foreignKey: 'categoryId',
+  otherKey: 'journalId',
+  as: 'journals'
+});
+JournalCategoryMap.belongsTo(Journal, { foreignKey: 'journalId' });
+JournalCategoryMap.belongsTo(Category, { foreignKey: 'categoryId' });
 
 // Journal 1:N Comment
 Journal.hasMany(Comment, { foreignKey: 'journalId', as: 'comments' });
@@ -159,6 +191,10 @@ module.exports = {
     sequelize,
     User,
     Journal,
+    JournalLevel,
+    JournalRatingCache,
+    Category,
+    JournalCategoryMap,
     Comment,
     CommentLike,
     Favorite,

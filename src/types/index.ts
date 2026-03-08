@@ -1,46 +1,90 @@
+// ==================== 期刊系统类型 ====================
+
 export interface Journal {
-  id: number;
-  title: string;
-  issn: string;
-  category: string;
-  rating: number;
-  description: string;
-  reviews: Review[];
-  dimensionAverages?: DimensionRatings;
+  journalId: string;
+  name: string;
+  supervisor?: string;
+  sponsor?: string;
+  issn?: string;
+  cn?: string;
+  publicationCycle?: string;
+  articleCount?: number;
+  avgCitations?: number;
+  impactFactor?: number;
+  totalCitations?: number;
+  downloadCount?: number;
+  fundPaperCount?: number;
+  otherCitationRate?: number;
+  fundPaperRate?: string;
+  coverImageUrl?: string;
+  formerName?: string;
+  editorInChief?: string;
+  language?: string;
+  address?: string;
+  postalCode?: string;
+  email?: string;
+  phone?: string;
+  introduction?: string;
+  mainColumns?: string[];
+  awards?: string[];
+  indexingHistory?: string[];
+  levels?: string[];
+  ratingCache?: JournalRatingCache;
 }
 
-export interface Review {
-  author: string;
+export interface JournalLevel {
+  id: number;
+  journalId: string;
+  levelName: string;
+}
+
+export interface JournalRatingCache {
+  journalId: string;
   rating: number;
-  content: string;
+  ratingCount: number;
+  reviewSpeed?: number;
+  editorAttitude?: number;
+  acceptDifficulty?: number;
+  reviewQuality?: number;
+  overallExperience?: number;
+}
+
+// 期刊分类
+export interface Category {
+  id: number;
+  name: string;
+  level?: number;
+  parentId?: number;
+  journalCount?: number;
+  children?: Category[];
 }
 
 export interface Comment {
-  id: string;                    // journalId-timestamp-nanoid
+  id: string;
   userId: number;
   userName: string;
-  journalId: number;
-  parentId: string | null;       // 父评论ID
+  journalId: string;
+  parentId: string | null;
   content: string;
-  rating?: number;               // 综合评分（向后兼容）
-  dimensionRatings?: DimensionRatings; // 多维评分
-  likes?: string[];              // 点赞用户 ID 列表
-  likeCount?: number;            // 点赞数
-  isLikedByMe?: boolean;         // 当前用户是否已点赞
+  rating?: number;
+  dimensionRatings?: DimensionRatings;
+  likes?: string[];
+  likeCount?: number;
+  isLikedByMe?: boolean;
   createdAt: string;
   updatedAt?: string;
   isDeleted: boolean;
-  replies?: Comment[];           // 前端组装
-  userBadges?: Badge[];          // 用户置顶徽章
+  replies?: Comment[];
+  userBadges?: Badge[];
 }
 
 // 多维评分维度
 export interface DimensionRatings {
-  reviewSpeed?: number;           // 审稿速度 1-5
-  editorAttitude?: number;        // 编辑态度 1-5
-  acceptDifficulty?: number;      // 录用难度 1-5
-  reviewQuality?: number;         // 审稿质量 1-5
-  overallExperience?: number;     // 综合体验 1-5
+  reviewSpeed?: number;
+  editorAttitude?: number;
+  acceptDifficulty?: number;
+  reviewQuality?: number;
+  overallExperience?: number;
 }
 
 export const DIMENSION_LABELS: Record<string, string> = {
@@ -54,7 +98,7 @@ export const DIMENSION_LABELS: Record<string, string> = {
 export const DIMENSION_KEYS = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'] as const;
 
 export interface RatingSummary {
-  journalId: number;
+  journalId: string;
   rating: number;
   ratingCount: number;
   dimensionAverages: DimensionRatings;
@@ -65,6 +109,8 @@ export interface User {
   id: string;
   email: string;
   name?: string;
+  avatar?: string;
+  bio?: string;
   role?: 'user' | 'admin' | 'superadmin';
 }
 
@@ -72,14 +118,14 @@ export interface UserProfile {
   id: number;
   email: string;
   name?: string;
-  avatar?: string;              // 头像 URL
-  bio?: string;                 // 个人简介
+  avatar?: string;
+  bio?: string;
   location?: string;
   institution?: string;
   website?: string;
   role: 'user' | 'admin' | 'superadmin';
   createdAt: string;
-  pinnedBadges?: number[];      // 置顶徽章ID
+  pinnedBadges?: number[];
   stats?: {
     commentCount: number;
     favoriteCount: number;
@@ -102,8 +148,8 @@ export interface AdminUser {
 
 export interface AdminComment {
   id: string;
-  journalId: number;
-  journalTitle: string;
+  journalId: string;
+  journalName: string;
   author: string;
   rating: number;
   content: string;
@@ -137,7 +183,7 @@ export interface RegisterData {
 export interface Favorite {
   id: number;
   userId: number;
-  journalId: number;
+  journalId: string;
   createdAt: string;
 }
 
@@ -150,8 +196,8 @@ export interface Follow {
 
 export interface MyComment {
   id: string;
-  journalId: number;
-  journalTitle: string;
+  journalId: string;
+  journalName: string;
   content: string;
   rating?: number;
   createdAt: string;
@@ -166,12 +212,8 @@ export interface ActivityStats {
     points: number;
     level: number;
   };
-  recentActivity: any[];  // Will be defined later
+  recentActivity: any[];
 }
-
-export type CategoryMap = {
-  [key: string]: string;
-};
 
 // 徽章系统类型
 export interface Badge {
@@ -190,7 +232,6 @@ export interface Badge {
   priority: number;
   isActive: boolean;
   createdAt: string;
-  // 用户徽章附加字段
   grantedAt?: string;
   isNew?: boolean;
   grantedBy?: number;
@@ -248,7 +289,7 @@ export interface SubmissionRecord {
   id: number;
   userId: string;
   manuscriptId: number;
-  journalId?: number;
+  journalId?: string;
   journalName?: string;
   submissionDate: string;
   status: string;

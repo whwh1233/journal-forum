@@ -12,7 +12,7 @@ import {
 const API_URL = '';
 
 // 获取授权 token
-const getAuthHeader = () => {
+const getAuthHeader = (): Record<string, string> => {
   const token = localStorage.getItem('authToken');
   return token ? { Authorization: `Bearer ${token}` } : {};
 };

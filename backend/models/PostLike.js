@@ -18,7 +18,7 @@ const PostLike = sequelize.define('PostLike', {
         field: 'user_id'
     }
 }, {
-    tableName: 'post_likes',
+    tableName: 'online_post_likes',
     updatedAt: false,
     indexes: [
         {

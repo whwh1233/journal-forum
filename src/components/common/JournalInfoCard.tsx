@@ -6,20 +6,20 @@ import './JournalInfoCard.css';
 
 interface JournalInfoCardProps {
   journal: {
-    id: number;
-    title: string;
-    issn: string;
-    category: string;
-    rating: number;
-    reviews: number;
-    description?: string;
-    dimensionAverages: {
+    journalId: string;
+    name: string;
+    issn?: string;
+    levels?: string[];
+    ratingCache?: {
+      rating: number;
       reviewSpeed?: number;
       editorAttitude?: number;
       acceptDifficulty?: number;
       reviewQuality?: number;
       overallExperience?: number;
     };
+    articleCount?: number;
+    introduction?: string;
   };
   isFavorited?: boolean;
   onFavoriteToggle?: () => void;
@@ -37,35 +37,34 @@ const JournalInfoCard: React.FC<JournalInfoCardProps> = ({
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const handleTitleClick = () => {
-    navigate(`/journals/${journal.id}`);
-  };
-
   const handleViewComments = () => {
-    navigate(`/journals/${journal.id}`);
+    navigate(`/journals/${journal.journalId}`);
   };
 
-  const reviewCount = Array.isArray(journal.reviews) ? journal.reviews.length : journal.reviews;
+  const reviewCount = journal.articleCount || 0; // fallback usage since reviews count isn't directly on minimal Journal type
+  const ratingValue = journal.ratingCache?.rating || 0;
 
   return (
     <div className={`journal-info-card ${expanded ? 'expanded' : 'collapsed'} ${className}`}>
       {/* 可折叠头部 */}
       <div className="card-header" onClick={() => setExpanded(!expanded)}>
         <div className="header-main">
-          <h4 className="journal-title" title={journal.title}>
-            {journal.title}
+          <h4 className="journal-title" title={journal.name}>
+            {journal.name}
           </h4>
           <div className="journal-meta">
-            <span className="category-badge">{journal.category}</span>
-            <span className="issn">ISSN: {journal.issn}</span>
+            {journal.levels && journal.levels.length > 0 && (
+              <span className="category-badge">{journal.levels[0]}{journal.levels.length > 1 && ' +'}</span>
+            )}
+            {journal.issn && <span className="issn">ISSN: {journal.issn}</span>}
           </div>
         </div>
         <div className="header-actions">
           <div className="rating-badge">
             <Star size={14} fill="currentColor" />
-            <span>{journal.rating.toFixed(1)}</span>
+            <span>{ratingValue.toFixed(1)}</span>
           </div>
-          <span className="review-count">{reviewCount} 评论</span>
+          <span className="review-count">{reviewCount} 记录文章</span>
           <button
             className="expand-toggle"
             aria-label={expanded ? '收起详情' : '展开详情'}
@@ -83,7 +82,7 @@ const JournalInfoCard: React.FC<JournalInfoCardProps> = ({
             <div className="dimensions-title">评分维度</div>
             <div className="dimensions-grid">
               {DIMENSION_KEYS.map(key => {
-                const value = journal.dimensionAverages[key] || 0;
+                const value = (journal.ratingCache as any)?.[key] || 0;
                 return (
                   <div key={key} className="dimension-item">
                     <div className="dimension-header">
@@ -103,9 +102,9 @@ const JournalInfoCard: React.FC<JournalInfoCardProps> = ({
           </div>
 
           {/* 描述 */}
-          {journal.description && (
-            <p className="description" title={journal.description}>
-              {journal.description}
+          {journal.introduction && (
+            <p className="description" title={journal.introduction}>
+              {journal.introduction.length > 100 ? journal.introduction.substring(0, 100) + '...' : journal.introduction}
             </p>
           )}
 

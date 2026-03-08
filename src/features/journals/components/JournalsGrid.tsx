@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useJournals } from '@/hooks/useJournals';
 import { Journal } from '@/types';
 import JournalCard from './JournalCard';
 import JournalDetailPanel from './JournalDetailPanel';
+import { Loader2 } from 'lucide-react';
 import './JournalsGrid.css';
 
 const JournalsGrid: React.FC = () => {
-  const { filteredJournals, loading, error } = useJournals();
+  const { filteredJournals, loading, loadingMore, error, hasMore, loadMoreJournals } = useJournals();
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const handleJournalClick = (journal: Journal) => {
     setSelectedJournal(journal);
@@ -20,8 +22,35 @@ const JournalsGrid: React.FC = () => {
     setSelectedJournal(null);
   };
 
+  // 无限滚动 - Intersection Observer
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries;
+    if (entry.isIntersecting && hasMore && !loadingMore) {
+      loadMoreJournals();
+    }
+  }, [hasMore, loadingMore, loadMoreJournals]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1
+    });
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [handleObserver]);
+
   if (loading) {
-    return <div className="loading">加载中...</div>;
+    return (
+      <div className="loading">
+        <Loader2 className="loading-spinner" size={24} />
+        <span>加载中...</span>
+      </div>
+    );
   }
 
   if (error) {
@@ -37,12 +66,26 @@ const JournalsGrid: React.FC = () => {
       <div className="journals-grid">
         {filteredJournals.map((journal) => (
           <JournalCard
-            key={journal.id}
+            key={journal.journalId}
             journal={journal}
             onClick={() => handleJournalClick(journal)}
           />
         ))}
       </div>
+
+      {/* 加载更多触发器 */}
+      <div ref={loadMoreRef} className="load-more-trigger">
+        {loadingMore && (
+          <div className="loading-more">
+            <Loader2 className="loading-spinner" size={20} />
+            <span>加载更多...</span>
+          </div>
+        )}
+        {!hasMore && filteredJournals.length > 0 && (
+          <div className="no-more">已加载全部期刊</div>
+        )}
+      </div>
+
       <JournalDetailPanel
         journal={selectedJournal}
         isOpen={isModalOpen}

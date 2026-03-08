@@ -18,7 +18,7 @@ const Submission = sequelize.define('Submission', {
         field: 'manuscript_id'
     },
     journalId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(50),
         allowNull: true,
         field: 'journal_id'
     },
@@ -38,7 +38,7 @@ const Submission = sequelize.define('Submission', {
         defaultValue: 'submitted'
     }
 }, {
-    tableName: 'submissions',
+    tableName: 'online_submissions',
     indexes: [
         { fields: ['user_id'] },
         { fields: ['manuscript_id'] },

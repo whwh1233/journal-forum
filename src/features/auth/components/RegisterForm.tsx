@@ -12,15 +12,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { register, loading, error, clearError } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { register, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await register(email, password, confirmPassword);
       onSuccess();
     } catch (err) {
       // 错误处理已在useAuth中处理
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -37,7 +41,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess 
             value={email}
             onChange={(e) => { setEmail(e.target.value); clearError(); }}
             required
-            disabled={loading}
+            disabled={submitting}
             className="auth-input"
           />
         </div>
@@ -49,7 +53,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess 
             value={password}
             onChange={(e) => { setPassword(e.target.value); clearError(); }}
             required
-            disabled={loading}
+            disabled={submitting}
             className="auth-input"
           />
         </div>
@@ -61,18 +65,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSwitchToLogin, onSuccess 
             value={confirmPassword}
             onChange={(e) => { setConfirmPassword(e.target.value); clearError(); }}
             required
-            disabled={loading}
+            disabled={submitting}
             className="auth-input"
           />
         </div>
-        <button type="submit" disabled={loading} className="auth-button">
-          {loading && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
-          {loading ? '注册中...' : '注册'}
+        <button type="submit" disabled={submitting} className="auth-button">
+          {submitting && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
+          {submitting ? '注册中...' : '注册'}
         </button>
       </form>
       <p className="auth-switch-text">
         已有账户？{' '}
-        <button onClick={() => { clearError(); onSwitchToLogin(); }} className="auth-switch-link" disabled={loading}>
+        <button onClick={() => { clearError(); onSwitchToLogin(); }} className="auth-switch-link" disabled={submitting}>
           立即登录
         </button>
       </p>

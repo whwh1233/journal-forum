@@ -1,7 +1,7 @@
 .journals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--spacing-xl);
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: var(--spacing-lg);
   animation: fadeInUp var(--transition-slow) ease-out;
 }
 
@@ -56,11 +56,54 @@
   font-style: italic;
 }
 
+/* Loading Spinner */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+}
+
+/* Load More Trigger */
+.load-more-trigger {
+  padding: var(--spacing-xl) 0;
+  min-height: 60px;
+}
+
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+.no-more {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  padding: var(--spacing-md) 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .journals-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: var(--spacing-md);
   }
 }
 
@@ -75,5 +118,12 @@
   .no-results {
     padding: var(--spacing-xl);
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .journals-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
   }
 }

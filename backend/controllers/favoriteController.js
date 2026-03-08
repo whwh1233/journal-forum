@@ -1,4 +1,4 @@
-const { Favorite, Journal } = require('../models');
+const { Favorite, Journal, JournalLevel, JournalRatingCache } = require('../models');
 const badgeService = require('../services/badgeService');
 
 // 添加收藏
@@ -6,13 +6,13 @@ const addFavorite = async (req, res) => {
     try {
         const { journalId } = req.body;
 
-        const journal = await Journal.findByPk(parseInt(journalId));
+        const journal = await Journal.findByPk(journalId);
         if (!journal) {
             return res.status(404).json({ message: '期刊不存在' });
         }
 
         const existing = await Favorite.findOne({
-            where: { userId: req.user.id, journalId: parseInt(journalId) }
+            where: { userId: req.user.id, journalId: journalId }
         });
 
         if (existing) {
@@ -21,7 +21,7 @@ const addFavorite = async (req, res) => {
 
         const newFavorite = await Favorite.create({
             userId: req.user.id,
-            journalId: parseInt(journalId)
+            journalId: journalId
         });
 
         // 检查收藏徽章
@@ -48,7 +48,7 @@ const removeFavorite = async (req, res) => {
         const { journalId } = req.params;
 
         const favorite = await Favorite.findOne({
-            where: { userId: req.user.id, journalId: parseInt(journalId) }
+            where: { userId: req.user.id, journalId: journalId }
         });
 
         if (!favorite) {
@@ -69,7 +69,7 @@ const checkFavorite = async (req, res) => {
         const { journalId } = req.params;
 
         const favorite = await Favorite.findOne({
-            where: { userId: req.user.id, journalId: parseInt(journalId) }
+            where: { userId: req.user.id, journalId: journalId }
         });
 
         res.json({ isFavorited: !!favorite });
@@ -91,14 +91,27 @@ const getUserFavorites = async (req, res) => {
             order: [['created_at', 'DESC']],
             limit: parseInt(limit),
             offset,
-            include: [{ model: Journal, as: 'journal' }]
+            include: [{
+                model: Journal,
+                as: 'journal',
+                include: [
+                    { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+                    { model: JournalRatingCache, as: 'ratingCache' }
+                ]
+            }]
         });
 
-        const favoritesWithJournal = rows.map(f => ({
-            id: f.id,
-            journal: f.journal,
-            createdAt: f.createdAt
-        }));
+        const favoritesWithJournal = rows.map(f => {
+            const data = f.toJSON();
+            if (data.journal) {
+                data.journal.levels = data.journal.levels ? data.journal.levels.map(l => l.levelName) : [];
+            }
+            return {
+                id: data.id,
+                journal: data.journal,
+                createdAt: data.createdAt
+            };
+        });
 
         res.json({
             favorites: favoritesWithJournal,

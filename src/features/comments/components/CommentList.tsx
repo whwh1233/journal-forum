@@ -6,7 +6,7 @@ import type { Comment } from '../../../types';
 import './CommentList.css';
 
 interface CommentListProps {
-  journalId: number;
+  journalId: string;
 }
 
 const CommentList: React.FC<CommentListProps> = ({ journalId }) => {

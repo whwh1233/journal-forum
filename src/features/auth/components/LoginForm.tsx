@@ -11,15 +11,19 @@ interface LoginFormProps {
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, loading, error, clearError } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const { login, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await login(email, password);
       onSuccess();
     } catch (err) {
       // 错误处理已在useAuth中处理
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -36,7 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSuccess }) 
             value={email}
             onChange={(e) => { setEmail(e.target.value); clearError(); }}
             required
-            disabled={loading}
+            disabled={submitting}
             className="auth-input"
           />
         </div>
@@ -48,18 +52,18 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister, onSuccess }) 
             value={password}
             onChange={(e) => { setPassword(e.target.value); clearError(); }}
             required
-            disabled={loading}
+            disabled={submitting}
             className="auth-input"
           />
         </div>
-        <button type="submit" disabled={loading} className="auth-button">
-          {loading && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
-          {loading ? '登录中...' : '登录'}
+        <button type="submit" disabled={submitting} className="auth-button">
+          {submitting && <Loader2 className="animate-spin" size={16} style={{ marginRight: '8px' }} />}
+          {submitting ? '登录中...' : '登录'}
         </button>
       </form>
       <p className="auth-switch-text">
         还没有账户？{' '}
-        <button onClick={() => { clearError(); onSwitchToRegister(); }} className="auth-switch-link" disabled={loading}>
+        <button onClick={() => { clearError(); onSwitchToRegister(); }} className="auth-switch-link" disabled={submitting}>
           立即注册
         </button>
       </p>

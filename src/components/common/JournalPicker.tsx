@@ -162,7 +162,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
         {value ? (
           <div className={`selected-journal ${isCustomJournal(value) ? 'custom' : ''}`}>
             <div className="journal-name-wrapper">
-              <span className="journal-name">{value.title}</span>
+              <span className="journal-name">{value.name || value.title}</span>
               {isCustomJournal(value) && <span className="custom-badge">自定义</span>}
             </div>
             <button type="button" className="clear-btn" onClick={handleClear} disabled={disabled}>
@@ -211,18 +211,18 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
 
             {results.map(journal => (
               <div
-                key={journal.id}
+                key={journal.journalId || journal.id}
                 className="journal-item"
                 onClick={() => handleSelect(journal)}
               >
                 <div className="journal-header">
-                  <span className="journal-title">{journal.title}</span>
-                  <span className="journal-rating">⭐ {journal.rating.toFixed(1)} ({Array.isArray(journal.reviews) ? journal.reviews.length : journal.reviews})</span>
+                  <span className="journal-title">{journal.name || journal.title}</span>
+                  <span className="journal-rating">⭐ {journal.rating.toFixed(1)} ({journal.reviews})</span>
                 </div>
                 <div className="journal-meta">
                   <span>ISSN: {journal.issn}</span>
                   <span className="separator">|</span>
-                  <span>{journal.category}</span>
+                  <span>{journal.levels?.join(', ') || journal.category}</span>
                 </div>
                 <div className="journal-dimensions">
                   {displayDimensions.map(dimKey => {

@@ -124,7 +124,7 @@ export const adminService = {
   },
 
   // 更新期刊
-  updateJournal: async (journalId: number, journal: { title?: string; issn?: string; category?: string; description?: string }): Promise<Journal> => {
+  updateJournal: async (journalId: string, journal: { title?: string; issn?: string; category?: string; description?: string }): Promise<Journal> => {
     const response = await fetch(`${API_URL}/api/admin/journals/${journalId}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -141,7 +141,7 @@ export const adminService = {
   },
 
   // 删除期刊
-  deleteJournal: async (journalId: number): Promise<void> => {
+  deleteJournal: async (journalId: string): Promise<void> => {
     const response = await fetch(`${API_URL}/api/admin/journals/${journalId}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),

@@ -209,8 +209,8 @@ const DashboardPage: React.FC = () => {
                   <div key={fav.id} className="favorite-item">
                     {fav.journal && (
                       <>
-                        <h3>{fav.journal.title}</h3>
-                        <p>{fav.journal.description}</p>
+                        <h3>{fav.journal.name}</h3>
+                        <p>{fav.journal.introduction}</p>
                         <span className="favorite-date">
                           收藏于 {new Date(fav.createdAt).toLocaleDateString('zh-CN')}
                         </span>

@@ -1,24 +1,38 @@
 import React from 'react';
-import { Search, X, BookOpen, Star, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { Search, X, BookOpen, Star, ArrowUpDown, ChevronDown, FolderTree } from 'lucide-react';
 import { useJournals } from '@/hooks/useJournals';
-import { categoryMap } from '@/services/journalService';
 import { DIMENSION_LABELS } from '@/types';
 import './SearchAndFilter.css';
 
 const SearchAndFilter: React.FC = () => {
   const {
     searchQuery,
-    selectedCategory,
+    selectedCategory, // 等级筛选
+    selectedCategoryId, // 分类筛选
     minRating,
     sortBy,
+    levels,           // 从 context 获取的动态等级列表
+    categories,       // 分类树
     setSearchQuery,
     setSelectedCategory,
+    setSelectedCategoryId,
     setMinRating,
     setSortBy,
     clearFilters
   } = useJournals();
 
-  const hasActiveFilters = searchQuery || selectedCategory || minRating > 0 || sortBy;
+  const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || sortBy;
+
+  // 获取选中分类的名称（用于显示标签）
+  const getSelectedCategoryName = (): string | null => {
+    if (!selectedCategoryId || !categories) return null;
+    for (const parent of categories) {
+      if (parent.id === selectedCategoryId) return parent.name;
+      const child = parent.children?.find(c => c.id === selectedCategoryId);
+      if (child) return child.name;
+    }
+    return null;
+  };
 
   const ratingLabels: Record<number, string> = {
     0: '所有评分',
@@ -38,9 +52,9 @@ const SearchAndFilter: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜索期刊名称、ISSN 或学科领域..."
+            placeholder="搜索期刊名称、ISSN 或学科等级..."
             className="search-input"
-            aria-label="搜索期刊名称、ISSN 或学科领域"
+            aria-label="搜索期刊名称、ISSN 或学科等级"
           />
           {searchQuery && (
             <button
@@ -57,23 +71,51 @@ const SearchAndFilter: React.FC = () => {
       {/* 筛选栏 */}
       <div className="filter-bar" role="group" aria-label="筛选选项">
         <div className="filter-group">
-          <label htmlFor="category-filter" className="filter-label">
+          <label htmlFor="level-filter" className="filter-label">
             <BookOpen size={16} />
-            学科
+            等级
+          </label>
+          <div className="select-wrapper">
+            <select
+              id="level-filter"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className={`filter-select ${selectedCategory ? 'has-value' : ''}`}
+              aria-label="按等级筛选"
+            >
+              <option value="">全部</option>
+              {levels && levels.map((level) => (
+                <option key={level.name} value={level.name}>
+                  {level.name} ({level.count})
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="select-arrow" size={14} />
+          </div>
+        </div>
+
+        <div className="filter-group">
+          <label htmlFor="category-filter" className="filter-label">
+            <FolderTree size={16} />
+            分类
           </label>
           <div className="select-wrapper">
             <select
               id="category-filter"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className={`filter-select ${selectedCategory ? 'has-value' : ''}`}
-              aria-label="按学科分类筛选"
+              value={selectedCategoryId || ''}
+              onChange={(e) => setSelectedCategoryId(e.target.value ? Number(e.target.value) : null)}
+              className={`filter-select ${selectedCategoryId ? 'has-value' : ''}`}
+              aria-label="按分类筛选"
             >
-              <option value="">全部</option>
-              {Object.entries(categoryMap).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
+              <option value="">全部分类</option>
+              {categories && categories.map((parent) => (
+                <optgroup key={parent.id} label={parent.name}>
+                  {parent.children?.map((child) => (
+                    <option key={child.id} value={child.id}>
+                      {child.name} ({child.journalCount || 0})
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <ChevronDown className="select-arrow" size={14} />
@@ -154,8 +196,17 @@ const SearchAndFilter: React.FC = () => {
           {selectedCategory && (
             <span className="filter-tag">
               <BookOpen size={12} />
-              {categoryMap[selectedCategory]}
-              <button onClick={() => setSelectedCategory('')} aria-label="移除学科筛选">
+              {selectedCategory}
+              <button onClick={() => setSelectedCategory('')} aria-label="移除等级筛选">
+                <X size={10} />
+              </button>
+            </span>
+          )}
+          {selectedCategoryId && (
+            <span className="filter-tag">
+              <FolderTree size={12} />
+              {getSelectedCategoryName()}
+              <button onClick={() => setSelectedCategoryId(null)} aria-label="移除分类筛选">
                 <X size={10} />
               </button>
             </span>

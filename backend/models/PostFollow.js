@@ -18,7 +18,7 @@ const PostFollow = sequelize.define('PostFollow', {
         field: 'user_id'
     }
 }, {
-    tableName: 'post_follows',
+    tableName: 'online_post_follows',
     updatedAt: false,
     indexes: [
         {

@@ -1,4 +1,4 @@
-const { Comment, CommentLike, Journal, User, Badge, UserBadge } = require('../models');
+const { Comment, CommentLike, Journal, JournalRatingCache, User, Badge, UserBadge } = require('../models');
 const { sequelize } = require('../config/database');
 const badgeService = require('../services/badgeService');
 
@@ -24,8 +24,8 @@ const validateDimensionRatings = (dimensionRatings) => {
     return null;
 };
 
-// 计算期刊多维评分聚合
-const computeJournalDimensionAverages = async (journalId) => {
+// 更新期刊评分缓存表
+const updateJournalRatingCache = async (journalId) => {
     const topLevelComments = await Comment.findAll({
         where: {
             journalId,
@@ -34,30 +34,58 @@ const computeJournalDimensionAverages = async (journalId) => {
         }
     });
 
-    const result = {};
-    let overallSum = 0;
-    let overallCount = 0;
+    if (topLevelComments.length === 0) {
+        // 无评论时删除缓存记录
+        await JournalRatingCache.destroy({ where: { journalId } });
+        return { rating: 0, ratingCount: 0, dimensionAverages: {} };
+    }
+
+    const sums = {};
+    const counts = {};
 
     for (const key of DIMENSION_KEYS) {
-        const withDim = topLevelComments.filter(c => c.dimensionRatings && c.dimensionRatings[key]);
-        if (withDim.length > 0) {
-            const sum = withDim.reduce((s, c) => s + c.dimensionRatings[key], 0);
-            result[key] = Math.round((sum / withDim.length) * 10) / 10;
-        }
+        sums[key] = 0;
+        counts[key] = 0;
     }
 
     for (const c of topLevelComments) {
-        const overall = (c.dimensionRatings && c.dimensionRatings.overallExperience) || c.rating;
-        if (overall) {
-            overallSum += overall;
-            overallCount++;
+        if (c.dimensionRatings) {
+            for (const key of DIMENSION_KEYS) {
+                if (c.dimensionRatings[key] != null) {
+                    sums[key] += c.dimensionRatings[key];
+                    counts[key]++;
+                }
+            }
         }
     }
 
+    const averages = {};
+    for (const key of DIMENSION_KEYS) {
+        averages[key] = counts[key] > 0 ? Math.round((sums[key] / counts[key]) * 10) / 10 : null;
+    }
+
+    // 计算综合评分
+    const validAvgs = Object.values(averages).filter(v => v !== null);
+    const rating = validAvgs.length > 0
+        ? Math.round((validAvgs.reduce((a, b) => a + b, 0) / validAvgs.length) * 10) / 10
+        : 0;
+
+    // Upsert 到缓存表
+    await JournalRatingCache.upsert({
+        journalId,
+        rating,
+        ratingCount: topLevelComments.length,
+        reviewSpeed: averages.reviewSpeed,
+        editorAttitude: averages.editorAttitude,
+        acceptDifficulty: averages.acceptDifficulty,
+        reviewQuality: averages.reviewQuality,
+        overallExperience: averages.overallExperience
+    });
+
     return {
-        dimensionAverages: result,
-        rating: overallCount > 0 ? Math.round((overallSum / overallCount) * 10) / 10 : 0,
-        ratingCount: overallCount
+        rating,
+        ratingCount: topLevelComments.length,
+        dimensionAverages: averages
     };
 };
 
@@ -101,7 +129,7 @@ const getCommentsByJournalId = async (req, res) => {
 
         // 获取该期刊的所有评论
         const comments = await Comment.findAll({
-            where: { journalId: parseInt(journalId) },
+            where: { journalId },
             order: [['created_at', 'DESC']]
         });
 
@@ -179,7 +207,7 @@ const createComment = async (req, res) => {
         const { journalId, parentId, content, rating, dimensionRatings } = req.body;
 
         // 验证期刊是否存在
-        const journal = await Journal.findByPk(parseInt(journalId));
+        const journal = await Journal.findByPk(journalId);
         if (!journal) {
             return res.status(404).json({ message: '期刊不存在' });
         }
@@ -243,7 +271,7 @@ const createComment = async (req, res) => {
         const newComment = await Comment.create({
             userId: req.user.id,
             userName: req.user.name || req.user.email.split('@')[0],
-            journalId: parseInt(journalId),
+            journalId,
             parentId: resolvedParentId,
             content,
             rating: finalRating,
@@ -252,13 +280,9 @@ const createComment = async (req, res) => {
             likeCount: 0
         });
 
-        // 如果是顶级评论，更新期刊评分和维度缓存
+        // 如果是顶级评论，更新期刊评分缓存表
         if (!parentId) {
-            const agg = await computeJournalDimensionAverages(parseInt(journalId));
-            await journal.update({
-                rating: agg.rating,
-                dimensionAverages: agg.dimensionAverages
-            });
+            await updateJournalRatingCache(journalId);
         }
 
         // 检查评论徽章
@@ -338,16 +362,9 @@ const deleteComment = async (req, res) => {
             content: '[该评论已被删除]'
         });
 
-        // 如果是顶级评论，重新计算期刊评分和维度缓存
+        // 如果是顶级评论，重新计算期刊评分缓存
         if (!comment.parentId) {
-            const journal = await Journal.findByPk(comment.journalId);
-            if (journal) {
-                const agg = await computeJournalDimensionAverages(comment.journalId);
-                await journal.update({
-                    rating: agg.rating,
-                    dimensionAverages: agg.dimensionAverages
-                });
-            }
+            await updateJournalRatingCache(comment.journalId);
         }
 
         res.json({ message: '评论已删除', comment: comment.toJSON() });
@@ -362,18 +379,27 @@ const getRatingSummary = async (req, res) => {
     try {
         const { journalId } = req.params;
 
-        const journal = await Journal.findByPk(parseInt(journalId));
+        const journal = await Journal.findByPk(journalId, {
+            include: [{ model: JournalRatingCache, as: 'ratingCache' }]
+        });
         if (!journal) {
             return res.status(404).json({ message: '期刊不存在' });
         }
 
-        const agg = await computeJournalDimensionAverages(parseInt(journalId));
+        const cache = journal.ratingCache;
+        const dimensionAverages = cache ? {
+            reviewSpeed: cache.reviewSpeed,
+            editorAttitude: cache.editorAttitude,
+            acceptDifficulty: cache.acceptDifficulty,
+            reviewQuality: cache.reviewQuality,
+            overallExperience: cache.overallExperience
+        } : {};
 
         res.json({
-            journalId: parseInt(journalId),
-            rating: agg.rating,
-            ratingCount: agg.ratingCount,
-            dimensionAverages: agg.dimensionAverages,
+            journalId,
+            rating: cache ? cache.rating : 0,
+            ratingCount: cache ? cache.ratingCount : 0,
+            dimensionAverages,
             dimensionLabels: DIMENSION_LABELS
         });
     } catch (error) {

@@ -11,17 +11,30 @@ export interface JournalSearchParams {
 }
 
 /**
- * 期刊搜索结果接口
+ * 期刊搜索结果接口（适配新数据库结构）
  */
 export interface JournalSearchResult {
-  id: number;
-  title: string;
+  id: string;           // 兼容旧代码，映射到 journalId
+  journalId: string;    // 新主键
+  title: string;        // 兼容旧代码，映射到 name
+  name: string;         // 新字段名
   issn: string;
-  category: string;
+  category: string;     // 兼容旧代码，取 levels[0]
+  levels: string[];     // 新字段：等级数组
   rating: number;
   reviews: number;
   description?: string;
+  introduction?: string;
   dimensionAverages: {
+    reviewSpeed?: number;
+    editorAttitude?: number;
+    acceptDifficulty?: number;
+    reviewQuality?: number;
+    overallExperience?: number;
+  };
+  ratingCache?: {
+    rating: number;
+    ratingCount: number;
     reviewSpeed?: number;
     editorAttitude?: number;
     acceptDifficulty?: number;
@@ -57,6 +70,34 @@ export interface CategoriesResponse {
 }
 
 /**
+ * 映射后端期刊数据到 JournalSearchResult
+ */
+const mapJournalToSearchResult = (journal: any): JournalSearchResult => {
+  const ratingCache = journal.ratingCache || {};
+  return {
+    id: journal.journalId,           // 兼容旧代码
+    journalId: journal.journalId,
+    title: journal.name,             // 兼容旧代码
+    name: journal.name,
+    issn: journal.issn || '',
+    category: journal.levels?.[0] || '',  // 兼容旧代码
+    levels: journal.levels || [],
+    rating: ratingCache.rating || 0,
+    reviews: ratingCache.ratingCount || 0,
+    description: journal.introduction,
+    introduction: journal.introduction,
+    dimensionAverages: {
+      reviewSpeed: ratingCache.reviewSpeed,
+      editorAttitude: ratingCache.editorAttitude,
+      acceptDifficulty: ratingCache.acceptDifficulty,
+      reviewQuality: ratingCache.reviewQuality,
+      overallExperience: ratingCache.overallExperience,
+    },
+    ratingCache
+  };
+};
+
+/**
  * 搜索期刊
  * @param params 搜索参数
  * @returns 搜索结果
@@ -70,7 +111,7 @@ export const searchJournals = async (
   const { journals, hasMore } = response.data.data;
 
   return {
-    results: journals,
+    results: journals.map(mapJournalToSearchResult),
     total: journals.length, // 后端未返回 total，暂用 results.length
     page: params.page || 1,
     limit: params.limit || 10,
@@ -97,14 +138,5 @@ export const getJournalById = async (id: string | number): Promise<JournalSearch
   const journal = response.data.data.journal;
 
   // 转换为 JournalSearchResult 格式
-  return {
-    id: journal.id,
-    title: journal.title,
-    issn: journal.issn,
-    category: journal.category,
-    rating: journal.rating,
-    reviews: Array.isArray(journal.reviews) ? journal.reviews.length : 0,
-    description: journal.description,
-    dimensionAverages: journal.dimensionAverages || {}
-  };
+  return mapJournalToSearchResult(journal);
 };

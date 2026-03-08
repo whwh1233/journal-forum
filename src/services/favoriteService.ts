@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_URL = '/api/favorites';
 
 // 添加收藏
-export const addFavorite = async (journalId: number): Promise<void> => {
+export const addFavorite = async (journalId: string): Promise<void> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('请先登录');
@@ -15,7 +15,7 @@ export const addFavorite = async (journalId: number): Promise<void> => {
 };
 
 // 取消收藏
-export const removeFavorite = async (journalId: number): Promise<void> => {
+export const removeFavorite = async (journalId: string): Promise<void> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('请先登录');
@@ -27,7 +27,7 @@ export const removeFavorite = async (journalId: number): Promise<void> => {
 };
 
 // 检查是否已收藏
-export const checkFavorite = async (journalId: number): Promise<boolean> => {
+export const checkFavorite = async (journalId: string): Promise<boolean> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     return false;
@@ -52,7 +52,7 @@ export const getUserFavorites = async (userId: number, page = 1, limit = 10) => 
 };
 
 // 切换收藏状态
-export const toggleFavorite = async (journalId: number): Promise<{ favorited: boolean }> => {
+export const toggleFavorite = async (journalId: string): Promise<{ favorited: boolean }> => {
   const token = localStorage.getItem('authToken');
   if (!token) {
     throw new Error('请先登录');

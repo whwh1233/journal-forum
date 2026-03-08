@@ -2,6 +2,15 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+// Mock API services globally
+vi.mock('@/services/journalService', () => ({
+  journalService: {
+    getLevelOptions: vi.fn().mockResolvedValue([{ name: 'SCI', count: 10 }, { name: 'EI', count: 5 }]),
+    getAllJournals: vi.fn().mockResolvedValue([]),
+    getJournalById: vi.fn().mockResolvedValue(null)
+  }
+}));
+
 // 每个测试后自动清理
 afterEach(() => {
   cleanup();
@@ -51,11 +60,11 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
+  constructor() { }
+  disconnect() { }
+  observe() { }
   takeRecords() {
     return [];
   }
-  unobserve() {}
+  unobserve() { }
 } as any;

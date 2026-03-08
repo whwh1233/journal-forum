@@ -26,7 +26,7 @@ const PostReport = sequelize.define('PostReport', {
         defaultValue: 'pending'
     }
 }, {
-    tableName: 'post_reports',
+    tableName: 'online_post_reports',
     indexes: [
         { fields: ['post_id'] },
         { fields: ['reporter_id'] },

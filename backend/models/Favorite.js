@@ -13,12 +13,12 @@ const Favorite = sequelize.define('Favorite', {
         field: 'user_id'
     },
     journalId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(50),
         allowNull: false,
         field: 'journal_id'
     }
 }, {
-    tableName: 'favorites',
+    tableName: 'online_favorites',
     updatedAt: false,
     indexes: [
         {

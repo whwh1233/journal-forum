@@ -6,19 +6,20 @@ import axios from 'axios';
 
 // Mock axios
 vi.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedAxios = axios as any;
 
 describe('JournalPicker', () => {
   const mockJournals = [
     {
-      id: 1,
-      title: 'Nature',
+      journalId: '1',
+      name: 'Nature',
       issn: '0028-0836',
-      category: 'SCI',
-      rating: 4.5,
-      reviews: 120,
-      description: 'Leading scientific journal',
-      dimensionAverages: {
+      levels: ['SCI'],
+      introduction: 'Leading scientific journal',
+      ratingCache: {
+        journalId: '1',
+        rating: 4.5,
+        ratingCount: 120,
         reviewSpeed: 4.0,
         editorAttitude: 4.5,
         acceptDifficulty: 4.8,
@@ -27,14 +28,15 @@ describe('JournalPicker', () => {
       }
     },
     {
-      id: 2,
-      title: 'Science',
+      journalId: '2',
+      name: 'Science',
       issn: '0036-8075',
-      category: 'SCI',
-      rating: 4.4,
-      reviews: 110,
-      description: 'Premier scientific journal',
-      dimensionAverages: {
+      levels: ['SCI'],
+      introduction: 'Premier scientific journal',
+      ratingCache: {
+        journalId: '2',
+        rating: 4.4,
+        ratingCount: 110,
         reviewSpeed: 3.9,
         editorAttitude: 4.3,
         acceptDifficulty: 4.7,
@@ -58,7 +60,7 @@ describe('JournalPicker', () => {
     localStorage.clear();
 
     // Mock categories endpoint - returns { data: { categories: [...] } }
-    mockedAxios.get.mockImplementation((url) => {
+    mockedAxios.get.mockImplementation((url: string) => {
       if (url === '/api/journals/categories') {
         return Promise.resolve({ data: { data: mockCategories } });
       }
@@ -92,10 +94,10 @@ describe('JournalPicker', () => {
     });
 
     it('should render with selected journal', async () => {
-      render(<JournalPicker value={mockJournals[0]} onChange={mockOnChange} />);
+      render(<JournalPicker value={mockJournals[0] as any} onChange={mockOnChange} />);
 
       await waitFor(() => {
-        // When a journal is selected, it shows the title in a span, not an input
+        // When a journal is selected, it shows the name in a span, not an input
         expect(screen.getByText('Nature')).toBeInTheDocument();
       });
     });
@@ -258,7 +260,7 @@ describe('JournalPicker', () => {
 
     it('should clear selection when clear button is clicked', async () => {
       const user = userEvent.setup();
-      render(<JournalPicker value={mockJournals[0]} onChange={mockOnChange} />);
+      render(<JournalPicker value={mockJournals[0] as any} onChange={mockOnChange} />);
 
       // Clear button shows × character
       const clearButton = screen.getByRole('button', { name: /×/ });
@@ -293,7 +295,7 @@ describe('JournalPicker', () => {
 
   describe('错误处理', () => {
     it('should show error message when search fails', async () => {
-      mockedAxios.get.mockImplementation((url) => {
+      mockedAxios.get.mockImplementation((url: string) => {
         if (url === '/api/journals/categories') {
           return Promise.resolve({ data: { data: mockCategories } });
         }
@@ -315,7 +317,7 @@ describe('JournalPicker', () => {
     });
 
     it('should show no results message when no journals found', async () => {
-      mockedAxios.get.mockImplementation((url) => {
+      mockedAxios.get.mockImplementation((url: string) => {
         if (url === '/api/journals/search') {
           return Promise.resolve({
             data: {
@@ -345,7 +347,7 @@ describe('JournalPicker', () => {
   describe('加载状态', () => {
     it('should show loading state while searching', async () => {
       // Delay the response
-      mockedAxios.get.mockImplementation((url) => {
+      mockedAxios.get.mockImplementation((url: string) => {
         if (url === '/api/journals/search') {
           return new Promise(resolve => {
             setTimeout(() => {
@@ -383,7 +385,7 @@ describe('JournalPicker', () => {
 
   describe('滚动加载', () => {
     it('should load more results when scrolling to bottom', async () => {
-      mockedAxios.get.mockImplementation((url, config) => {
+      mockedAxios.get.mockImplementation((url: string, config: any) => {
         if (url === '/api/journals/search') {
           const page = config?.params?.page || 1;
           return Promise.resolve({

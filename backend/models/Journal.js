@@ -2,65 +2,49 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Journal = sequelize.define('Journal', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  title: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: '期刊标题是必填项' }
-    }
-  },
-  issn: {
-    type: DataTypes.STRING(9),
-    allowNull: false,
-    unique: true,
-    validate: {
-      notEmpty: { msg: 'ISSN是必填项' },
-      is: { args: /^\d{4}-\d{4}$/, msg: '请输入有效的ISSN格式（如：1234-5678）' }
-    }
-  },
-  category: {
+  journalId: {
     type: DataTypes.STRING(50),
-    allowNull: false,
-    validate: {
-      isIn: {
-        args: [['computer-science', 'biology', 'physics', 'chemistry', 'mathematics', 'medicine']],
-        msg: '学科分类必须是预定义的值之一'
-      }
-    }
+    primaryKey: true,
+    field: 'journal_id'
   },
-  rating: {
-    type: DataTypes.DECIMAL(2, 1),
-    defaultValue: 0,
-    get() {
-      const val = this.getDataValue('rating');
-      return val === null ? 0 : parseFloat(val);
-    }
+  name: {
+    type: DataTypes.STRING(100),
+    allowNull: false
   },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-    defaultValue: ''
+  supervisor: DataTypes.STRING(100),
+  sponsor: DataTypes.STRING(255),
+  issn: DataTypes.STRING(20),
+  cn: DataTypes.STRING(20),
+  publicationCycle: {
+    type: DataTypes.STRING(20),
+    field: 'publication_cycle'
   },
-  // 多维评分均值缓存（JSON）
-  dimensionAverages: {
-    type: DataTypes.JSON,
-    allowNull: true,
-    defaultValue: null,
-    field: 'dimension_averages'
-  },
-  // 旧版 reviews 数组（JSON，兼容迁移数据）
-  reviews: {
-    type: DataTypes.JSON,
-    defaultValue: [],
-    field: 'reviews'
-  }
+  // 数值指标
+  articleCount: { type: DataTypes.INTEGER, field: 'article_count' },
+  avgCitations: { type: DataTypes.FLOAT, field: 'avg_citations' },
+  impactFactor: { type: DataTypes.FLOAT, field: 'impact_factor' },
+  totalCitations: { type: DataTypes.INTEGER, field: 'total_citations' },
+  downloadCount: { type: DataTypes.INTEGER, field: 'download_count' },
+  fundPaperCount: { type: DataTypes.INTEGER, field: 'fund_paper_count' },
+  otherCitationRate: { type: DataTypes.FLOAT, field: 'other_citation_rate' },
+  // 文本字段
+  fundPaperRate: { type: DataTypes.STRING(20), field: 'fund_paper_rate' },
+  coverImageUrl: { type: DataTypes.STRING(255), field: 'cover_image_url' },
+  formerName: { type: DataTypes.STRING(255), field: 'former_name' },
+  editorInChief: { type: DataTypes.STRING(50), field: 'editor_in_chief' },
+  language: DataTypes.STRING(20),
+  address: DataTypes.STRING(255),
+  postalCode: { type: DataTypes.STRING(20), field: 'postal_code' },
+  email: DataTypes.STRING(500),
+  phone: DataTypes.STRING(500),
+  introduction: DataTypes.TEXT,
+  // JSON 字段
+  mainColumns: { type: DataTypes.JSON, field: 'main_columns' },
+  awards: DataTypes.JSON,
+  indexingHistory: { type: DataTypes.JSON, field: 'indexing_history' }
 }, {
-  tableName: 'journals'
+  tableName: 'online_journals',
+  timestamps: false
 });
 
 module.exports = Journal;

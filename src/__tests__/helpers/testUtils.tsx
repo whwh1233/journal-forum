@@ -50,13 +50,16 @@ export const mockAdminUser = {
 
 // Mock期刊数据
 export const mockJournal = {
-  id: 1,
-  title: 'Test Journal',
+  journalId: '1',
+  name: 'Test Journal',
   issn: '1234-5678',
-  category: 'computer-science',
-  rating: 4.5,
-  description: 'Test journal description',
-  reviews: [],
+  levels: ['计算机科学'],
+  ratingCache: {
+    journalId: '1',
+    rating: 4.5,
+    ratingCount: 0
+  },
+  introduction: 'Test journal description',
   createdAt: new Date().toISOString(),
 };
 
@@ -65,7 +68,7 @@ export const mockComment = {
   id: '1-1234567890-abc123',
   userId: 1,
   userName: 'Test User',
-  journalId: 1,
+  journalId: '1',
   parentId: null,
   content: 'This is a test comment',
   rating: 5,

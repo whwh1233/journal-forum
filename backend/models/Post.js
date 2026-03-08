@@ -43,7 +43,7 @@ const Post = sequelize.define('Post', {
     defaultValue: []
   },
   journalId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(50),
     allowNull: true,
     field: 'journal_id'
   },
@@ -96,7 +96,7 @@ const Post = sequelize.define('Post', {
     defaultValue: 'published'
   }
 }, {
-  tableName: 'posts',
+  tableName: 'online_posts',
   indexes: [
     {
       fields: ['user_id']

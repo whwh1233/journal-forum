@@ -62,7 +62,7 @@ exports.getPosts = async (req, res) => {
                 {
                     model: Journal,
                     as: 'journal',
-                    attributes: ['id', 'title'],
+                    attributes: ['journalId', 'name'],
                     required: false
                 }
             ],
@@ -192,7 +192,7 @@ exports.createPost = async (req, res) => {
                 {
                     model: Journal,
                     as: 'journal',
-                    attributes: ['id', 'title'],
+                    attributes: ['journalId', 'name'],
                     required: false
                 }
             ]
@@ -233,7 +233,7 @@ exports.updatePost = async (req, res) => {
         const updatedPost = await Post.findByPk(id, {
             include: [
                 { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
-                { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
             ]
         });
 
@@ -415,7 +415,7 @@ exports.getMyPosts = async (req, res) => {
         const { count, rows: posts } = await Post.findAndCountAll({
             where: { userId: req.user.id, isDeleted: false },
             include: [
-                { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
             ],
             order: [['createdAt', 'DESC']],
             limit: parseInt(limit),
@@ -451,7 +451,7 @@ exports.getMyFavorites = async (req, res) => {
                     where: { isDeleted: false },
                     include: [
                         { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
-                        { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                        { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
                     ]
                 }
             ],
@@ -491,7 +491,7 @@ exports.getMyFollows = async (req, res) => {
                     where: { isDeleted: false },
                     include: [
                         { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
-                        { model: Journal, as: 'journal', attributes: ['id', 'title'], required: false }
+                        { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
                     ]
                 }
             ],

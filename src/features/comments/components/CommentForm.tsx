@@ -5,7 +5,7 @@ import type { DimensionRatings } from '../../../types';
 import './CommentForm.css';
 
 interface CommentFormProps {
-  journalId: number;
+  journalId: string;
   parentId?: string | null;
   onCommentAdded: () => void;
   onCancel?: () => void;

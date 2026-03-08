@@ -14,10 +14,7 @@ const ProfileEditPage: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    bio: user?.bio || '',
-    location: user?.location || '',
-    institution: user?.institution || '',
-    website: user?.website || ''
+    bio: user?.bio || ''
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -179,42 +176,6 @@ const ProfileEditPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               placeholder="介绍一下自己..."
               rows={3}
-            />
-          </div>
-
-          <div className="profile-form-group">
-            <label htmlFor="location" className="profile-form-label">所在地</label>
-            <input
-              type="text"
-              id="location"
-              className="profile-form-input"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="请输入所在地"
-            />
-          </div>
-
-          <div className="profile-form-group">
-            <label htmlFor="institution" className="profile-form-label">机构</label>
-            <input
-              type="text"
-              id="institution"
-              className="profile-form-input"
-              value={formData.institution}
-              onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
-              placeholder="请输入所在机构"
-            />
-          </div>
-
-          <div className="profile-form-group">
-            <label htmlFor="website" className="profile-form-label">网站</label>
-            <input
-              type="url"
-              id="website"
-              className="profile-form-input"
-              value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              placeholder="https://"
             />
           </div>
 

@@ -4,7 +4,7 @@ import { addFavorite, removeFavorite, checkFavorite } from '../../../services/fa
 import './FavoriteButton.css';
 
 interface FavoriteButtonProps {
-  journalId: number;
+  journalId: string;
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId }) => {
