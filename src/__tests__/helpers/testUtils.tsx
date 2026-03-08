@@ -7,7 +7,7 @@ import { JournalProvider } from '../../contexts/JournalContext';
 // 包装所有provider的测试wrapper
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
-    <BrowserRouter>
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <JournalProvider>{children}</JournalProvider>
       </AuthProvider>
@@ -23,7 +23,7 @@ const customRender = (
 
 // 只包装Router的简单wrapper
 const RouterWrapper = ({ children }: { children: React.ReactNode }) => {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{children}</BrowserRouter>;
 };
 
 const renderWithRouter = (

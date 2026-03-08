@@ -6,10 +6,10 @@
 /* Posts Grid Layout */
 .post-list-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-6);
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
   margin-bottom: var(--space-6);
-  animation: fadeInUp 0.5s ease-out;
+  animation: fadeInUp 0.4s var(--ease-out);
 }
 
 @keyframes fadeInUp {
@@ -359,11 +359,19 @@
   padding: 0 var(--space-3);
 }
 
+/* Large screens: 2 columns */
+@media (min-width: 1200px) {
+  .post-list-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .post-list-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 }
 

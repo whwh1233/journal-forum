@@ -657,21 +657,59 @@
   }
 }
 
-/* Dark Mode Adjustments */
-@media (prefers-color-scheme: dark) {
-  .post-form-toolbar {
-    background: var(--gray-800);
+/* Theme Adjustments */
+[data-theme="dark"] .post-form-container {
+  background: var(--color-background);
+}
+
+[data-theme="dark"] .post-form-toolbar {
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .post-form-toolbar-button {
+  background: var(--color-background);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .post-form-view-toggle {
+  background: var(--color-background);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .post-form-view-button {
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .post-form-textarea,
+[data-theme="dark"] .post-form-preview-content {
+  background: var(--color-surface);
+}
+
+[data-theme="dark"] .post-form-preview-content code {
+  background: var(--color-background);
+}
+
+[data-theme="dark"] .post-form-modal {
+  background: var(--color-background);
+}
+
+[data-theme="dark"] .post-form-button--secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .post-form,
+  .post-form-modal-overlay,
+  .post-form-modal,
+  .post-form-tag {
+    animation: none;
   }
 
-  .post-form-toolbar-button {
-    background: var(--gray-900);
-  }
-
-  .post-form-view-toggle {
-    background: var(--gray-900);
-  }
-
-  .post-form-preview-content code {
-    background: var(--gray-800);
+  .post-form-toolbar-button:hover,
+  .post-form-button:hover,
+  .post-form-modal-button:hover {
+    transform: none;
   }
 }
