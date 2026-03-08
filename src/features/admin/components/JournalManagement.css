@@ -3,7 +3,7 @@
   /* Container styles removed - handled by .page-wrapper */
 }
 
-/* Add Button (used in PageHeader actions) */
+/* Add Button */
 .add-button {
   padding: var(--space-3) var(--space-5);
   background: var(--color-primary);
