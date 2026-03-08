@@ -3,7 +3,7 @@ import { journalService, categoryMap } from '../../../services/journalService';
 import { adminService } from '../../../services/adminService';
 import { Journal } from '../../../types';
 import { Star, X } from 'lucide-react';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './JournalManagement.css';
 
 interface JournalFormData {
@@ -21,6 +21,8 @@ const initialFormData: JournalFormData = {
 };
 
 const JournalManagement: React.FC = () => {
+  usePageTitle('期刊管理');
+
   const [journals, setJournals] = useState<Journal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,15 +123,12 @@ const JournalManagement: React.FC = () => {
 
   return (
     <div className="journal-management">
-      <PageHeader
-        title="期刊管理"
-        actions={
+      <div className="page-wrapper">
+        <div className="journal-management-header">
           <button className="add-button" onClick={handleAdd}>
             + 添加期刊
           </button>
-        }
-      />
-      <div className="page-wrapper">
+        </div>
         <div className="filter-bar">
         <form onSubmit={handleSearch} className="search-form">
           <input

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { adminGetAllBadges, grantBadge } from '../../../services/badgeService';
 import { adminService } from '../../../services/adminService';
 import { Badge, AdminUser } from '../../../types';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import { Sparkles, Award, List, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import './BadgeManagement.css';
 
 const BadgeManagement: React.FC = () => {
+    usePageTitle('荣誉管理');
+
     const [badges, setBadges] = useState<Badge[]>([]);
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
@@ -64,7 +66,6 @@ const BadgeManagement: React.FC = () => {
     if (loading) {
         return (
             <div className="badge-management">
-                <PageHeader title="荣誉管理" />
                 <div className="page-wrapper">
                     <div className="loading-indicator">
                         <div className="loading-spinner"></div>
@@ -78,7 +79,6 @@ const BadgeManagement: React.FC = () => {
     if (error) {
         return (
             <div className="badge-management">
-                <PageHeader title="荣誉管理" />
                 <div className="page-wrapper">
                     <div className="admin-error">{error}</div>
                 </div>
@@ -88,7 +88,6 @@ const BadgeManagement: React.FC = () => {
 
     return (
         <div className="badge-management">
-            <PageHeader title="荣誉管理" />
             <div className="page-wrapper">
 
                 <div className="admin-header">

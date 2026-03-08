@@ -2,10 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { adminService } from '../../../services/adminService';
 import { AdminComment, PaginationInfo } from '../../../types';
 import { Star } from 'lucide-react';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './CommentManagement.css';
 
 const CommentManagement: React.FC = () => {
+  usePageTitle('评论管理');
+
   const [comments, setComments] = useState<AdminComment[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,6 @@ const CommentManagement: React.FC = () => {
 
   return (
     <div className="comment-management">
-      <PageHeader title="评论管理" />
       <div className="page-wrapper">
         <div className="search-bar">
         <form onSubmit={handleSearch} className="search-form">

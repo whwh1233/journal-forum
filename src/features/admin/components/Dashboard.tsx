@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { adminService } from '../../../services/adminService';
 import { AdminStats } from '../../../types';
 import { Users, BookOpen, MessageSquare, Award } from 'lucide-react';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
+  usePageTitle('仪表盘');
+
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard">
-      <PageHeader title="仪表盘" />
       <div className="page-wrapper">
         <div className="stats-grid">
           <div className="stat-card" onClick={() => navigate('/admin/users')}>

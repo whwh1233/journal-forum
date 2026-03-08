@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { adminService } from '../../../services/adminService';
 import { AdminUser, PaginationInfo } from '../../../types';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import './UserManagement.css';
 
 const UserManagement: React.FC = () => {
+  usePageTitle('用户管理');
+
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +79,6 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="user-management">
-      <PageHeader title="用户管理" />
       <div className="page-wrapper">
         <div className="search-bar">
         <form onSubmit={handleSearch} className="search-form">

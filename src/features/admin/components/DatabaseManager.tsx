@@ -6,7 +6,7 @@ import {
   TableDataResponse,
   AuditLog
 } from '../../../services/databaseService';
-import PageHeader from '../../../components/layout/PageHeader';
+import { usePageTitle } from '@/contexts/PageContext';
 import {
   Database,
   Table,
@@ -28,6 +28,8 @@ import './DatabaseManager.css';
 type ViewMode = 'tables' | 'structure' | 'data' | 'logs';
 
 const DatabaseManager: React.FC = () => {
+  usePageTitle('数据库管理');
+
   // 表列表状态
   const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTable, setSelectedTable] = useState<string>('');
@@ -649,7 +651,6 @@ const DatabaseManager: React.FC = () => {
   if (loading && viewMode === 'tables' && tables.length === 0) {
     return (
       <div className="database-manager">
-        <PageHeader title="数据库管理" />
         <div className="page-wrapper">
           <div className="loading-indicator">
             <div className="loading-spinner"></div>
@@ -663,7 +664,6 @@ const DatabaseManager: React.FC = () => {
   if (error && viewMode === 'tables') {
     return (
       <div className="database-manager">
-        <PageHeader title="数据库管理" />
         <div className="page-wrapper">
           <div className="admin-error">{error}</div>
         </div>
@@ -673,7 +673,6 @@ const DatabaseManager: React.FC = () => {
 
   return (
     <div className="database-manager">
-      <PageHeader title="数据库管理" />
       <div className="page-wrapper">
         {/* 操作反馈 */}
         {actionMessage && (
