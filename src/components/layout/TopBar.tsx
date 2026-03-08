@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
+import { usePageContext } from '@/contexts/PageContext';
 import ThemePicker from '@/components/common/ThemePicker';
 import UserDropdown from '@/components/common/UserDropdown';
 import './TopBar.css';
@@ -8,6 +9,7 @@ import './TopBar.css';
 const TopBar: React.FC = () => {
   const { state: authState } = useAuthContext();
   const { openAuthModal } = useAuthModal();
+  const { title } = usePageContext();
 
   const user = authState.user;
   const isAuthenticated = authState.isAuthenticated;
@@ -16,6 +18,7 @@ const TopBar: React.FC = () => {
 
   return (
     <div className="top-bar">
+      <h1 className="top-bar-title">{title}</h1>
       <div className="top-bar-right">
         <ThemePicker />
 

@@ -7,7 +7,7 @@
   border-bottom: 1px solid var(--topbar-border);
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   padding: 0 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
@@ -92,6 +92,18 @@
 .top-bar-login-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+.top-bar-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--gray-900, #111827);
+  margin: 0;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50%;
 }
 
 @media (max-width: 768px) {
