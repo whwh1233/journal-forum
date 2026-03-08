@@ -5,9 +5,11 @@ import PostList from '../components/PostList';
 import { postService } from '../services/postService';
 import { Post, PostFilters, PostPagination, PostCategory, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
 import { useAuth } from '../../../hooks/useAuth';
+import { usePageTitle } from '@/contexts/PageContext';
 import './CommunityPage.css';
 
 const CommunityPage: React.FC = () => {
+  usePageTitle('社区讨论');
   const navigate = useNavigate();
   const { user } = useAuth();
 

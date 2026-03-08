@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import PostDetail from '../components/PostDetail';
 import PostCommentList from '../components/PostCommentList';
+import { usePageTitle } from '@/contexts/PageContext';
 import { postService } from '../services/postService';
 import { Post } from '../types/post';
 import './PostDetailPage.css';
 
 const PostDetailPage: React.FC = () => {
+  usePageTitle('帖子详情');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 

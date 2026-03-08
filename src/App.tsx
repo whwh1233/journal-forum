@@ -7,7 +7,7 @@ import { AuthModalProvider, useAuthModal } from '@/contexts/AuthModalContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { BadgeProvider } from '@/contexts/BadgeContext';
 import { PostProvider } from '@/contexts/PostContext';
-import { PageProvider } from '@/contexts/PageContext';
+import { PageProvider, usePageTitle } from '@/contexts/PageContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
@@ -36,6 +36,8 @@ import './App.css';
  * 首页内容组件
  */
 const HomeContent: React.FC = () => {
+  usePageTitle('期刊列表');
+
   return (
     <div className="home-content">
       <div className="container">
