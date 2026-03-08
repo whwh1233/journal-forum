@@ -46,7 +46,9 @@ const corsOptions = {
       // 生产环境：极度收缩白名单
       const allowedOrigins = [
         'http://8.130.26.87',
-        'http://8.130.26.87:3000' // 为防止带端口访问，可一并添加
+        'https://8.130.26.87',
+        'http://8.130.26.87:3000', // 为防止带端口访问，可一并添加
+        'https://8.130.26.87:3000' // 为防止带端口访问，可一并添加
       ];
       if (allowedOrigins.includes(origin) || !origin) {
         callback(null, true);
