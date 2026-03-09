@@ -111,6 +111,7 @@ const AppContent: React.FC = () => {
           {/* 首页 */}
           <Route path="/" element={<HomeContent />} />
 
+
           {/* 社区讨论 */}
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/posts/:id" element={<PostDetailPage />} />

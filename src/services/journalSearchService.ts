@@ -5,7 +5,8 @@ import axios from 'axios';
  */
 export interface JournalSearchParams {
   q: string;
-  category?: string;
+  level?: string;
+  categoryId?: number;
   page?: number;
   limit?: number;
 }
@@ -55,11 +56,36 @@ export interface JournalSearchResponse {
 }
 
 /**
- * 分类项接口
+ * 等级项接口
  */
-export interface CategoryItem {
+export interface LevelItem {
   name: string;
   count: number;
+}
+
+/**
+ * 等级响应接口
+ */
+export interface LevelsResponse {
+  levels: LevelItem[];
+}
+
+/**
+ * 二级分类项接口
+ */
+export interface CategoryChild {
+  id: number;
+  name: string;
+  journalCount: number;
+}
+
+/**
+ * 一级分类项接口（树形结构）
+ */
+export interface CategoryItem {
+  id: number;
+  name: string;
+  children: CategoryChild[];
 }
 
 /**
@@ -125,6 +151,15 @@ export const searchJournals = async (
  */
 export const getCategories = async (): Promise<CategoriesResponse> => {
   const response = await axios.get('/api/journals/categories');
+  return response.data.data;
+};
+
+/**
+ * 获取期刊等级列表
+ * @returns 等级列表
+ */
+export const getLevels = async (): Promise<LevelsResponse> => {
+  const response = await axios.get('/api/journals/levels');
   return response.data.data;
 };
 

@@ -45,10 +45,10 @@ const createSearchController = () => {
       const db = getDB();
 
       // 验证查询字符串长度
-      if (!q || q.trim().length < 2) {
+      if (!q || q.trim().length < 1) {
         return res.status(400).json({
           success: false,
-          error: 'Search query must be at least 2 characters'
+          error: 'Search query must be at least 1 character'
         });
       }
 
@@ -174,7 +174,7 @@ describe('Journal Search API', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.error).toBe('Search query must be at least 2 characters');
+      expect(response.body.error).toBe('Search query must be at least 1 character');
     });
 
     it('should filter by category', async () => {

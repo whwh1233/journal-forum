@@ -1,6 +1,58 @@
 const { Journal, JournalLevel, JournalRatingCache, Category, JournalCategoryMap, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
+// 排序字段优先级顺序（固定）
+const SORT_FIELD_PRIORITY = [
+    'commentCount',      // 评论数
+    'impactFactor',      // 影响因子
+    'rating',            // 综合评分
+    'overallExperience', // 综合体验
+    'reviewSpeed',       // 审稿速度
+    'editorAttitude',    // 编辑态度
+    'acceptDifficulty',  // 录用难度
+    'reviewQuality'      // 审稿质量
+];
+
+// 需要内存排序的字段（来自 ratingCache）
+const RATING_CACHE_FIELDS = ['commentCount', 'rating', 'overallExperience', 'reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality'];
+
+// 解析排序参数：支持 field:order,field:order 格式
+const parseSortBy = (sortBy) => {
+    if (!sortBy) return [];
+
+    const sortFields = [];
+    const parts = sortBy.split(',');
+
+    for (const part of parts) {
+        const [field, order = 'desc'] = part.trim().split(':');
+        if (field && SORT_FIELD_PRIORITY.includes(field)) {
+            sortFields.push({
+                field,
+                order: order.toLowerCase() === 'asc' ? 'asc' : 'desc'
+            });
+        }
+    }
+
+    // 按固定优先级排序
+    sortFields.sort((a, b) =>
+        SORT_FIELD_PRIORITY.indexOf(a.field) - SORT_FIELD_PRIORITY.indexOf(b.field)
+    );
+
+    return sortFields;
+};
+
+// 获取字段值的辅助函数
+const getFieldValue = (journal, field) => {
+    if (field === 'impactFactor') {
+        return journal.impactFactor || 0;
+    }
+    if (field === 'commentCount') {
+        return (journal.ratingCache && journal.ratingCache.ratingCount) || 0;
+    }
+    // 其他字段都在 ratingCache 中
+    return (journal.ratingCache && journal.ratingCache[field]) || 0;
+};
+
 // 获取所有期刊（支持搜索和筛选）
 const getJournals = async (req, res, next) => {
     try {
@@ -56,21 +108,30 @@ const getJournals = async (req, res, next) => {
             where[Op.and] = andConditions;
         }
 
-        // 排序逻辑
-        let order = [];
-        const dimensionFields = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
-        let sortInMemory = false;
+        // 解析排序参数
+        const sortFields = parseSortBy(sortBy);
 
-        if (sortBy === 'rating') {
-            // 按评分缓存表排序需要 JOIN
-            sortInMemory = true;
-        } else if (dimensionFields.includes(sortBy)) {
-            sortInMemory = true;
-        } else if (sortBy === 'name') {
-            order = [['name', 'ASC']];
-        } else {
-            // 默认或按影响因子排序：从高到低
-            order = [['impactFactor', 'DESC']];
+        // 判断是否需要内存排序
+        const needsMemorySort = sortFields.length > 0 &&
+            sortFields.some(sf => RATING_CACHE_FIELDS.includes(sf.field));
+
+        // 构建数据库排序（仅当不需要内存排序且有 impactFactor 排序时）
+        let order = [];
+        if (!needsMemorySort) {
+            const ifSort = sortFields.find(sf => sf.field === 'impactFactor');
+            if (ifSort) {
+                // 处理 NULL 值：NULL 始终排最后
+                order = [
+                    [sequelize.fn('ISNULL', sequelize.col('impactFactor')), 'ASC'],
+                    ['impactFactor', ifSort.order.toUpperCase()]
+                ];
+            } else if (sortFields.length === 0) {
+                // 默认按影响因子降序，NULL 排最后
+                order = [
+                    [sequelize.fn('ISNULL', sequelize.col('impactFactor')), 'ASC'],
+                    ['impactFactor', 'DESC']
+                ];
+            }
         }
 
         const offset = (page - 1) * limit;
@@ -87,7 +148,8 @@ const getJournals = async (req, res, next) => {
             distinct: true
         };
 
-        if (!sortInMemory) {
+        // 如果需要内存排序，先获取全部数据再分页
+        if (!needsMemorySort) {
             queryOptions.offset = Number(offset);
             queryOptions.limit = Number(limit);
         }
@@ -103,19 +165,20 @@ const getJournals = async (req, res, next) => {
             return data;
         });
 
-        // 如果需要内存排序（按评分或维度排序）
-        if (sortInMemory) {
-            if (sortBy === 'rating') {
-                journals.sort((a, b) =>
-                    ((b.ratingCache && b.ratingCache.rating) || 0) -
-                    ((a.ratingCache && a.ratingCache.rating) || 0)
-                );
-            } else if (dimensionFields.includes(sortBy)) {
-                journals.sort((a, b) =>
-                    ((b.ratingCache && b.ratingCache[sortBy]) || 0) -
-                    ((a.ratingCache && a.ratingCache[sortBy]) || 0)
-                );
-            }
+        // 内存排序（多字段排序）
+        if (needsMemorySort && sortFields.length > 0) {
+            journals.sort((a, b) => {
+                for (const { field, order } of sortFields) {
+                    const aVal = getFieldValue(a, field);
+                    const bVal = getFieldValue(b, field);
+
+                    if (aVal !== bVal) {
+                        const diff = order === 'asc' ? aVal - bVal : bVal - aVal;
+                        if (diff !== 0) return diff;
+                    }
+                }
+                return 0;
+            });
             // 分页
             journals = journals.slice(Number(offset), Number(offset) + Number(limit));
         }
@@ -222,13 +285,13 @@ const getCategories = async (req, res, next) => {
 // 搜索期刊（用于投稿追踪期刊选择器）
 const searchJournals = async (req, res, next) => {
     try {
-        const { q, level, page = 1, limit = 10 } = req.query;
+        const { q, level, categoryId, page = 1, limit = 10 } = req.query;
 
         // 验证查询字符串长度
-        if (!q || q.trim().length < 2) {
+        if (!q || q.trim().length < 1) {
             return res.status(400).json({
                 success: false,
-                error: 'Search query must be at least 2 characters'
+                error: 'Search query must be at least 1 character'
             });
         }
 
@@ -241,13 +304,43 @@ const searchJournals = async (req, res, next) => {
             ]
         };
 
+        const andConditions = [];
+
         // 可选等级过滤
         if (level) {
-            where[Op.and] = sequelize.literal(`EXISTS (
+            andConditions.push(sequelize.literal(`EXISTS (
                 SELECT 1 FROM online_journal_levels l
-                WHERE l.journal_id = Journal.journal_id
+                WHERE l.journal_id = \`Journal\`.\`journal_id\`
                 AND l.level_name = ${sequelize.escape(level)}
-            )`);
+            )`));
+        }
+
+        // 可选学科分类过滤
+        if (categoryId) {
+            const category = await Category.findByPk(categoryId);
+            if (category) {
+                let categoryIds = [Number(categoryId)];
+                if (category.level === 1) {
+                    // 一级分类：获取所有子类ID
+                    const children = await Category.findAll({
+                        where: { parentId: categoryId },
+                        attributes: ['id'],
+                        raw: true
+                    });
+                    categoryIds = children.map(c => c.id);
+                }
+                if (categoryIds.length > 0) {
+                    andConditions.push(sequelize.literal(`EXISTS (
+                        SELECT 1 FROM online_journal_category_map m
+                        WHERE m.journal_id = Journal.journal_id
+                        AND m.category_id IN (${categoryIds.join(',')})
+                    )`));
+                }
+            }
+        }
+
+        if (andConditions.length > 0) {
+            where[Op.and] = andConditions;
         }
 
         // 计算分页

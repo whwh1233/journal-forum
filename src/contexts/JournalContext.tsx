@@ -2,13 +2,56 @@ import React, { createContext, useContext, useReducer, useEffect, useCallback } 
 import { Journal, PaginationInfo, Category } from '@/types';
 import { journalService } from '@/services/journalService';
 
+// 排序字段类型：null=无排序, 'desc'=降序, 'asc'=升序
+export type SortOrder = 'asc' | 'desc' | null;
+
+// 排序字段状态
+export type SortFields = Record<string, SortOrder>;
+
+// 排序字段优先级（固定顺序）
+export const SORT_FIELD_PRIORITY = [
+  'commentCount',      // 评论数
+  'impactFactor',      // 影响因子
+  'rating',            // 综合评分
+  'overallExperience', // 综合体验
+  'reviewSpeed',       // 审稿速度
+  'editorAttitude',    // 编辑态度
+  'acceptDifficulty',  // 录用难度
+  'reviewQuality'      // 审稿质量
+] as const;
+
+// 排序字段显示名称
+export const SORT_FIELD_LABELS: Record<string, string> = {
+  commentCount: '评论数',
+  impactFactor: '影响因子',
+  rating: '综合评分',
+  overallExperience: '综合体验',
+  reviewSpeed: '审稿速度',
+  editorAttitude: '编辑态度',
+  acceptDifficulty: '录用难度',
+  reviewQuality: '审稿质量'
+};
+
+// 将 sortFields 转换为 API 参数格式
+export const sortFieldsToString = (sortFields: SortFields): string => {
+  const parts: string[] = [];
+  for (const field of SORT_FIELD_PRIORITY) {
+    const order = sortFields[field];
+    if (order) {
+      parts.push(`${field}:${order}`);
+    }
+  }
+  return parts.join(',');
+};
+
 // 过滤状态类型
 interface FilterState {
   searchQuery: string;
   selectedCategory: string; // 等级筛选 (selectedLevel)
   selectedCategoryId: number | null; // 分类筛选
   minRating: number;
-  sortBy: string;
+  sortFields: SortFields;
+  sortExpanded: boolean;
 }
 
 // Journal上下文状态
@@ -37,7 +80,8 @@ type JournalAction =
   | { type: 'SET_SELECTED_CATEGORY'; payload: string }
   | { type: 'SET_SELECTED_CATEGORY_ID'; payload: number | null }
   | { type: 'SET_MIN_RATING'; payload: number }
-  | { type: 'SET_SORT_BY'; payload: string }
+  | { type: 'TOGGLE_SORT_FIELD'; payload: string }
+  | { type: 'SET_SORT_EXPANDED'; payload: boolean }
   | { type: 'CLEAR_FILTERS' };
 
 // 初始状态
@@ -53,9 +97,17 @@ const initialState: JournalState = {
   selectedCategory: '',
   selectedCategoryId: null,
   minRating: 0,
-  sortBy: '',
+  sortFields: {},
+  sortExpanded: false,
   pagination: null,
   hasMore: true
+};
+
+// 切换排序字段状态：null -> desc -> asc -> null
+const toggleSortOrder = (current: SortOrder): SortOrder => {
+  if (current === null) return 'desc';
+  if (current === 'desc') return 'asc';
+  return null;
 };
 
 // Reducer函数
@@ -76,12 +128,14 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
     case 'APPEND_JOURNALS': {
       const { journals, pagination } = action.payload;
       const newJournals = [...state.journals, ...journals];
+      // 如果返回空数据或已到最后一页，停止加载更多
+      const hasMore = journals.length > 0 && pagination.currentPage < pagination.totalPages;
       return {
         ...state,
         journals: newJournals,
         filteredJournals: newJournals,
         pagination,
-        hasMore: pagination.currentPage < pagination.totalPages,
+        hasMore,
         loadingMore: false
       };
     }
@@ -112,8 +166,20 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
       return { ...state, selectedCategory: action.payload };
     case 'SET_MIN_RATING':
       return { ...state, minRating: action.payload };
-    case 'SET_SORT_BY':
-      return { ...state, sortBy: action.payload };
+    case 'TOGGLE_SORT_FIELD': {
+      const field = action.payload;
+      const currentOrder = state.sortFields[field] || null;
+      const newOrder = toggleSortOrder(currentOrder);
+      const newSortFields = { ...state.sortFields };
+      if (newOrder === null) {
+        delete newSortFields[field];
+      } else {
+        newSortFields[field] = newOrder;
+      }
+      return { ...state, sortFields: newSortFields };
+    }
+    case 'SET_SORT_EXPANDED':
+      return { ...state, sortExpanded: action.payload };
     case 'CLEAR_FILTERS':
       return {
         ...state,
@@ -121,7 +187,7 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
         selectedCategory: '',
         selectedCategoryId: null,
         minRating: 0,
-        sortBy: '',
+        sortFields: {},
         filteredJournals: state.journals
       };
     default:
@@ -129,13 +195,12 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
   }
 }
 
-// 过滤期刊的辅助函数
+// 过滤期刊的辅助函数（仅做本地筛选，不做排序，排序由后端处理）
 function filterJournals(
   journals: Journal[],
   searchQuery: string,
   selectedCategory: string,
-  minRating: number,
-  sortBy: string
+  minRating: number
 ): Journal[] {
   let filtered = [...journals];
 
@@ -161,21 +226,8 @@ function filterJournals(
     });
   }
 
-  // 本地排序（后端已排，这里作为双重保险）
-  const dimensionFields = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
-  if (sortBy === 'rating') {
-    filtered.sort((a, b) => {
-      const aRating = a.ratingCache?.rating || 0;
-      const bRating = b.ratingCache?.rating || 0;
-      return bRating - aRating;
-    });
-  } else if (sortBy && dimensionFields.includes(sortBy)) {
-    filtered.sort((a, b) => {
-      const aScore = (a.ratingCache as any)?.[sortBy] || 0;
-      const bScore = (b.ratingCache as any)?.[sortBy] || 0;
-      return bScore - aScore;
-    });
-  }
+  // 注意：不在这里做排序，排序完全由后端处理
+  // 前端重新排序会破坏后端的分页顺序
 
   return filtered;
 }
@@ -197,6 +249,9 @@ const JournalContext = createContext<{
 export function JournalProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(journalReducer, initialState);
 
+  // 将 sortFields 转换为 API 参数字符串
+  const sortByParam = sortFieldsToString(state.sortFields);
+
   // 刷新期刊数据（重新加载第一页）
   const refreshJournals = useCallback(async () => {
     try {
@@ -205,7 +260,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         state.searchQuery,
         state.selectedCategory,
         state.minRating,
-        state.sortBy,
+        sortByParam,
         1,
         12,
         state.selectedCategoryId
@@ -217,7 +272,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         payload: error instanceof Error ? error.message : '加载期刊数据失败'
       });
     }
-  }, [state.searchQuery, state.selectedCategory, state.minRating, state.sortBy, state.selectedCategoryId]);
+  }, [state.searchQuery, state.selectedCategory, state.minRating, sortByParam, state.selectedCategoryId]);
 
   // 加载更多期刊
   const loadMoreJournals = useCallback(async () => {
@@ -230,7 +285,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         state.searchQuery,
         state.selectedCategory,
         state.minRating,
-        state.sortBy,
+        sortByParam,
         nextPage,
         12,
         state.selectedCategoryId
@@ -242,7 +297,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         payload: error instanceof Error ? error.message : '加载更多期刊失败'
       });
     }
-  }, [state.loadingMore, state.hasMore, state.pagination, state.searchQuery, state.selectedCategory, state.minRating, state.sortBy, state.selectedCategoryId]);
+  }, [state.loadingMore, state.hasMore, state.pagination, state.searchQuery, state.selectedCategory, state.minRating, sortByParam, state.selectedCategoryId]);
 
   // 加载学科选项
   const loadLevels = useCallback(async () => {
@@ -267,7 +322,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   // 初始加载和过滤器变化时重新加载
   useEffect(() => {
     refreshJournals();
-  }, [state.searchQuery, state.selectedCategory, state.selectedCategoryId, state.minRating, state.sortBy, refreshJournals]);
+  }, [state.searchQuery, state.selectedCategory, state.selectedCategoryId, state.minRating, sortByParam, refreshJournals]);
 
   // 首次渲染加载 Levels 和 Categories
   useEffect(() => {
@@ -275,13 +330,12 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
     loadCategories();
   }, [loadLevels, loadCategories]);
 
-  // 单独处理filteredJournals的更新
+  // 单独处理filteredJournals的更新（仅本地筛选，排序由后端处理）
   const filteredJournals = filterJournals(
     state.journals,
     state.searchQuery,
     state.selectedCategory,
-    state.minRating,
-    state.sortBy
+    state.minRating
   );
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { useJournalSearch } from '../../hooks/useJournalSearch';
-import { getCategories, CategoryItem, JournalSearchResult } from '../../services/journalSearchService';
+import { getCategories, getLevels, CategoryItem, LevelItem, JournalSearchResult } from '../../services/journalSearchService';
 import { DIMENSION_LABELS } from '../../types';
 import { createCustomJournal, isCustomJournal } from './journalPickerUtils';
 import './JournalPicker.css';
@@ -16,13 +16,25 @@ interface JournalPickerProps {
 const JournalPicker: React.FC<JournalPickerProps> = ({
   value,
   onChange,
-  placeholder = '搜索期刊名称或ISSN...',
+  placeholder = '输入期刊名称、ISSN 或刊号搜索...',
   disabled = false
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // 等级筛选状态
+  const [levels, setLevels] = useState<LevelItem[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const [isLevelsExpanded, setIsLevelsExpanded] = useState(false);
+
+  // 学科分类筛选状态
   const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>('全部学科');
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [hoveredCategory, setHoveredCategory] = useState<CategoryItem | null>(null);
+
+  // 维度显示设置
   const [displayDimensions, setDisplayDimensions] = useState<string[]>(() => {
     const saved = localStorage.getItem('journalPickerDimensions');
     return saved ? JSON.parse(saved) : ['reviewSpeed', 'overallExperience'];
@@ -30,25 +42,41 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
 
   const { results, loading, error, hasMore, search, loadMore, reset } = useJournalSearch();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const categoryMenuRef = useRef<HTMLDivElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 加载分类
+  // 加载等级和分类数据
   useEffect(() => {
+    getLevels().then(res => setLevels(res.levels)).catch(err => {
+      console.error('Error loading levels:', err);
+    });
     getCategories().then(res => setCategories(res.categories)).catch(err => {
       console.error('Error loading categories:', err);
     });
   }, []);
 
-  // 点击外部关闭下拉列表
+  // 点击外部关闭下拉列表和分类菜单
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
+      if (categoryMenuRef.current && !categoryMenuRef.current.contains(e.target as Node)) {
+        setIsCategoryMenuOpen(false);
+        setHoveredCategory(null);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // 触发搜索
+  const triggerSearch = (query: string, level: string | null, categoryId: number | null) => {
+    if (query.trim().length >= 1) {
+      search(query, level || undefined, categoryId || undefined);
+      setIsOpen(true);
+    }
+  };
 
   // 防抖搜索
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,10 +87,9 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
       clearTimeout(debounceTimerRef.current);
     }
 
-    if (newValue.trim().length >= 2) {
+    if (newValue.trim().length >= 1) {
       debounceTimerRef.current = setTimeout(() => {
-        search(newValue, selectedCategory || undefined);
-        setIsOpen(true);
+        triggerSearch(newValue, selectedLevel, selectedCategoryId);
       }, 300);
     } else {
       reset();
@@ -94,12 +121,28 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
     onChange(null);
   };
 
-  // 切换分类
-  const handleCategoryChange = (category: string | null) => {
-    setSelectedCategory(category);
-    if (inputValue.trim().length >= 2) {
-      search(inputValue, category || undefined);
+  // 切换等级筛选
+  const handleLevelChange = (level: string | null) => {
+    setSelectedLevel(level);
+    if (inputValue.trim().length >= 1) {
+      triggerSearch(inputValue, level, selectedCategoryId);
     }
+  };
+
+  // 选择学科分类（一级或二级）
+  const handleCategorySelect = (categoryId: number | null, categoryName: string) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedCategoryName(categoryName);
+    setIsCategoryMenuOpen(false);
+    setHoveredCategory(null);
+    if (inputValue.trim().length >= 1) {
+      triggerSearch(inputValue, selectedLevel, categoryId);
+    }
+  };
+
+  // 计算一级分类的期刊总数
+  const getCategoryTotalCount = (category: CategoryItem): number => {
+    return category.children.reduce((sum, child) => sum + child.journalCount, 0);
   };
 
   // 切换维度
@@ -121,7 +164,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
     const target = e.target as HTMLDivElement;
     if (target.scrollHeight - target.scrollTop <= target.clientHeight + 50) {
       if (!loading && hasMore) {
-        loadMore(inputValue, selectedCategory || undefined);
+        loadMore(inputValue, selectedLevel || undefined, selectedCategoryId || undefined);
       }
     }
   };
@@ -134,27 +177,107 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
     { key: 'overallExperience', label: '综合体验' }
   ];
 
+  // 显示的等级数量（折叠时显示前8个）
+  const COLLAPSED_LEVEL_COUNT = 8;
+  const displayedLevels = isLevelsExpanded ? levels : levels.slice(0, COLLAPSED_LEVEL_COUNT);
+  const hasMoreLevels = levels.length > COLLAPSED_LEVEL_COUNT;
+
   return (
     <div className="journal-picker" ref={dropdownRef}>
-      {/* 分类标签 */}
-      <div className="category-tabs">
-        <button
-          type="button"
-          className={selectedCategory === null ? 'active' : ''}
-          onClick={() => handleCategoryChange(null)}
-        >
-          全部
-        </button>
-        {categories.map(cat => (
+      {/* 等级筛选 */}
+      <div className="filter-section">
+        <span className="filter-label">等级筛选：</span>
+        <div className={`level-tabs ${isLevelsExpanded ? 'expanded' : ''}`}>
           <button
             type="button"
-            key={cat.name}
-            className={selectedCategory === cat.name ? 'active' : ''}
-            onClick={() => handleCategoryChange(cat.name)}
+            className={`filter-btn ${selectedLevel === null ? 'active' : ''}`}
+            onClick={() => handleLevelChange(null)}
           >
-            {cat.name} ({cat.count})
+            全部
           </button>
-        ))}
+          {displayedLevels.map(level => (
+            <button
+              type="button"
+              key={level.name}
+              className={`filter-btn ${selectedLevel === level.name ? 'active' : ''}`}
+              onClick={() => handleLevelChange(level.name)}
+            >
+              {level.name}({level.count})
+            </button>
+          ))}
+          {hasMoreLevels && (
+            <button
+              type="button"
+              className="expand-btn"
+              onClick={() => setIsLevelsExpanded(!isLevelsExpanded)}
+            >
+              {isLevelsExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              {isLevelsExpanded ? '收起' : `更多(${levels.length - COLLAPSED_LEVEL_COUNT})`}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 学科分类筛选 */}
+      <div className="filter-section">
+        <span className="filter-label">学科分类：</span>
+        <div className="category-selector" ref={categoryMenuRef}>
+          <button
+            type="button"
+            className={`category-trigger ${isCategoryMenuOpen ? 'open' : ''}`}
+            onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+          >
+            <span>{selectedCategoryName}</span>
+            <ChevronDown size={14} className={`arrow ${isCategoryMenuOpen ? 'rotated' : ''}`} />
+          </button>
+
+          {isCategoryMenuOpen && (
+            <div className="category-menu">
+              <div className="category-list">
+                {/* 全部选项 */}
+                <div
+                  className={`category-item ${selectedCategoryId === null ? 'active' : ''}`}
+                  onClick={() => handleCategorySelect(null, '全部学科')}
+                >
+                  全部学科
+                </div>
+
+                {/* 一级分类列表 */}
+                {categories.map(cat => (
+                  <div
+                    key={cat.id}
+                    className={`category-item ${selectedCategoryId === cat.id ? 'active' : ''} ${hoveredCategory?.id === cat.id ? 'hovered' : ''}`}
+                    onMouseEnter={() => setHoveredCategory(cat)}
+                    onClick={() => handleCategorySelect(cat.id, cat.name)}
+                  >
+                    <span>{cat.name}</span>
+                    <span className="count">({getCategoryTotalCount(cat)})</span>
+                    {cat.children.length > 0 && <ChevronDown size={12} className="submenu-arrow" />}
+                  </div>
+                ))}
+              </div>
+
+              {/* 二级分类悬浮面板 */}
+              {hoveredCategory && hoveredCategory.children.length > 0 && (
+                <div className="subcategory-panel">
+                  <div className="subcategory-header">{hoveredCategory.name}</div>
+                  <div className="subcategory-list">
+                    {hoveredCategory.children.map(child => (
+                      <div
+                        key={child.id}
+                        className={`subcategory-item ${selectedCategoryId === child.id ? 'active' : ''}`}
+                        onClick={() => handleCategorySelect(child.id, `${hoveredCategory.name} > ${child.name}`)}
+                      >
+                        <span>{child.name}</span>
+                        <span className="count">({child.journalCount})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 搜索框 */}
@@ -250,7 +373,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
             {loading && <div className="loading-message">加载中...</div>}
 
             {/* 搜索无结果时的提示和自定义选项 */}
-            {!loading && results.length === 0 && inputValue.trim().length >= 2 && (
+            {!loading && results.length === 0 && inputValue.trim().length >= 1 && (
               <div className="no-results-section">
                 <div className="empty-message">在期刊库中未找到匹配结果</div>
                 <button type="button" className="use-custom-btn" onClick={handleUseCustomName}>
@@ -261,7 +384,7 @@ const JournalPicker: React.FC<JournalPickerProps> = ({
             )}
 
             {/* 有结果时也显示自定义选项 */}
-            {!loading && results.length > 0 && inputValue.trim().length >= 2 && (
+            {!loading && results.length > 0 && inputValue.trim().length >= 1 && (
               <div className="custom-option-footer">
                 <button type="button" className="use-custom-btn secondary" onClick={handleUseCustomName}>
                   <Plus size={14} />

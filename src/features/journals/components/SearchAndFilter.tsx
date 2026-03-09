@@ -1,234 +1,264 @@
-import React from 'react';
-import { Search, X, BookOpen, Star, ArrowUpDown, ChevronDown, FolderTree } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { Search, X, BookOpen, Star, ArrowUpDown, ChevronDown, FolderTree, ArrowDown, ArrowUp, Circle, Check, ChevronRight } from 'lucide-react';
 import { useJournals } from '@/hooks/useJournals';
-import { DIMENSION_LABELS } from '@/types';
+import { SORT_FIELD_PRIORITY, SORT_FIELD_LABELS } from '@/contexts/JournalContext';
 import './SearchAndFilter.css';
+
+interface Option {
+  id: string | number;
+  name: string;
+  children?: Option[];
+}
+
+interface PopoverSelectProps {
+  label: string;
+  icon: React.ReactNode;
+  options: Option[];
+  selectedId: string | number | null;
+  onSelect: (id: any) => void;
+  placeholder?: string;
+  isCascaded?: boolean;
+}
+
+const PopoverSelect: React.FC<PopoverSelectProps> = ({
+  label, icon, options, selectedId, onSelect, placeholder = '请选择', isCascaded = false
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [hoveredParentId, setHoveredParentId] = useState<string | number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedName = useMemo(() => {
+    if (selectedId === null || selectedId === undefined || selectedId === '' || selectedId === 0) return placeholder;
+    for (const opt of options) {
+      if (opt.id === selectedId) return opt.name;
+      const child = opt.children?.find(c => c.id === selectedId);
+      if (child) return child.name;
+    }
+    return placeholder;
+  }, [selectedId, options, placeholder]);
+
+  const hoveredParent = options.find(o => o.id === hoveredParentId);
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+    if (!isOpen) setHoveredParentId(null);
+  };
+
+  return (
+    <div className="filter-group size-large" ref={containerRef}>
+      <div className="filter-label">{icon} <span>{label}</span></div>
+      <div className="popover-select-container">
+        <div
+          className={`popover-trigger ${selectedId && selectedId !== '0' && selectedId !== 0 ? 'has-value' : ''} ${isOpen ? 'open' : ''}`}
+          onClick={toggleMenu}
+        >
+          <span className="trigger-text">{selectedName}</span>
+          <ChevronDown size={14} className={`arrow ${isOpen ? 'open' : ''}`} />
+        </div>
+
+        {isOpen && (
+          <div className={`popover-menu ${isCascaded ? 'cascaded' : ''}`}>
+            <div className="menu-column main-column">
+              <div
+                className={`menu-item ${!selectedId || selectedId === '0' || selectedId === 0 ? 'active' : ''}`}
+                onClick={() => { onSelect(isCascaded ? null : (typeof options[0]?.id === 'number' ? 0 : '')); setIsOpen(false); }}
+              >
+                <span className="item-text">{isCascaded ? '全部分类' : '全部'}</span>
+                {(!selectedId || selectedId === '0' || selectedId === 0) && <Check size={14} className="check-icon" />}
+              </div>
+              {options.map(opt => (
+                <div
+                  key={opt.id}
+                  className={`menu-item ${hoveredParentId === opt.id ? 'hovered' : ''} ${selectedId === opt.id ? 'active' : ''}`}
+                  onMouseEnter={() => isCascaded && setHoveredParentId(opt.id)}
+                  onClick={() => {
+                    onSelect(opt.id);
+                    setIsOpen(false);
+                  }}
+                >
+                  <span className="item-text">{opt.name}</span>
+                  {isCascaded && opt.children && opt.children.length > 0 && <ChevronRight size={14} className="sub-arrow" />}
+                  {(!isCascaded && selectedId === opt.id) && <Check size={14} className="check-icon" />}
+                </div>
+              ))}
+            </div>
+
+            {isCascaded && hoveredParent && hoveredParent.children && hoveredParent.children.length > 0 && (
+              <div className="menu-column sub-column">
+                {hoveredParent.children.map(child => (
+                  <div
+                    key={child.id}
+                    className={`menu-item ${selectedId === child.id ? 'active' : ''}`}
+                    onClick={() => { onSelect(child.id); setIsOpen(false); }}
+                  >
+                    <span className="item-text">{child.name}</span>
+                    {selectedId === child.id && <Check size={14} className="check-icon" />}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const SearchAndFilter: React.FC = () => {
   const {
     searchQuery,
-    selectedCategory, // 等级筛选
-    selectedCategoryId, // 分类筛选
+    selectedCategory,
+    selectedCategoryId,
     minRating,
-    sortBy,
-    levels,           // 从 context 获取的动态等级列表
-    categories,       // 分类树
+    sortFields,
+    sortExpanded,
+    hasActiveSorts,
+    levels,
+    categories,
     setSearchQuery,
     setSelectedCategory,
     setSelectedCategoryId,
     setMinRating,
-    setSortBy,
+    toggleSortField,
+    setSortExpanded,
     clearFilters
   } = useJournals();
 
-  const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || sortBy;
+  const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || hasActiveSorts;
 
-  // 获取选中分类的名称（用于显示标签）
-  const getSelectedCategoryName = (): string | null => {
-    if (!selectedCategoryId || !categories) return null;
-    for (const parent of categories) {
-      if (parent.id === selectedCategoryId) return parent.name;
-      const child = parent.children?.find(c => c.id === selectedCategoryId);
-      if (child) return child.name;
-    }
-    return null;
+  const getSortIcon = (field: string) => {
+    const order = sortFields[field];
+    if (order === 'desc') return <ArrowDown size={14} className="sort-icon desc" />;
+    if (order === 'asc') return <ArrowUp size={14} className="sort-icon asc" />;
+    return <Circle size={10} className="sort-icon none" />;
   };
 
-  const ratingLabels: Record<number, string> = {
-    0: '所有评分',
-    2: '2星以上',
-    3: '3星以上',
-    4: '4星以上'
-  };
+  const levelOptions = useMemo(() => levels?.map(l => ({ id: l.name, name: l.name })) || [], [levels]);
+  const ratingOptions = [
+    { id: 4, name: '4星以上' },
+    { id: 3, name: '3星以上' },
+    { id: 2, name: '2星以上' }
+  ];
+  const categoryOptions = useMemo(() => categories?.map(c => ({
+    id: c.id,
+    name: c.name,
+    children: c.children?.map(child => ({ id: child.id, name: child.name }))
+  })) || [], [categories]);
 
   return (
     <section className="search-filter-section" aria-label="搜索和筛选期刊">
-      {/* 搜索栏 */}
-      <div className="search-bar">
-        <div className="search-input-wrapper">
-          <Search className="search-icon" size={18} />
+      <div className="sfc-search-bar">
+        <div className="sfc-search-inner">
+          <Search className="sfc-search-icon" size={18} />
           <input
-            id="journal-search"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="搜索期刊名称、ISSN 或学科等级..."
-            className="search-input"
-            aria-label="搜索期刊名称、ISSN 或学科等级"
+            className="sfc-search-input"
           />
           {searchQuery && (
-            <button
-              className="search-clear-btn"
-              onClick={() => setSearchQuery('')}
-              aria-label="清除搜索"
-            >
+            <button className="sfc-search-clear" onClick={() => setSearchQuery('')}>
               <X size={14} />
             </button>
           )}
         </div>
       </div>
 
-      {/* 筛选栏 */}
-      <div className="filter-bar" role="group" aria-label="筛选选项">
-        <div className="filter-group">
-          <label htmlFor="level-filter" className="filter-label">
-            <BookOpen size={16} />
-            等级
-          </label>
-          <div className="select-wrapper">
-            <select
-              id="level-filter"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className={`filter-select ${selectedCategory ? 'has-value' : ''}`}
-              aria-label="按等级筛选"
-            >
-              <option value="">全部</option>
-              {levels && levels.map((level) => (
-                <option key={level.name} value={level.name}>
-                  {level.name} ({level.count})
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="select-arrow" size={14} />
-          </div>
-        </div>
+      <div className="filter-bar">
+        <PopoverSelect
+          label="等级"
+          icon={<BookOpen size={18} />}
+          options={levelOptions}
+          selectedId={selectedCategory}
+          onSelect={setSelectedCategory}
+          placeholder="全部等级"
+        />
 
-        <div className="filter-group">
-          <label htmlFor="category-filter" className="filter-label">
-            <FolderTree size={16} />
-            分类
-          </label>
-          <div className="select-wrapper">
-            <select
-              id="category-filter"
-              value={selectedCategoryId || ''}
-              onChange={(e) => setSelectedCategoryId(e.target.value ? Number(e.target.value) : null)}
-              className={`filter-select ${selectedCategoryId ? 'has-value' : ''}`}
-              aria-label="按分类筛选"
-            >
-              <option value="">全部分类</option>
-              {categories && categories.map((parent) => (
-                <optgroup key={parent.id} label={parent.name}>
-                  {parent.children?.map((child) => (
-                    <option key={child.id} value={child.id}>
-                      {child.name} ({child.journalCount || 0})
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-            <ChevronDown className="select-arrow" size={14} />
-          </div>
-        </div>
+        <PopoverSelect
+          label="分类"
+          icon={<FolderTree size={18} />}
+          options={categoryOptions}
+          selectedId={selectedCategoryId}
+          onSelect={setSelectedCategoryId}
+          placeholder="全部分类"
+          isCascaded={true}
+        />
 
-        <div className="filter-group">
-          <label htmlFor="rating-filter" className="filter-label">
-            <Star size={16} />
-            评分
-          </label>
-          <div className="select-wrapper">
-            <select
-              id="rating-filter"
-              value={minRating}
-              onChange={(e) => setMinRating(Number(e.target.value))}
-              className={`filter-select ${minRating > 0 ? 'has-value' : ''}`}
-              aria-label="按最低评分筛选"
-            >
-              <option value="0">全部</option>
-              <option value="4">4星以上</option>
-              <option value="3">3星以上</option>
-              <option value="2">2星以上</option>
-            </select>
-            <ChevronDown className="select-arrow" size={14} />
-          </div>
-        </div>
+        <PopoverSelect
+          label="评分"
+          icon={<Star size={18} />}
+          options={ratingOptions}
+          selectedId={minRating}
+          onSelect={setMinRating}
+          placeholder="全部评分"
+        />
 
-        <div className="filter-group">
-          <label htmlFor="sort-filter" className="filter-label">
-            <ArrowUpDown size={16} />
-            排序
-          </label>
-          <div className="select-wrapper">
-            <select
-              id="sort-filter"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className={`filter-select ${sortBy ? 'has-value' : ''}`}
-              aria-label="按维度排序"
-            >
-              <option value="">默认</option>
-              <option value="rating">综合评分</option>
-              <option value="reviewSpeed">审稿速度</option>
-              <option value="editorAttitude">编辑态度</option>
-              <option value="acceptDifficulty">录用难度</option>
-              <option value="reviewQuality">审稿质量</option>
-              <option value="overallExperience">综合体验</option>
-            </select>
-            <ChevronDown className="select-arrow" size={14} />
-          </div>
+        <div className="filter-group size-large">
+          <div className="filter-label"><ArrowUpDown size={16} /> <span>排序功能</span></div>
+          <button
+            className={`sort-trigger-btn ${hasActiveSorts ? 'has-value' : ''} ${sortExpanded ? 'open' : ''}`}
+            onClick={() => setSortExpanded(!sortExpanded)}
+          >
+            <span className="trigger-text">{hasActiveSorts ? '多维度排序' : '配置排序'}</span>
+            <ChevronDown size={14} className={`arrow ${sortExpanded ? 'open' : ''}`} />
+          </button>
         </div>
 
         {hasActiveFilters && (
-          <button
-            onClick={clearFilters}
-            className="clear-filters-btn"
-            aria-label="清除所有筛选条件"
-          >
-            <X size={14} />
-            清除
-          </button>
+          <div className="filter-group clear-group">
+            <div className="filter-label" style={{ visibility: 'hidden' }}><X size={16} /> <span>占位</span></div>
+            <button onClick={clearFilters} className="clear-filters-btn">
+              <X size={14} /> <span>重置筛选</span>
+            </button>
+          </div>
         )}
       </div>
 
-      {/* 已选筛选标签 */}
-      {hasActiveFilters && (
-        <div className="active-filters">
-          {searchQuery && (
-            <span className="filter-tag">
-              <Search size={12} />
-              "{searchQuery}"
-              <button onClick={() => setSearchQuery('')} aria-label="移除搜索条件">
-                <X size={10} />
-              </button>
-            </span>
-          )}
-          {selectedCategory && (
-            <span className="filter-tag">
-              <BookOpen size={12} />
-              {selectedCategory}
-              <button onClick={() => setSelectedCategory('')} aria-label="移除等级筛选">
-                <X size={10} />
-              </button>
-            </span>
-          )}
-          {selectedCategoryId && (
-            <span className="filter-tag">
-              <FolderTree size={12} />
-              {getSelectedCategoryName()}
-              <button onClick={() => setSelectedCategoryId(null)} aria-label="移除分类筛选">
-                <X size={10} />
-              </button>
-            </span>
-          )}
-          {minRating > 0 && (
-            <span className="filter-tag">
-              <Star size={12} />
-              {ratingLabels[minRating]}
-              <button onClick={() => setMinRating(0)} aria-label="移除评分筛选">
-                <X size={10} />
-              </button>
-            </span>
-          )}
-          {sortBy && (
-            <span className="filter-tag">
-              <ArrowUpDown size={12} />
-              {sortBy === 'rating' ? '综合评分' : (DIMENSION_LABELS[sortBy] || sortBy)}
-              <button onClick={() => setSortBy('')} aria-label="移除排序">
-                <X size={10} />
-              </button>
-            </span>
-          )}
+      {sortExpanded && (
+        <div className="sort-panel-container">
+          <div className="sort-panel-header">
+            <div className="header-info">
+              <span className="title">排序配置管理</span>
+              <span className="desc">支持多重排序组合，点击卡片进行切换控制</span>
+            </div>
+            <button className="close-panel-btn" onClick={() => setSortExpanded(false)}>
+              <X size={18} />
+            </button>
+          </div>
+          <div className="sort-field-grid">
+            {SORT_FIELD_PRIORITY.map((field) => {
+              const order = sortFields[field];
+              const isActive = !!order;
+              return (
+                <button
+                  key={field}
+                  className={`sort-item-card ${isActive ? `active ${order}` : ''}`}
+                  onClick={() => toggleSortField(field)}
+                >
+                  <div className="sort-item-content">
+                    <span className="field-name">{SORT_FIELD_LABELS[field]}</span>
+                    <div className="sort-status">
+                      {getSortIcon(field)}
+                      <span className="status-text">{order === 'desc' ? '降序排列' : order === 'asc' ? '升序排列' : '暂未启用'}</span>
+                    </div>
+                  </div>
+                  {isActive && <div className="active-glow" />}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
     </section>

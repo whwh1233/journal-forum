@@ -109,7 +109,9 @@
       "Bash(grep:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run:*)",
-      "Bash(npx vitest run:*)"
+      "Bash(npx vitest run:*)",
+      "Bash(cmd /c \"taskkill /PID 27616 /F\")",
+      "Bash(ping:*)"
     ]
   }
 }

@@ -16,16 +16,18 @@ export const useJournalSearch = () => {
   /**
    * 搜索期刊
    * @param query 搜索关键词
-   * @param category 可选分类筛选
+   * @param level 可选等级筛选
+   * @param categoryId 可选学科分类筛选
    * @param isLoadMore 是否为加载更多（追加结果）
    */
   const search = useCallback(async (
     query: string,
-    category?: string,
+    level?: string,
+    categoryId?: number,
     isLoadMore = false
   ) => {
     // 验证搜索关键词长度
-    if (query.trim().length < 2) {
+    if (query.trim().length < 1) {
       setResults([]);
       setHasMore(false);
       return;
@@ -44,7 +46,8 @@ export const useJournalSearch = () => {
       const currentPage = isLoadMore ? page + 1 : 1;
       const response = await searchJournals({
         q: query,
-        category,
+        level,
+        categoryId,
         page: currentPage,
         limit: 10
       });
@@ -68,11 +71,12 @@ export const useJournalSearch = () => {
   /**
    * 加载更多结果
    * @param query 搜索关键词
-   * @param category 可选分类筛选
+   * @param level 可选等级筛选
+   * @param categoryId 可选学科分类筛选
    */
-  const loadMore = useCallback((query: string, category?: string) => {
+  const loadMore = useCallback((query: string, level?: string, categoryId?: number) => {
     if (!loading && hasMore) {
-      search(query, category, true);
+      search(query, level, categoryId, true);
     }
   }, [loading, hasMore, search]);
 
