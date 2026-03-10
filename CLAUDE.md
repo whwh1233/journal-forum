@@ -458,14 +458,72 @@ src/
 └── styles/global.css               # 6 个主题 CSS 变量定义
 ```
 
+## 📐 Design System 设计系统
+
+统一的视觉设计规范，确保所有组件遵循一致的字体、间距、尺寸标准。
+
+### 字体 (Font Family)
+
+| 用途 | 字体 | CSS 变量 |
+|------|------|----------|
+| 全站主字体 | **Lexend** | `--font-sans` |
+| 标题/展示 | Lexend (600-700) | `--font-display` |
+| 代码/等宽 | JetBrains Mono | `--font-mono` |
+
+### 字号系统 (Typography Scale)
+
+**比例**: Perfect Fourth (1.333) | **基准**: 16px
+
+| 层级 | 字号 | 图标 | CSS 变量 | 用途 |
+|------|------|------|----------|------|
+| 2XL | 50px | — | `--text-2xl` | 品牌标题 |
+| XL | 38px | 40px | `--text-xl` | 页面主标题 |
+| LG | 28px | 32px | `--text-lg` | 区块标题 |
+| MD | 21px | 24px | `--text-md` | 卡片标题 |
+| **Base** | **16px** | **20px** | `--text-base` | 正文（默认） |
+| SM | 14px | 16px | `--text-sm` | 辅助文本、按钮 |
+| XS | 12px | 14px | `--text-xs` | 注释、时间戳 |
+
+**图标配对规则**: `图标尺寸 = 字号 × 1.25`（向上取整到偶数）
+
+### 间距系统 (Spacing)
+
+使用现有变量，禁止硬编码。
+
+| 变量 | 值 | 变量 | 值 |
+|------|-----|------|-----|
+| `--space-1` | 4px | `--space-6` | 32px |
+| `--space-2` | 8px | `--space-8` | 48px |
+| `--space-3` | 12px | `--space-10` | 64px |
+| `--space-4` | 16px | `--space-12` | 80px |
+| `--space-5` | 24px | | |
+
+### 组件尺寸 (Component Sizing)
+
+| 尺寸 | 高度 | 字号 | 图标 | 头像 | 圆角 |
+|------|------|------|------|------|------|
+| XS | 24px | 12px | 14px | 20px | 4px |
+| SM | 32px | 14px | 16px | 28px | 6px |
+| **MD** | **40px** | **16px** | **20px** | **36px** | **8px** |
+| LG | 48px | 21px | 24px | 48px | 10px |
+| XL | 56px | 28px | 32px | 64px | 12px |
+
+### 实施规则
+
+1. **禁止硬编码**: 所有字号、间距、尺寸必须使用 CSS 变量
+2. **图标一致性**: Lucide React 图标必须使用配对尺寸
+3. **组件默认**: 未指定尺寸时使用 MD (40px 高度)
+4. **详细文档**: `docs/superpowers/specs/2026-03-10-design-system.md`
+
 ---
 
 ## 当前状态与待办事项
-> **最后更新**: 2026-03-07
+> **最后更新**: 2026-03-10
 > **规则**: 仅记录当前最新状态和最优先问题，每次改动后更新此区域
 
 ### ✅ 当前状态
 
+- **Design System**: 已完成统一设计系统规范（字体 Lexend、Perfect Fourth 字号比例、5 级组件尺寸、图标配对规则）
 - **投稿追踪系统**：已完成期刊智能关联与数据整合。JournalPicker 组件（分类过滤、防抖搜索、维度显示）、JournalInfoCard 组件（5 维度评分、收藏切换）、双向快捷入口。
 - **数据库升级**：已完整从 LowDB 迁移至 MySQL 8.0。包括 9 大 Sequelize 模型构建（支持高并发）、数据平滑迁移（支持 UUID）、所有控制器与服务层的彻底重写。
 - **权限体系**：三级角色（user/admin/superadmin），superadmin 可访问数据库管理功能。
@@ -479,8 +537,9 @@ src/
 
 ### 🔴 优先待办
 
-1. **前端组件测试** - 剩余组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
-2. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
+1. **Design System 实施** - 将设计规范应用到所有组件（替换硬编码字号/间距/尺寸为 CSS 变量）
+2. **前端组件测试** - 剩余组件待补充测试（TopBar, SideNav, PageHeader, AppLayout, SearchAndFilter, JournalDetailPanel, CommentList, CommentForm, RegisterForm 等）
+3. **单元测试缺失** - `backend/__tests__/unit/` 和 `src/__tests__/integration/` 目录为空
 
 ### 📋 功能积压 (详见 `EXPANSION_PLAN.md`)
 
@@ -496,7 +555,16 @@ src/
 ## 最近重要改动
 > 记录最近 2-3 次会话的关键改动，便于新对话快速了解项目演进
 
-### 2026-03-02 (Session 5 - Current)
+### 2026-03-10 (Session 6 - Current)
+新增统一 Design System 设计系统：
+1. **字体系统**：全站统一使用 Lexend 字体（阅读优化、舒适现代），代码使用 JetBrains Mono
+2. **字号系统**：Perfect Fourth (1.333) 比例，7 级字号（12px ~ 50px），基准 16px
+3. **图标配对**：图标尺寸 = 字号 × 1.25，确保视觉平衡
+4. **组件尺寸**：5 级体系（XS/SM/MD/LG/XL），MD (40px) 为默认
+5. **间距系统**：统一使用 `--space-1` ~ `--space-12` 变量，禁止硬编码
+6. **设计文档**：`docs/superpowers/specs/2026-03-10-design-system.md`
+
+### 2026-03-02 (Session 5)
 新增数据库管理功能（类 phpMyAdmin）：
 1. **权限体系升级**：User 模型新增 `superadmin` 角色，三级权限（user/admin/superadmin）。新增 `superAdminAuth.js` 中间件。
 2. **数据库管理页面**：管理后台新增「数据库管理」入口（仅 superadmin 可见），支持：
@@ -513,11 +581,11 @@ src/
 2. **控制器完全替换**：将全部 Controller、Service 及 Middleware 从基于 LowDB 的 JSON 操作改写为异步 SQL 查询，优化内存占用与并发性能（如 COUNT/SUM 替代数组遍历）。
 3. **数据无损迁移**：开发了 `scripts/migrateData.js` 脚本，将旧版 database.json 中包含的 5 个用户、8 个期刊、34 条级联评论等历史数据平滑迁移到 MySQL，期间完成 Integer ID 到 UUID 主键的安全转换和 Decimal 的格式修正。
 
-### 2026-03-01 (Session 3)
-多维排序与评论有用性点赞：
-1. **多维期刊排序**：首页 `SearchAndFilter` 新增排序下拉菜单，支持按综合评分及 5 个评价维度排序。后端 `getJournals` 接收 `sortBy` 参数，排序基于缓存在 `journal.dimensionAverages` 中的实时均值。
-2. **评论有用性点赞**：新增 `POST /api/comments/:id/like` Toggle 接口，`CommentItem` 增加点赞按钮（本地即时反馈），`CommentList` 排序增加"最有用"选项。
-3. **性能优化**：`createComment`/`deleteComment` 时自动将 `dimensionAverages` 持久化到 `journal` 对象，避免排序时实时遍历评论。
+### 2026-03-01 (Session 4)
+全面迁移至 MySQL 数据库架构：
+1. **数据层重构**：引入 Sequelize ORM 构建 8 个数据模型，实现复杂表间关联
+2. **控制器完全替换**：将全部 Controller、Service 及 Middleware 从 LowDB 改写为异步 SQL 查询
+3. **数据无损迁移**：开发 `scripts/migrateData.js` 脚本，完成历史数据平滑迁移
 
 ---
 **维护说明**: 每次会话结束时更新此区域，保留最近 3 次会话记录。
