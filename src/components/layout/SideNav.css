@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 8px 0 12px;
+  padding: var(--space-2) 0 var(--space-3);
   z-index: var(--z-nav);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   overflow: hidden;
@@ -24,13 +24,13 @@
 .side-nav-toggle {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: var(--size-md);
   flex-shrink: 0;
   justify-content: center;
   padding: 0;
-  margin: 0 10px 6px;
+  margin: 0 var(--space-2) var(--space-1);
   width: 44px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: none;
   background: transparent;
   color: var(--nav-toggle-color);
@@ -42,8 +42,8 @@
 
 .side-nav.expanded .side-nav-toggle {
   justify-content: space-between;
-  width: calc(100% - 20px);
-  padding: 0 10px;
+  width: calc(100% - var(--space-5));
+  padding: 0 var(--space-2);
 }
 
 .side-nav-toggle:hover {
@@ -57,7 +57,7 @@
 }
 
 .side-nav-brand {
-  font-size: 1.25rem;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--nav-brand-color);
   letter-spacing: 0.04em;
@@ -65,7 +65,7 @@
 }
 
 .side-nav-toggle-icon {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--nav-toggle-color);
   flex-shrink: 0;
   display: inline-block;
@@ -83,7 +83,7 @@
   flex-direction: column;
   align-items: stretch;
   gap: 2px;
-  padding: 0 10px;
+  padding: 0 var(--space-2);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -92,8 +92,8 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 4px;
-  padding: 8px 10px 0;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) 0;
   border-top: 1px solid var(--nav-divider);
 }
 
@@ -101,14 +101,14 @@
 .side-nav-item {
   display: flex;
   align-items: center;
-  height: 46px;
-  border-radius: 8px;
+  height: var(--size-lg);
+  border-radius: var(--radius-md);
   color: var(--nav-item-color);
   text-decoration: none;
   cursor: pointer;
   border: none;
   background: transparent;
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -121,8 +121,8 @@
 
 .side-nav.expanded .side-nav-item {
   justify-content: flex-start;
-  padding: 0 10px;
-  gap: 10px;
+  padding: 0 var(--space-2);
+  gap: var(--space-2);
 }
 
 .side-nav-item:hover {
@@ -160,7 +160,7 @@
   overflow: hidden;
   transition: max-width 0.22s ease, opacity 0.18s ease;
   pointer-events: none;
-  font-size: 0.95rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: inherit;
   white-space: nowrap;
@@ -176,7 +176,7 @@
 .side-nav-divider {
   height: 1px;
   background: var(--nav-divider);
-  margin: 4px 0;
+  margin: var(--space-1) 0;
   border-radius: 1px;
 }
 
@@ -184,10 +184,10 @@
 .side-nav-user {
   display: flex;
   align-items: center;
-  height: 52px;
-  gap: 10px;
-  border-radius: 8px;
-  padding: 0 6px;
+  height: var(--size-lg);
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-1);
   cursor: pointer;
   border: none;
   background: transparent;
@@ -208,21 +208,21 @@
 }
 
 .side-nav-avatar {
-  width: 36px;
-  height: 36px;
+  width: var(--avatar-md);
+  height: var(--avatar-md);
   border-radius: 50%;
   background: var(--nav-avatar-bg);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .side-nav-user-name {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: inherit;
   white-space: nowrap;
@@ -255,9 +255,9 @@
     bottom: 0;
     left: 0;
     width: 100% !important;
-    height: 56px;
+    height: var(--size-xl);
     flex-direction: row;
-    padding: 0 8px;
+    padding: 0 var(--space-2);
     overflow: visible;
     transition: none;
   }
@@ -275,7 +275,7 @@
   }
 
   .side-nav-top { flex: 1; justify-content: space-around; }
-  .side-nav-bottom { flex: 0 0 auto; justify-content: flex-end; gap: 4px; }
+  .side-nav-bottom { flex: 0 0 auto; justify-content: flex-end; gap: var(--space-1); }
 
   .side-nav-item {
     width: 44px; height: 44px;
