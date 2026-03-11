@@ -54,7 +54,7 @@
 /* Icons */
 .theme-toggle-icon {
   position: absolute;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   line-height: 1;
   pointer-events: none;
   transition: opacity 0.2s ease;

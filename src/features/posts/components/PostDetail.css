@@ -77,7 +77,7 @@
 }
 
 .post-detail-author-name {
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -87,7 +87,7 @@
   align-items: center;
   gap: 6px;
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .post-detail-meta-right {
@@ -102,7 +102,7 @@
   align-items: center;
   padding: 6px 16px;
   border-radius: var(--radius-full);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -145,7 +145,7 @@
 }
 
 .post-detail-tag {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   padding: 6px 14px;
   border-radius: var(--radius-md);
   background: var(--gray-100);
@@ -174,7 +174,7 @@
   align-items: center;
   gap: 8px;
   color: var(--color-text-muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   font-weight: 500;
 }
 
@@ -184,7 +184,7 @@
 
 /* Content Section - Markdown Styles */
 .post-detail-content {
-  font-size: 1.0625rem;
+  font-size: var(--text-base);
   line-height: 1.8;
   color: var(--color-text);
   font-family: var(--font-sans);
@@ -283,7 +283,7 @@
   background: transparent;
   color: inherit;
   padding: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   line-height: 1.6;
 }
 
@@ -308,7 +308,7 @@
   width: 100%;
   border-collapse: collapse;
   margin: 1.5em 0;
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
 }
 
 .post-detail-content th,
@@ -359,7 +359,7 @@
 }
 
 .post-detail-journal-header h4 {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -387,7 +387,7 @@
 }
 
 .post-detail-journal-title {
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-accent);
   flex: 1;
@@ -417,7 +417,7 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   color: var(--color-text);
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast);
@@ -459,7 +459,7 @@
 }
 
 .post-detail-action-count {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   padding: 2px 8px;
   background: var(--gray-100);
   border-radius: var(--radius-full);
@@ -549,7 +549,7 @@
 }
 
 .post-detail-error h3 {
-  font-size: 1.5rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 var(--space-2) 0;
@@ -586,7 +586,7 @@
   }
 
   .post-detail-title {
-    font-size: 1.5rem;
+    font-size: var(--text-lg);
   }
 
   .post-detail-meta {
@@ -595,7 +595,7 @@
   }
 
   .post-detail-content {
-    font-size: 1rem;
+    font-size: var(--text-base);
   }
 
   .post-detail-content h1 { font-size: 1.5rem; }
@@ -628,7 +628,7 @@
   }
 
   .post-detail-title {
-    font-size: 1.375rem;
+    font-size: var(--text-md);
   }
 
   .post-detail-content pre {

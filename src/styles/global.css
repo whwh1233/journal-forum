@@ -181,6 +181,10 @@
 
   --color-text-secondary: var(--gray-500);
 
+  /* ── 侧边栏宽度 ─────────────────────────── */
+  --nav-width-collapsed: 64px;
+  --nav-width-expanded: 200px;
+
   /* ── 主题变量：侧边栏 ─────────────────── */
   --nav-bg: #1e293b;
   --nav-item-color: #94a3b8;

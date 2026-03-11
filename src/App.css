@@ -29,7 +29,7 @@
 .journals-section h2 {
   margin-bottom: var(--spacing-lg);
   color: var(--color-primary-dark);
-  font-size: 1.8rem;
+  font-size: var(--text-xl);
   font-family: var(--font-heading);
   font-weight: 700;
 }

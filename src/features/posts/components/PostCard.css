@@ -49,15 +49,15 @@
 
 .post-pinned-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: var(--space-3);
+  right: var(--space-3);
   background: linear-gradient(135deg, var(--color-accent) 0%, var(--blue-700) 100%);
   color: white;
-  font-size: 0.6875rem;
+  font-size: var(--text-xs);
   font-weight: 600;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+  box-shadow: var(--shadow-md);
   z-index: 1;
   letter-spacing: 0.02em;
 }
@@ -89,13 +89,13 @@
 }
 
 .post-author-avatar {
-  width: 36px;
-  height: 36px;
+  width: var(--avatar-md);
+  height: var(--avatar-md);
   border-radius: var(--radius-full);
   object-fit: cover;
   border: 2px solid var(--color-surface);
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .post-author-avatar--placeholder {
@@ -107,7 +107,7 @@
 }
 
 .post-author-name {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
   white-space: nowrap;
@@ -119,9 +119,9 @@
 .post-category-badge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
@@ -160,7 +160,7 @@
 
 /* Title - 标题样式 */
 .post-card-title {
-  font-size: 1.125rem;
+  font-size: var(--text-md);
   font-weight: 600;
   font-family: var(--font-display);
   color: var(--color-primary);
@@ -175,7 +175,7 @@
 }
 
 .post-card-title--compact {
-  font-size: 1rem;
+  font-size: var(--text-base);
   -webkit-line-clamp: 1;
 }
 
@@ -185,7 +185,7 @@
 
 /* Content Summary */
 .post-card-content {
-  font-size: 0.9375rem;
+  font-size: var(--text-sm);
   line-height: 1.65;
   color: var(--color-text-muted);
   margin: 0;
@@ -204,8 +204,8 @@
 }
 
 .post-card-tag {
-  font-size: 0.75rem;
-  padding: 4px 10px;
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text-muted);
@@ -246,9 +246,9 @@
 .post-stat {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   color: var(--color-text-muted);
-  font-size: 0.8125rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   transition: color var(--duration-fast) var(--ease-out);
 }
@@ -277,9 +277,9 @@
 .post-card-time {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--space-1);
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -298,7 +298,7 @@
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  font-size: 0.8125rem;
+  font-size: var(--text-xs);
   transition: all var(--duration-fast) var(--ease-out);
 }
 
@@ -358,11 +358,11 @@
   }
 
   .post-card-title {
-    font-size: 1rem;
+    font-size: var(--text-base);
   }
 
   .post-card-content {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     -webkit-line-clamp: 2;
   }
 
@@ -377,16 +377,16 @@
   }
 
   .post-stat {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 
   .post-author-avatar {
-    width: 32px;
-    height: 32px;
+    width: var(--avatar-sm);
+    height: var(--avatar-sm);
   }
 
   .post-author-name {
-    font-size: 0.8125rem;
+    font-size: var(--text-xs);
   }
 }
 
@@ -398,26 +398,26 @@
   }
 
   .post-card-title {
-    font-size: 0.9375rem;
+    font-size: var(--text-sm);
   }
 
   .post-category-badge {
-    font-size: 0.6875rem;
-    padding: 4px 8px;
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
   }
 
   .post-card-tags {
-    gap: 6px;
+    gap: var(--space-2);
   }
 
   .post-card-tag {
-    font-size: 0.6875rem;
-    padding: 3px 8px;
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
   }
 
   .post-author-avatar {
-    width: 28px;
-    height: 28px;
+    width: var(--avatar-xs);
+    height: var(--avatar-xs);
   }
 }
 

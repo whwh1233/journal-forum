@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .toast-message {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   line-height: 1.5;
   color: var(--color-text);
   word-wrap: break-word;
@@ -102,7 +102,7 @@
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   line-height: 1;
   margin: -4px -4px -4px 0;
 }

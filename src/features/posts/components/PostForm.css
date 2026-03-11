@@ -35,7 +35,7 @@
 }
 
 .post-form-header h2 {
-  font-size: 1.75rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   font-family: var(--font-display);
   color: var(--color-primary);
@@ -47,7 +47,7 @@
   align-items: center;
   gap: 6px;
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .post-form-autosave svg {
@@ -72,7 +72,7 @@
 
 .post-form-label {
   display: block;
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text);
   margin-bottom: var(--space-2);
@@ -92,7 +92,7 @@
 .post-form-select {
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-family: var(--font-sans);
   color: var(--color-text);
   background: var(--color-surface);
@@ -131,13 +131,13 @@
 }
 
 .post-form-error {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: rgb(239, 68, 68);
   font-weight: 500;
 }
 
 .post-form-char-count {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-left: auto;
 }
@@ -163,7 +163,7 @@
   background: var(--color-accent);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   animation: slideIn 0.2s ease-out;
 }
@@ -258,7 +258,7 @@
   border: none;
   border-right: 1px solid var(--color-border);
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--duration-fast);
@@ -312,7 +312,7 @@
   width: 100%;
   min-height: 500px;
   padding: var(--space-4);
-  font-size: 1rem;
+  font-size: var(--text-base);
   line-height: 1.8;
   font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
   color: var(--color-text);
@@ -348,7 +348,7 @@
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   overflow-y: auto;
   min-height: 500px;
-  font-size: 1.0625rem;
+  font-size: var(--text-base);
   line-height: 1.8;
   color: var(--color-text);
 }
@@ -437,7 +437,7 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   font-family: var(--font-sans);
   border-radius: var(--radius-lg);
@@ -531,7 +531,7 @@
 }
 
 .post-form-modal h3 {
-  font-size: 1.5rem;
+  font-size: var(--text-lg);
   font-weight: 700;
   font-family: var(--font-display);
   color: var(--color-primary);
@@ -539,7 +539,7 @@
 }
 
 .post-form-modal p {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-text-muted);
   margin: 0 0 var(--space-6) 0;
   line-height: 1.6;
@@ -553,7 +553,7 @@
 
 .post-form-modal-button {
   padding: var(--space-3) var(--space-5);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -600,7 +600,7 @@
   }
 
   .post-form-header h2 {
-    font-size: 1.5rem;
+    font-size: var(--text-lg);
   }
 
   .post-form-row {

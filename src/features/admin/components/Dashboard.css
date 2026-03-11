@@ -8,7 +8,7 @@
   text-align: center;
   padding: var(--space-10);
   color: var(--gray-500);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .dashboard-error {
@@ -42,8 +42,8 @@
 }
 
 .stat-icon {
-  width: 56px;
-  height: 56px;
+  width: var(--size-xl);
+  height: var(--size-xl);
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
@@ -68,14 +68,14 @@
 }
 
 .stat-value {
-  font-size: 2rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--gray-900);
   line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--gray-500);
   margin-top: var(--space-1);
 }
@@ -90,7 +90,7 @@
 }
 
 .section-title {
-  font-size: 1.1rem;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--gray-800);
   margin-bottom: var(--space-4);
@@ -111,7 +111,7 @@
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
   color: var(--gray-700);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
@@ -147,13 +147,12 @@
   }
 
   .stat-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 1.25rem;
+    width: var(--size-lg);
+    height: var(--size-lg);
   }
 
   .stat-value {
-    font-size: 1.5rem;
+    font-size: var(--text-lg);
   }
 
   .action-buttons {

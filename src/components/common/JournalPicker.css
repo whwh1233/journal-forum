@@ -11,7 +11,7 @@
 
 .filter-label {
   display: inline-block;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
@@ -24,7 +24,7 @@
   background: var(--color-bg);
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   transition: all 0.2s;
   white-space: nowrap;
@@ -65,7 +65,7 @@
   background: transparent;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text-muted);
   transition: all 0.2s;
@@ -92,7 +92,7 @@
   background: var(--color-bg);
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   transition: all 0.2s;
   min-width: 140px;
@@ -152,7 +152,7 @@
   justify-content: space-between;
   padding: 0.625rem 1rem;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   transition: all 0.15s;
 }
 
@@ -168,7 +168,7 @@
 }
 
 .category-item .count {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
   margin-left: 0.5rem;
 }
@@ -189,7 +189,7 @@
 
 .subcategory-header {
   padding: 0.75rem 1rem;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-muted);
   border-bottom: 1px solid var(--color-border);
@@ -206,7 +206,7 @@
   justify-content: space-between;
   padding: 0.5rem 1rem;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   transition: all 0.15s;
 }
 
@@ -221,7 +221,7 @@
 }
 
 .subcategory-item .count {
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
 
@@ -266,13 +266,13 @@
 .selected-journal .journal-name {
   font-weight: 600;
   color: var(--color-primary);
-  font-size: 1rem;
+  font-size: var(--text-base);
 }
 
 .selected-journal .clear-btn {
   background: var(--color-primary);
   border: none;
-  font-size: 1.25rem;
+  font-size: var(--text-md);
   cursor: pointer;
   color: white;
   padding: 0;
@@ -313,7 +313,7 @@
   padding: 0.2rem 0.5rem;
   background: #f59e0b;
   color: white;
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   border-radius: 4px;
   flex-shrink: 0;
@@ -371,7 +371,7 @@
 }
 
 .selector-label {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text-muted);
 }
@@ -382,7 +382,7 @@
   background: var(--color-bg);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   transition: all 0.2s;
 }
@@ -450,7 +450,7 @@
 
 .journal-item .journal-title {
   font-weight: 600;
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-text);
   flex: 1;
   min-width: 0;
@@ -460,7 +460,7 @@
 }
 
 .journal-rating {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: #d97706;
   font-weight: 600;
   flex-shrink: 0;
@@ -470,7 +470,7 @@
 }
 
 .journal-meta {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin-bottom: 0.875rem;
   display: flex;
@@ -496,7 +496,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .dimension-row .dimension-label {
@@ -512,7 +512,7 @@
 }
 
 .dot {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-border);
   transition: color 0.15s;
 }
@@ -528,7 +528,7 @@
   padding: 2rem 1.5rem;
   text-align: center;
   color: var(--color-text-muted);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .loading-message {
@@ -587,7 +587,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -625,7 +625,7 @@
   background: transparent;
   color: #d97706;
   border: 1.5px dashed #f59e0b;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
 }
 

@@ -19,7 +19,7 @@
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   background: var(--color-background);
   color: var(--color-text);
   transition: border-color var(--duration-fast) var(--ease-out);
@@ -37,7 +37,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
@@ -113,7 +113,7 @@
 .comment-author {
   font-weight: 600;
   color: var(--gray-800);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .comment-divider {
@@ -122,7 +122,7 @@
 
 .comment-journal {
   color: var(--gray-600);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 .comment-rating {
@@ -132,7 +132,7 @@
   padding: var(--space-1) var(--space-2);
   background: #fef3c7;
   border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: #92400e;
 }
@@ -143,13 +143,13 @@
 
 .comment-date {
   color: var(--gray-500);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
 }
 
 .comment-content {
   color: var(--gray-700);
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   margin-bottom: var(--space-4);
   padding: var(--space-3);
   background: var(--gray-50);
@@ -167,7 +167,7 @@
   color: #991b1b;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out);
@@ -191,7 +191,7 @@
   background: var(--color-background);
   border: 1px solid var(--gray-300);
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   color: var(--color-text);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
@@ -209,7 +209,7 @@
 
 .pagination-info {
   color: var(--gray-600);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
 }
 
 /* Responsive */
@@ -237,6 +237,6 @@
   }
 
   .comment-content {
-    font-size: 0.9rem;
+    font-size: var(--text-base);
   }
 }

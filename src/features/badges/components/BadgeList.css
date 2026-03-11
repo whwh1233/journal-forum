@@ -15,6 +15,6 @@
   border-radius: 9999px;
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 500;
 }

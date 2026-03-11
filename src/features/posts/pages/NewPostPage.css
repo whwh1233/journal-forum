@@ -55,7 +55,7 @@
   margin: 0;
   color: rgb(185, 28, 28);
   font-weight: 500;
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   flex: 1;
   line-height: 1.5;
 }
@@ -66,7 +66,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);
@@ -121,7 +121,7 @@
 
 .new-post-page-submitting p {
   color: white;
-  font-size: 1.0625rem;
+  font-size: var(--text-md);
   font-weight: 600;
   margin: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);

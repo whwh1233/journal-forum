@@ -71,7 +71,7 @@
 }
 
 .new-badge-toast__title {
-  font-size: 12px;
+  font-size: var(--text-xs);
   color: var(--badge-color);
   font-weight: 600;
   text-transform: uppercase;
@@ -80,13 +80,13 @@
 }
 
 .new-badge-toast__name {
-  font-size: 18px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 
 .new-badge-toast__desc {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }

@@ -6,7 +6,7 @@
 
 .app-layout-main {
   flex: 1;
-  margin-left: 64px;
+  margin-left: var(--nav-width-collapsed);
   min-height: 100vh;
   overflow-x: hidden;
   display: flex;
@@ -17,21 +17,21 @@
 }
 
 .app-layout.nav-expanded .app-layout-main {
-  margin-left: 200px;
+  margin-left: var(--nav-width-expanded);
 }
 
 .app-layout-main .container {
   background: var(--panel-bg, var(--color-background));
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 768px) {
   .app-layout-main,
   .app-layout.nav-expanded .app-layout-main {
     margin-left: 0;
-    padding-bottom: 56px;
+    padding-bottom: var(--size-xl);
     transition: none;
   }
 }

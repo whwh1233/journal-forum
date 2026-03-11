@@ -12,7 +12,7 @@
 }
 
 .badge-wall__title {
-  font-size: 18px;
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 20px 0;
@@ -27,7 +27,7 @@
 }
 
 .badge-wall__category-title {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text-secondary);
   margin: 0 0 12px 0;

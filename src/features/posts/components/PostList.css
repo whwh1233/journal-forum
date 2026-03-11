@@ -159,7 +159,7 @@
 }
 
 .post-list-empty-title {
-  font-size: 1.5rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   font-family: var(--font-display);
   color: var(--color-text);
@@ -167,7 +167,7 @@
 }
 
 .post-list-empty-description {
-  font-size: 1rem;
+  font-size: var(--text-base);
   color: var(--color-text-muted);
   margin: 0 0 var(--space-6) 0;
   max-width: 400px;
@@ -183,7 +183,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-lg);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast);
@@ -222,7 +222,7 @@
 }
 
 .post-list-error-title {
-  font-size: 1.5rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   font-family: var(--font-display);
   color: var(--color-text);
@@ -230,7 +230,7 @@
 }
 
 .post-list-error-message {
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   color: var(--color-text-muted);
   margin: 0 0 var(--space-6) 0;
   max-width: 400px;
@@ -246,7 +246,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-lg);
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast);
@@ -272,7 +272,7 @@
   gap: var(--space-3);
   padding: var(--space-6);
   color: var(--color-text-muted);
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
 }
 
 .post-list-spinner {
@@ -301,7 +301,7 @@
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-lg);
   color: rgb(239, 68, 68);
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
   margin-bottom: var(--space-4);
 }
 
@@ -314,7 +314,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration-fast);
@@ -353,7 +353,7 @@
 
 .post-list-end-text {
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   white-space: nowrap;
   padding: 0 var(--space-3);
@@ -388,17 +388,17 @@
 
   .post-list-empty-title,
   .post-list-error-title {
-    font-size: 1.25rem;
+    font-size: var(--text-md);
   }
 
   .post-list-empty-description,
   .post-list-error-message {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 
   .post-list-empty-button,
   .post-list-error-button {
-    font-size: 0.9375rem;
+    font-size: var(--text-base);
     padding: var(--space-2-5) var(--space-4);
   }
 }

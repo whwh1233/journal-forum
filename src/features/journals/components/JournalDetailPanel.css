@@ -1,7 +1,7 @@
 .journal-panel-overlay {
   position: fixed;
   top: 0;
-  left: 64px;
+  left: var(--nav-width-collapsed);
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
@@ -20,7 +20,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: min(680px, calc(100vw - 64px));
+  width: min(680px, calc(100vw - var(--nav-width-collapsed)));
   height: 100vh;
   background: var(--panel-bg, var(--color-background));
   z-index: 201;
@@ -46,7 +46,7 @@
 }
 
 .journal-panel-title {
-  font-size: 1.2rem;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-primary-dark, #1e293b);
   margin: 0;
@@ -67,7 +67,7 @@
   background: transparent;
   cursor: pointer;
   color: var(--color-text-secondary, #6b7280);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   flex-shrink: 0;
   transition: background 0.15s, color 0.15s;
 }
@@ -116,7 +116,7 @@
 .journal-panel-body .detail-label {
   font-weight: 600;
   color: var(--color-text-secondary);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -164,7 +164,7 @@
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-out);

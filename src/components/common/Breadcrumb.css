@@ -22,7 +22,7 @@
 .breadcrumb-link {
   color: var(--color-link);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
@@ -69,7 +69,7 @@
 }
 
 .breadcrumb-current {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text);
   padding: var(--space-1) var(--space-2);
@@ -79,7 +79,7 @@
 @media (max-width: 480px) {
   .breadcrumb-link,
   .breadcrumb-current {
-    font-size: 0.8125rem;
+    font-size: var(--text-sm);
     padding: var(--space-1);
   }
 }

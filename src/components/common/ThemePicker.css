@@ -59,7 +59,7 @@
 }
 
 .theme-picker-header h3 {
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text);
   margin: 0;
@@ -144,13 +144,13 @@
 }
 
 .theme-name {
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .theme-desc {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 

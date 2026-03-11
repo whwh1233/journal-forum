@@ -8,7 +8,7 @@
   border: none;
   border-radius: var(--radius-md);
   color: var(--color-link);
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 500;
   font-family: var(--font-sans);
   cursor: pointer;
@@ -52,7 +52,7 @@
 /* Responsive */
 @media (max-width: 480px) {
   .back-button {
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     padding: var(--space-2);
     margin-left: calc(-1 * var(--space-2));
   }

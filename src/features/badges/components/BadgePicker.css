@@ -25,17 +25,17 @@
 
 .badge-picker__header h4 {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--text-base);
   font-weight: 600;
 }
 
 .badge-picker__count {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
 .badge-picker__hint {
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin: 0 0 16px 0;
 }
@@ -87,7 +87,7 @@
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;

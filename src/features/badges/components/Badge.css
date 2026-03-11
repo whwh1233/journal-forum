@@ -1,14 +1,14 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
   border-radius: 9999px;
   background: linear-gradient(135deg, var(--badge-color) 0%, color-mix(in srgb, var(--badge-color) 80%, black) 100%);
   color: white;
   font-weight: 500;
   position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
 }
 
 .badge:hover {
@@ -17,18 +17,18 @@
 }
 
 .badge--sm {
-  padding: 2px 6px;
-  font-size: 11px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
 }
 
 .badge--md {
-  padding: 4px 10px;
-  font-size: 13px;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
 }
 
 .badge--lg {
-  padding: 6px 14px;
-  font-size: 15px;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-base);
 }
 
 .badge__icon {
@@ -47,7 +47,7 @@
   right: -2px;
   width: 8px;
   height: 8px;
-  background: #ef4444;
+  background: var(--color-error);
   border-radius: 50%;
   border: 2px solid white;
   animation: pulse 2s infinite;

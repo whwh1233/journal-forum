@@ -23,7 +23,7 @@
 }
 
 .admin-header h2 {
-    font-size: 1.5rem;
+    font-size: var(--text-lg);
     font-weight: 700;
     color: var(--color-text);
     margin-bottom: var(--space-2);
@@ -34,7 +34,7 @@
 
 .admin-header p {
     color: var(--color-text-muted);
-    font-size: 0.95rem;
+    font-size: var(--text-base);
     margin: 0;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .grant-badge-card h3 {
-    font-size: 1.25rem;
+    font-size: var(--text-md);
     font-weight: 600;
     margin-bottom: var(--space-5);
     margin-top: 0;
@@ -83,7 +83,7 @@
 
 .form-group label {
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     color: var(--gray-500);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -96,7 +96,7 @@
     background-color: var(--color-surface);
     color: var(--gray-800);
     font-weight: 500;
-    font-size: 0.95rem;
+    font-size: var(--text-base);
     transition: all var(--duration-fast) var(--ease-out);
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -119,8 +119,8 @@
     color: white;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: var(--text-base);
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
@@ -203,7 +203,7 @@
 .badges-list-card h3 {
     padding: var(--space-5);
     margin: 0;
-    font-size: 1.1rem;
+    font-size: var(--text-md);
     font-weight: 600;
     border-bottom: 1px solid var(--gray-100);
     background: var(--gray-50);
@@ -233,7 +233,7 @@
 .admin-table th {
     background: white;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     color: var(--gray-500);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -266,14 +266,14 @@
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.2rem;
+    font-size: var(--text-md);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .badge-name-cell strong {
     font-weight: 600;
     color: var(--gray-800);
-    font-size: 1rem;
+    font-size: var(--text-base);
 }
 
 /* Status Badges matched to UserManagement */
@@ -281,7 +281,7 @@
     display: inline-block;
     padding: var(--space-1) var(--space-3);
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
     font-weight: 600;
 }
 
@@ -299,7 +299,7 @@
     display: inline-block;
     padding: 4px 8px;
     border-radius: 6px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 600;
     background: var(--gray-100);
     color: var(--gray-600);
@@ -314,7 +314,7 @@
 
 .metric-condition {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
     background: var(--gray-100);
     padding: 4px 8px;
     border-radius: 6px;
@@ -325,7 +325,7 @@
 .empty-condition {
     color: var(--gray-400);
     font-style: italic;
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
 }
 
 /* Loading and Error states */
