@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  height: 38px;
+  height: var(--size-md);
   padding: 0 12px 0 6px;
   border-radius: 20px;
   border: 1px solid var(--topbar-user-border);
