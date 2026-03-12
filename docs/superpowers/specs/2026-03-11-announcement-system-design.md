@@ -12,7 +12,7 @@
 
 **迁移要点**：
 - **移除** `isActive` (BOOLEAN)，**替换为** `status` (ENUM)，迁移时 `isActive=true` 映射为 `status='active'`，`isActive=false` 映射为 `status='draft'`
-- **新增** 10 个字段：`type`, `status`, `priority`, `targetType`, `targetRoles`, `targetUserIds`, `colorScheme`, `customColor`, `isPinned`
+- **新增** 8 个字段：`type`, `priority`, `targetType`, `targetRoles`, `targetUserIds`, `colorScheme`, `customColor`, `isPinned`
 - **保留** `id`, `title`, `content`, `startTime`, `endTime`, `creatorId`, `createdAt`, `updatedAt`
 
 | 字段 | 类型 | 新增/变更 | 说明 |
@@ -222,7 +222,7 @@ backend/
 - 颜色方案：4 个预设色块 + 自定义色轮
 - 受众选择按钮组（全站/按角色/指定用户）：
   - **按角色**：显示角色多选复选框（user / admin / superadmin）
-  - **指定用户**：自动补全搜索输入框，支持按用户名模糊搜索（复用 `GET /api/admin/users?search=keyword` 已有端点），支持多选，已选用户以标签形式显示
+  - **指定用户**：自动补全搜索输入框，支持按用户名模糊搜索（复用 `GET /api/admin/users?search=keyword` 端点，需扩展其搜索范围至 `name` 字段），支持多选，已选用户以标签形式显示
 - Markdown 编辑器（复用现有帖子系统的编辑/预览/分屏模式）
 - 发布时间/过期时间选择器
 - 置顶/优先级选项复选框
@@ -248,7 +248,7 @@ backend/
 - **铃铛**：`aria-label="公告通知"` + `aria-expanded` 标记面板状态，`aria-haspopup="true"`
 - **面板**：面板打开时 focus 移入，Escape 键关闭，Tab 键在列表项间导航
 - **紧急弹窗**：`role="alertdialog"` + `aria-modal="true"`，焦点陷阱（focus trap），Escape 键不关闭（必须点确认按钮）
-- **轮播**：`aria-roledescription="carousel"` + `aria-label="公告轮播"`，提供暂停控制
+- **轮播**：`aria-roledescription="carousel"` + `aria-label="公告轮播"`，hover 暂停满足可访问性要求
 
 ## 测试计划
 
