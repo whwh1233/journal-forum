@@ -24,7 +24,10 @@ const getUsers = async (req, res, next) => {
 
         const where = {};
         if (search) {
-            where.email = { [Op.like]: `%${search.toLowerCase()}%` };
+            where[Op.or] = [
+                { email: { [Op.like]: `%${search.toLowerCase()}%` } },
+                { name: { [Op.like]: `%${search}%` } }
+            ];
         }
 
         const offset = (page - 1) * limit;
