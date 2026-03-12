@@ -16,6 +16,7 @@ const badgeRoutes = require('./routes/badgeRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
 const postRoutes = require('./routes/postRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
+const announcementRoutes = require('./routes/announcementRoutes');
 
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
@@ -123,6 +124,7 @@ app.use('/api/badges', badgeRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/submissions', submissionRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 // 404处理
 app.use(notFound);
