@@ -21,6 +21,12 @@ const UserAnnouncementRead = sequelize.define('UserAnnouncementRead', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'read_at'
+    },
+    dismissed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        field: 'dismissed',
+        comment: '紧急弹窗是否已确认关闭'
     }
 }, {
     tableName: 'user_announcement_reads',
