@@ -8,39 +8,54 @@
 
 ### announcements 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | UUID | 主键 |
-| title | STRING(200) | 公告标题，必填 |
-| content | TEXT | Markdown 内容，必填 |
-| type | ENUM('normal','urgent','banner') | 公告类型 |
-| status | ENUM('draft','scheduled','active','expired','archived') | 生命周期状态 |
-| priority | INTEGER, default 0 | 排序权重，越大越优先 |
-| targetType | ENUM('all','role','user') | 受众模式 |
-| targetRoles | JSON | 目标角色数组，targetType='role' 时使用 |
-| targetUserIds | JSON | 目标用户 ID 数组，targetType='user' 时使用 |
-| colorScheme | STRING(50) | 预设颜色：'info'/'success'/'warning'/'danger' |
-| customColor | STRING(7) | 自定义 HEX 色值，覆盖 colorScheme |
-| isPinned | BOOLEAN, default false | 是否在下拉面板中置顶 |
-| startTime | DATE, nullable | 定时发布时间，null=立即 |
-| endTime | DATE, nullable | 过期时间，null=永不过期 |
-| creatorId | UUID | 创建者，外键→users |
-| createdAt / updatedAt | DATE | 自动时间戳 |
+现有模型包含 `id`, `title`, `content`, `startTime`, `endTime`, `isActive`, `creatorId`。需要进行以下变更：
+
+**迁移要点**：
+- **移除** `isActive` (BOOLEAN)，**替换为** `status` (ENUM)，迁移时 `isActive=true` 映射为 `status='active'`，`isActive=false` 映射为 `status='draft'`
+- **新增** 10 个字段：`type`, `status`, `priority`, `targetType`, `targetRoles`, `targetUserIds`, `colorScheme`, `customColor`, `isPinned`
+- **保留** `id`, `title`, `content`, `startTime`, `endTime`, `creatorId`, `createdAt`, `updatedAt`
+
+| 字段 | 类型 | 新增/变更 | 说明 |
+|------|------|-----------|------|
+| id | UUID | 保留 | 主键 |
+| title | STRING(200) | 保留 | 公告标题，必填 |
+| content | TEXT | 保留 | Markdown 内容，必填 |
+| type | ENUM('normal','urgent','banner') | **新增** | 公告类型 |
+| status | ENUM('draft','scheduled','active','expired','archived') | **替换 isActive** | 生命周期状态 |
+| priority | INTEGER, default 0 | **新增** | 排序权重，越大越优先 |
+| targetType | ENUM('all','role','user') | **新增** | 受众模式 |
+| targetRoles | JSON | **新增** | 目标角色数组，targetType='role' 时使用 |
+| targetUserIds | JSON | **新增** | 目标用户 ID 数组，targetType='user' 时使用 |
+| colorScheme | STRING(50), default 'info' | **新增** | 预设颜色：'info'/'success'/'warning'/'danger' |
+| customColor | STRING(7), nullable | **新增** | 自定义 HEX 色值，覆盖 colorScheme |
+| isPinned | BOOLEAN, default false | **新增** | 是否在下拉面板中置顶 |
+| startTime | DATE, nullable | 保留 | 定时发布时间，null=立即 |
+| endTime | DATE, nullable | 保留 | 过期时间，null=永不过期 |
+| creatorId | UUID | 保留 | 创建者，外键→users |
+| createdAt / updatedAt | DATE | 保留 | 自动时间戳 |
 
 ### user_announcement_reads 表
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | INTEGER | 自增主键 |
-| userId | UUID | 用户 ID，联合唯一 |
-| announcementId | UUID | 公告 ID，联合唯一 |
-| dismissed | BOOLEAN, default false | 是否已关闭横幅/弹窗（区别于已读） |
-| readAt | DATE | 标记已读时间 |
+现有模型包含 `id`, `userId`, `announcementId`, `readAt`。需要新增 `dismissed` 字段。
+
+| 字段 | 类型 | 新增/变更 | 说明 |
+|------|------|-----------|------|
+| id | INTEGER | 保留 | 自增主键 |
+| userId | UUID | 保留 | 用户 ID，联合唯一 |
+| announcementId | UUID | 保留 | 公告 ID，联合唯一 |
+| dismissed | BOOLEAN, default false | **新增** | 紧急弹窗是否已确认关闭 |
+| readAt | DATE | 保留 | 标记已读时间 |
 
 ### 关系
 
 - User 1:N → Announcement（creatorId，创建者关系）
 - User N:M ↔ Announcement（through UserAnnouncementRead，已读追踪）
+
+### dismissed 字段说明
+
+`dismissed` 仅用于**紧急弹窗 (urgent)** 的确认状态追踪。用户点击"我知道了"后，同时设置 `dismissed=true` 和 `readAt=now`，确保同一紧急公告不再弹出。
+
+**横幅关闭**使用 `sessionStorage`（前端本地存储），不写入数据库。这是因为用户需求是"关闭后下次访问重新显示"——sessionStorage 在标签页关闭后自动清除，天然满足此行为。
 
 ### 状态流转
 
@@ -51,6 +66,14 @@ scheduled → active     （到达 startTime，自动转换）
 active → expired       （到达 endTime，自动转换）
 active → archived      （管理员手动下线）
 ```
+
+### 自动状态转换机制
+
+采用**查询时惰性评估**（check-on-read）模式，不引入 cron job：
+
+- 每次查询公告列表时，在 SQL WHERE 条件中直接用 `startTime <= NOW()` 和 `endTime > NOW()` 过滤，而非依赖 `status` 列的值
+- 管理端列表查询时，对 `status='scheduled'` 且 `startTime <= NOW()` 的记录自动更新为 `active`；对 `status='active'` 且 `endTime <= NOW()` 的记录自动更新为 `expired`
+- 这样无需后台定时任务，数据库 `status` 列在被查询时保持最新
 
 ## API 设计
 
@@ -65,6 +88,9 @@ active → archived      （管理员手动下线）
 | POST | /api/announcements/:id/read | 需要 | 手动标记已读 |
 | POST | /api/announcements/read-all | 需要 | 一键全部标记已读 |
 
+**用户端查询参数**：
+- `GET /api/announcements?page=1&limit=20` — 分页参数
+
 ### 管理端 `/api/admin/announcements/*`
 
 所有端点需要 admin 或 superadmin 权限。
@@ -77,7 +103,14 @@ active → archived      （管理员手动下线）
 | PUT | /api/admin/announcements/:id | 编辑公告 |
 | PUT | /api/admin/announcements/:id/publish | 发布/定时发布（draft → active/scheduled） |
 | PUT | /api/admin/announcements/:id/archive | 手动下线/归档（active → archived） |
-| DELETE | /api/admin/announcements/:id | 删除公告（仅草稿/已归档可删） |
+| DELETE | /api/admin/announcements/:id | 删除公告（仅 draft/expired/archived 可删） |
+
+**管理端查询参数**：
+- `GET /api/admin/announcements?page=1&limit=20&status=active&type=banner&sortBy=createdAt&order=desc`
+- `status`：筛选状态（draft/scheduled/active/expired/archived）
+- `type`：筛选类型（normal/urgent/banner）
+- `sortBy`：排序字段（createdAt/startTime/priority），默认 createdAt
+- `order`：排序方向（asc/desc），默认 desc
 
 ## 前端架构
 
@@ -137,8 +170,8 @@ backend/
 - **位置**：TopBar 上方，全宽
 - **样式**：浅色背景 + 底部 2px 强调色边框。使用项目 CSS 变量（`--color-info-light` / `--color-success-light` / `--color-warning-light` / `--color-error-light`）
 - **轮播**：多个横幅自动轮播，5 秒切换，hover 暂停。底部圆点指示器可点击切换
-- **关闭**：点击 ✕ 关闭当前条，记 sessionStorage，下次访问重新显示（直到过期）
-- **点击**：点击横幅文字展开公告详情弹窗
+- **关闭**：点击 ✕ 关闭当前条，记 sessionStorage（key: `dismissed-banner-{id}`），同一标签页会话内不再显示。标签页关闭后自动清除，下次访问重新显示（直到过期）
+- **横幅展示内容**：仅显示 `title` 字段（纯文本），点击后在详情弹窗中渲染完整 Markdown `content`
 - **游客可见**：未登录用户可看到全站横幅公告
 
 ### 预设颜色方案
@@ -154,7 +187,7 @@ backend/
 
 ### 铃铛下拉面板 (AnnouncementBell)
 
-- **位置**：TopBar 右侧，ThemePicker 左边
+- **位置**：TopBar 右侧，排列顺序为 `[页面标题] ... [AnnouncementBell] [ThemePicker] [UserDropdown]`
 - **铃铛图标**：Lucide React `Bell` 图标，未读时显示红色数字徽章
 - **面板**：360px 宽下拉面板，最大高度 350px 可滚动
 - **面板头部**："公告通知" + 未读计数徽章 + "全部已读" 按钮
@@ -181,13 +214,15 @@ backend/
 - 顶部：标题 + 公告统计 + "新建公告" 按钮
 - 状态筛选标签栏：全部/草稿/定时/活跃/已过期/归档
 - 表格列：标题（含创建者）、类型标签、状态标签、受众、已读率进度条、发布时间、操作按钮
-- 操作根据状态不同：草稿→编辑/发布/删除，活跃→编辑/下线，已过期/归档→编辑/删除
+- 操作根据状态不同：草稿→编辑/发布/删除，活跃→编辑/下线，已过期→编辑/删除，归档→编辑/删除
 
 **创建/编辑表单**：
 - 标题输入框
 - 类型选择按钮组（普通/紧急/横幅）
 - 颜色方案：4 个预设色块 + 自定义色轮
-- 受众选择按钮组（全站/按角色/指定用户），按角色时显示角色多选，指定用户时显示用户搜索
+- 受众选择按钮组（全站/按角色/指定用户）：
+  - **按角色**：显示角色多选复选框（user / admin / superadmin）
+  - **指定用户**：自动补全搜索输入框，支持按用户名模糊搜索（复用 `GET /api/admin/users?search=keyword` 已有端点），支持多选，已选用户以标签形式显示
 - Markdown 编辑器（复用现有帖子系统的编辑/预览/分屏模式）
 - 发布时间/过期时间选择器
 - 置顶/优先级选项复选框
@@ -206,6 +241,14 @@ backend/
 - 图标：Lucide React，尺寸使用 `--icon-*` 变量
 - 字体：`--font-sans`（正文）、`--font-mono`（代码/编辑器）
 - 动画：`--duration-fast` / `--duration-normal` / `--duration-slow` + `--ease-out`
+
+## 无障碍 (Accessibility)
+
+- **横幅**：`role="alert"` + `aria-live="polite"`，关闭按钮 `aria-label="关闭公告"`
+- **铃铛**：`aria-label="公告通知"` + `aria-expanded` 标记面板状态，`aria-haspopup="true"`
+- **面板**：面板打开时 focus 移入，Escape 键关闭，Tab 键在列表项间导航
+- **紧急弹窗**：`role="alertdialog"` + `aria-modal="true"`，焦点陷阱（focus trap），Escape 键不关闭（必须点确认按钮）
+- **轮播**：`aria-roledescription="carousel"` + `aria-label="公告轮播"`，提供暂停控制
 
 ## 测试计划
 
