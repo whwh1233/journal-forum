@@ -20,7 +20,8 @@
     /* Module resolution */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@shared/*": ["shared/*"]
     },
 
     /* Linting */
@@ -29,6 +30,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "shared", "e2e"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

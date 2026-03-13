@@ -12,3 +12,11 @@ nul
 /blob-report/
 /playwright/.cache/
 .superpowers/
+
+# E2E test artifacts
+e2e/screenshots/*
+!e2e/screenshots/.gitkeep
+e2e/repro-scripts/*
+!e2e/repro-scripts/.gitkeep
+e2e/coverage/*
+!e2e/coverage/.gitkeep
