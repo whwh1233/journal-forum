@@ -2,14 +2,11 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Bell, Check, Loader } from 'lucide-react';
 import { useAnnouncement } from '@/contexts/AnnouncementContext';
 import AnnouncementItem from './AnnouncementItem';
+import AnnouncementModal from './AnnouncementModal';
 import type { Announcement } from '../types/announcement';
 import './AnnouncementBell.css';
 
-interface AnnouncementBellProps {
-  onAnnouncementClick?: (announcement: Announcement) => void;
-}
-
-const AnnouncementBell: React.FC<AnnouncementBellProps> = ({ onAnnouncementClick }) => {
+const AnnouncementBell: React.FC = () => {
   const {
     announcements,
     unreadCount,
@@ -19,6 +16,7 @@ const AnnouncementBell: React.FC<AnnouncementBellProps> = ({ onAnnouncementClick
   } = useAnnouncement();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -67,11 +65,16 @@ const AnnouncementBell: React.FC<AnnouncementBellProps> = ({ onAnnouncementClick
       if (!announcement.isRead) {
         await markAsRead(announcement.id);
       }
-      onAnnouncementClick?.(announcement);
+      setSelectedAnnouncement(announcement);
       setIsOpen(false);
     },
-    [markAsRead, onAnnouncementClick]
+    [markAsRead]
   );
+
+  // 关闭 Modal
+  const handleCloseModal = useCallback(() => {
+    setSelectedAnnouncement(null);
+  }, []);
 
   // 全部已读
   const handleMarkAllRead = useCallback(
@@ -149,6 +152,14 @@ const AnnouncementBell: React.FC<AnnouncementBellProps> = ({ onAnnouncementClick
             )}
           </div>
         </div>
+      )}
+
+      {selectedAnnouncement && (
+        <AnnouncementModal
+          announcement={selectedAnnouncement}
+          mode="detail"
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );

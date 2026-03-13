@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import SideNav from './SideNav';
 import TopBar from './TopBar';
-import AnnouncementBanner from '@/features/announcements/components/AnnouncementBanner';
+import AnnouncementHandler from '@/features/announcements/components/AnnouncementHandler';
 import PageTransition from '@/components/common/PageTransition';
 import './AppLayout.css';
 
@@ -29,7 +29,7 @@ const AppLayout: React.FC = () => {
 
       {/* 内容区：路由过渡只作用于 Outlet，不触及 SideNav */}
       <main className="app-layout-main">
-        <AnnouncementBanner />
+        <AnnouncementHandler />
         <TopBar />
         <PageTransition variant="subtle">
           <Outlet />

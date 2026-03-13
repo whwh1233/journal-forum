@@ -1,0 +1,293 @@
+.announcement-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal, 1050);
+  padding: var(--space-4);
+  animation: overlay-fade-in var(--duration-fast) var(--ease-out);
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.announcement-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-background);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  text-align: center;
+  padding: var(--space-6);
+  padding-top: var(--space-8);
+  animation: modal-slide-up var(--duration-normal) var(--ease-out);
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Color stripe */
+.announcement-modal__stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.announcement-modal__stripe--info {
+  background: var(--color-info);
+}
+
+.announcement-modal__stripe--success {
+  background: var(--color-success);
+}
+
+.announcement-modal__stripe--warning {
+  background: var(--color-warning);
+}
+
+.announcement-modal__stripe--danger {
+  background: var(--color-error);
+}
+
+/* Close button */
+.announcement-modal__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.announcement-modal__close:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text);
+}
+
+/* Icon */
+.announcement-modal__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: var(--space-4);
+}
+
+.announcement-modal__icon--info {
+  background: var(--color-info-light);
+  color: var(--color-info);
+}
+
+.announcement-modal__icon--success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.announcement-modal__icon--warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.announcement-modal__icon--danger {
+  background: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* Type label */
+.announcement-modal__type {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-2);
+}
+
+.announcement-modal__type--info {
+  color: var(--color-info);
+}
+
+.announcement-modal__type--success {
+  color: var(--color-success);
+}
+
+.announcement-modal__type--warning {
+  color: var(--color-warning);
+}
+
+.announcement-modal__type--danger {
+  color: var(--color-error);
+}
+
+/* Title */
+.announcement-modal__title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 var(--space-4);
+  line-height: 1.4;
+}
+
+/* Content */
+.announcement-modal__content {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  line-height: 1.7;
+  text-align: left;
+  margin-bottom: var(--space-4);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.announcement-modal__content h1,
+.announcement-modal__content h2,
+.announcement-modal__content h3 {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.announcement-modal__content h1 { font-size: var(--text-lg); }
+.announcement-modal__content h2 { font-size: var(--text-md); }
+.announcement-modal__content h3 { font-size: var(--text-sm); }
+
+.announcement-modal__content p {
+  margin-bottom: var(--space-3);
+}
+
+.announcement-modal__content ul,
+.announcement-modal__content ol {
+  margin-bottom: var(--space-3);
+  padding-left: var(--space-5);
+}
+
+.announcement-modal__content li {
+  margin-bottom: var(--space-1);
+}
+
+.announcement-modal__content a {
+  color: var(--color-info);
+  text-decoration: none;
+}
+
+.announcement-modal__content a:hover {
+  text-decoration: underline;
+}
+
+.announcement-modal__content code {
+  background: var(--color-background-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.announcement-modal__content pre {
+  background: var(--color-background-hover);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-3);
+}
+
+.announcement-modal__content pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.announcement-modal__content blockquote {
+  border-left: 3px solid var(--color-border);
+  padding-left: var(--space-3);
+  color: var(--color-text-muted);
+  margin: var(--space-3) 0;
+}
+
+/* Meta */
+.announcement-modal__meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+}
+
+.announcement-modal__separator {
+  color: var(--color-border);
+}
+
+/* Button */
+.announcement-modal__button {
+  width: 100%;
+  height: var(--size-md, 40px);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.announcement-modal__button--info {
+  background: var(--color-info);
+}
+
+.announcement-modal__button--info:hover {
+  background: var(--color-info-dark, #2563eb);
+}
+
+.announcement-modal__button--success {
+  background: var(--color-success);
+}
+
+.announcement-modal__button--success:hover {
+  background: var(--color-success-dark, #16a34a);
+}
+
+.announcement-modal__button--warning {
+  background: var(--color-warning);
+}
+
+.announcement-modal__button--warning:hover {
+  background: var(--color-warning-dark, #d97706);
+}
+
+.announcement-modal__button--danger {
+  background: var(--color-error);
+}
+
+.announcement-modal__button--danger:hover {
+  background: var(--color-error-dark, #dc2626);
+}
