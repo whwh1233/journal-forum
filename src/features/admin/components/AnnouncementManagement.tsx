@@ -8,7 +8,6 @@ import {
   Send,
   Archive,
   AlertTriangle,
-  CheckCircle,
   Info,
   Loader,
 } from 'lucide-react';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pin } from 'lucide-react';
-import type { Announcement, ColorScheme } from '../types/announcement';
+import type { Announcement } from '../types/announcement';
 import './AnnouncementItem.css';
 
 // 颜色方案对应的类型标签
