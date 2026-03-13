@@ -4,3 +4,4 @@ export { default as JournalManagement } from './components/JournalManagement';
 export { default as CommentManagement } from './components/CommentManagement';
 export { default as BadgeManagement } from './components/BadgeManagement';
 export { default as DatabaseManager } from './components/DatabaseManager';
+export { default as AnnouncementManagement } from './components/AnnouncementManagement';

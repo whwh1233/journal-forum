@@ -20,7 +20,8 @@ import {
   JournalManagement,
   CommentManagement,
   BadgeManagement,
-  DatabaseManager
+  DatabaseManager,
+  AnnouncementManagement
 } from '@/features/admin';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
@@ -196,6 +197,14 @@ const AppContent: React.FC = () => {
             element={
               <AdminRoute>
                 <BadgeManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/announcements"
+            element={
+              <AdminRoute>
+                <AnnouncementManagement />
               </AdminRoute>
             }
           />
