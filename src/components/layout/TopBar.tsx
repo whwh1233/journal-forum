@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
 import { usePageContext } from '@/contexts/PageContext';
+import AnnouncementBell from '@/features/announcements/components/AnnouncementBell';
 import ThemePicker from '@/components/common/ThemePicker';
 import UserDropdown from '@/components/common/UserDropdown';
 import './TopBar.css';
@@ -20,6 +21,7 @@ const TopBar: React.FC = () => {
     <div className="top-bar">
       <h1 className="top-bar-title">{title}</h1>
       <div className="top-bar-right">
+        {isAuthenticated && <AnnouncementBell />}
         <ThemePicker />
 
         {isAuthenticated ? (
