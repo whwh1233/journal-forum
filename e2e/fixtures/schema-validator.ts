@@ -1,6 +1,6 @@
 import { Page, Response } from '@playwright/test';
 // Use zod v3 compatibility mode for TypeScript 4.9 compatibility
-import { z, ZodSchema } from 'zod/v3';
+import { z, ZodSchema } from 'zod';
 
 /**
  * Schema 验证错误
