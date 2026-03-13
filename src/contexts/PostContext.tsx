@@ -306,7 +306,7 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
   // Increment view count (silent, no error handling needed)
   const incrementViewCount = useCallback(async (id: number) => {
     try {
-      await postService.incrementViewCount(id);
+      await postService.incrementView(id);
 
       // Update current post view count
       if (currentPost && currentPost.id === id) {

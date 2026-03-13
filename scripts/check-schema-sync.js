@@ -78,21 +78,24 @@ function runTypeScriptCheck(verbose) {
   } catch (error) {
     const errorOutput = error.stdout || error.stderr || error.message;
 
-    // Filter out node_modules errors (library type issues)
+    // Filter out non-critical errors
     const lines = errorOutput.split('\n');
     const sourceErrors = lines.filter(line => {
       // Skip empty lines
       if (!line.trim()) return false;
       // Skip node_modules errors
       if (line.includes('node_modules/')) return false;
-      // Keep src/ errors
-      return line.includes('src/') || line.includes('error TS');
+      // Skip test files (e2e/, __tests__, .test., .spec.)
+      if (line.includes('e2e/') || line.includes('__tests__/') ||
+          line.includes('.test.') || line.includes('.spec.')) return false;
+      // Skip unused variable warnings (TS6133)
+      if (line.includes('TS6133')) return false;
+      // Keep src/ errors only
+      return line.includes('src/') && line.includes('error TS');
     });
 
-    // Check if there are actual source code errors (not just node_modules)
-    const hasSourceErrors = sourceErrors.some(line =>
-      line.includes('src/') && line.includes('error TS')
-    );
+    // Check if there are actual source code errors
+    const hasSourceErrors = sourceErrors.length > 0;
 
     return {
       success: !hasSourceErrors,

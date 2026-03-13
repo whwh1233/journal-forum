@@ -82,7 +82,7 @@ const JournalManagement: React.FC = () => {
     setEditingJournal(journal);
     setFormData({
       name: journal.name,
-      issn: journal.issn,
+      issn: journal.issn || '',
       level: journal.levels && journal.levels.length > 0 ? journal.levels[0] : '',
       introduction: journal.introduction || '',
     });

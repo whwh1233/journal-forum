@@ -101,7 +101,7 @@ const CommentManagement: React.FC = () => {
                     <div className="comment-meta">
                       <span className="comment-author">{comment.author}</span>
                       <span className="comment-divider">|</span>
-                      <span className="comment-journal">{truncateText(comment.journalTitle, 30)}</span>
+                      <span className="comment-journal">{truncateText(comment.journalName, 30)}</span>
                       <span className="comment-rating">
                         <Star size={14} fill="currentColor" className="star" />
                         {comment.rating}
