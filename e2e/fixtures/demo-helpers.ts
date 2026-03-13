@@ -1,4 +1,82 @@
 import { Page } from '@playwright/test';
+import { ErrorCollector, ErrorReport, startErrorCollector } from './error-collector';
+import { InteractionTracker, CoverageReport, startInteractionTracker } from './interaction-tracker';
+
+// 全局实例，用于在 demo 函数中记录步骤
+let currentErrorCollector: ErrorCollector | null = null;
+let currentInteractionTracker: InteractionTracker | null = null;
+
+/**
+ * Demo 实例接口
+ */
+export interface DemoInstance {
+  errorCollector: ErrorCollector;
+  interactionTracker: InteractionTracker;
+}
+
+/**
+ * Demo 报告接口
+ */
+export interface DemoReport {
+  errorReport: ErrorReport;
+  interactionReport: CoverageReport;
+}
+
+/**
+ * 初始化 Demo 测试 - 创建并启动 ErrorCollector 和 InteractionTracker
+ */
+export async function initDemo(page: Page, testName: string): Promise<DemoInstance> {
+  log('🚀', `初始化 Demo: ${testName}`);
+
+  const errorCollector = await startErrorCollector(page);
+  const interactionTracker = await startInteractionTracker(page);
+
+  // 保存全局引用
+  currentErrorCollector = errorCollector;
+  currentInteractionTracker = interactionTracker;
+
+  // 记录测试开始步骤
+  errorCollector.recordStep('test_start', undefined, testName);
+
+  return { errorCollector, interactionTracker };
+}
+
+/**
+ * 完成 Demo 测试 - 获取报告并打印
+ */
+export async function finishDemo(): Promise<DemoReport> {
+  if (!currentErrorCollector || !currentInteractionTracker) {
+    throw new Error('Demo not initialized. Call initDemo() first.');
+  }
+
+  // 获取报告
+  const errorReport = currentErrorCollector.getReport();
+  const interactionReport = await currentInteractionTracker.generateReport();
+
+  // 打印报告
+  currentErrorCollector.printReport();
+  await currentInteractionTracker.printReport();
+
+  // 停止收集器
+  currentErrorCollector.stop();
+  currentInteractionTracker.stop();
+
+  // 清除全局引用
+  const collector = currentErrorCollector;
+  currentErrorCollector = null;
+  currentInteractionTracker = null;
+
+  log('✅', `Demo 完成 - 错误: ${errorReport.totalErrors}, 交互覆盖: ${interactionReport.coveragePercent}%`);
+
+  return { errorReport, interactionReport };
+}
+
+/**
+ * 获取当前 ErrorCollector（内部使用）
+ */
+function getErrorCollector(): ErrorCollector | null {
+  return currentErrorCollector;
+}
 
 /**
  * 延迟函数
@@ -124,6 +202,12 @@ export async function demoAction(
   description: string,
   delayMs = 400
 ): Promise<void> {
+  // 记录操作步骤
+  const collector = getErrorCollector();
+  if (collector) {
+    collector.recordStep('action', selector, description);
+  }
+
   await showToast(page, description);
   await delay(200);
   await highlight(page, selector);
@@ -138,6 +222,12 @@ export async function demoClick(
   selector: string,
   description: string
 ): Promise<void> {
+  // 记录点击操作步骤
+  const collector = getErrorCollector();
+  if (collector) {
+    collector.recordStep('click', selector, description);
+  }
+
   await demoAction(page, selector, description);
   await page.locator(selector).first().click();
   await delay(500);
@@ -152,6 +242,12 @@ export async function demoType(
   text: string,
   description: string
 ): Promise<void> {
+  // 记录输入操作步骤
+  const collector = getErrorCollector();
+  if (collector) {
+    collector.recordStep('type', selector, text);
+  }
+
   await showToast(page, description);
   await highlight(page, selector);
   await delay(300);
@@ -176,6 +272,12 @@ export async function demoFill(
   text: string,
   description: string
 ): Promise<void> {
+  // 记录填充操作步骤
+  const collector = getErrorCollector();
+  if (collector) {
+    collector.recordStep('fill', selector, text);
+  }
+
   await showToast(page, description);
   await highlight(page, selector);
   await delay(300);
@@ -192,6 +294,12 @@ export async function demoScroll(
   amount = 300,
   description?: string
 ): Promise<void> {
+  // 记录滚动操作步骤
+  const collector = getErrorCollector();
+  if (collector) {
+    collector.recordStep('scroll', direction, String(amount));
+  }
+
   if (description) {
     await showToast(page, description);
   }

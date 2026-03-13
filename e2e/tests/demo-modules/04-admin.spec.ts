@@ -6,6 +6,8 @@ import {
   adminSelectors,
 } from '../../fixtures/test-data';
 import {
+  initDemo,
+  finishDemo,
   delay,
   showChapterTitle,
   showToast,
@@ -14,6 +16,8 @@ import {
   demoScroll,
   log,
 } from '../../fixtures/demo-helpers';
+import { ErrorCollector } from '../../fixtures/error-collector';
+import { InteractionTracker } from '../../fixtures/interaction-tracker';
 
 // 管理员登录辅助函数
 async function loginAsAdmin(page: any) {
@@ -29,10 +33,26 @@ async function loginAsAdmin(page: any) {
 }
 
 test.describe('管理员场景演示', () => {
-  test.beforeEach(async ({ page }) => {
+  let errorCollector: ErrorCollector;
+  let interactionTracker: InteractionTracker;
+
+  test.beforeEach(async ({ page }, testInfo) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     await loginAsAdmin(page);
+    const demo = await initDemo(page, testInfo.title);
+    errorCollector = demo.errorCollector;
+    interactionTracker = demo.interactionTracker;
+  });
+
+  test.afterEach(async ({ page }, testInfo) => {
+    const { errorReport, interactionReport } = await finishDemo();
+
+    // Assert zero errors
+    expect(
+      errorReport.totalErrors,
+      `测试 "${testInfo.title}" 发现 ${errorReport.totalErrors} 个错误`
+    ).toBe(0);
   });
 
   test('用户管理', async ({ page }) => {

@@ -9,6 +9,8 @@ import {
   followSelectors,
 } from '../../fixtures/test-data';
 import {
+  initDemo,
+  finishDemo,
   delay,
   showChapterTitle,
   showToast,
@@ -18,6 +20,8 @@ import {
   demoScroll,
   log,
 } from '../../fixtures/demo-helpers';
+import { ErrorCollector } from '../../fixtures/error-collector';
+import { InteractionTracker } from '../../fixtures/interaction-tracker';
 
 // 登录辅助函数
 async function login(page: any, user: { email: string; password: string }) {
@@ -33,11 +37,27 @@ async function login(page: any, user: { email: string; password: string }) {
 }
 
 test.describe('用户场景演示', () => {
-  test.beforeEach(async ({ page }) => {
+  let errorCollector: ErrorCollector;
+  let interactionTracker: InteractionTracker;
+
+  test.beforeEach(async ({ page }, testInfo) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     // 先注册/登录演示用户
     await login(page, demoUsers.author);
+    const demo = await initDemo(page, testInfo.title);
+    errorCollector = demo.errorCollector;
+    interactionTracker = demo.interactionTracker;
+  });
+
+  test.afterEach(async ({ page }, testInfo) => {
+    const { errorReport, interactionReport } = await finishDemo();
+
+    // Assert zero errors
+    expect(
+      errorReport.totalErrors,
+      `测试 "${testInfo.title}" 发现 ${errorReport.totalErrors} 个错误`
+    ).toBe(0);
   });
 
   test('发表评论和评分', async ({ page }) => {
