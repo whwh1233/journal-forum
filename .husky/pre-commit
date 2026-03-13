@@ -1,0 +1,52 @@
+#!/bin/sh
+
+echo ""
+echo "Running pre-commit checks..."
+echo "---------------------------------------------"
+
+# 1. TypeScript compilation check
+echo ""
+echo "[1/4] TypeScript compilation check..."
+npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "TypeScript compilation failed!"
+  echo "Please fix the errors above before committing."
+  exit 1
+fi
+echo "TypeScript check passed!"
+
+# 2. Schema sync check
+echo ""
+echo "[2/4] Schema sync check..."
+node scripts/check-schema-sync.js
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Schema sync check failed!"
+  exit 1
+fi
+
+# 3. Demo coverage check
+echo ""
+echo "[3/4] Demo coverage check..."
+node scripts/check-demo-coverage.js
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Demo coverage check failed!"
+  exit 1
+fi
+
+# 4. Run affected demo tests (quick mode)
+echo ""
+echo "[4/4] Running affected demo tests..."
+node scripts/run-affected-demos.js --quick
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Demo tests failed!"
+  echo "Run 'node scripts/run-affected-demos.js --headed' to debug."
+  exit 1
+fi
+
+echo ""
+echo "---------------------------------------------"
+echo "All pre-commit checks passed!"
