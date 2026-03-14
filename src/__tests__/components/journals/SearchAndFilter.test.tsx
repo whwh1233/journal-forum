@@ -72,7 +72,9 @@ const defaultUseJournalsReturn = {
   setMinRating: mockSetMinRating,
   toggleSortField: mockToggleSortField,
   setSortExpanded: mockSetSortExpanded,
-  clearFilters: mockClearFilters
+  clearFilters: mockClearFilters,
+  hotSortMode: null,
+  setHotSortMode: vi.fn()
 };
 
 describe('SearchAndFilter', () => {
