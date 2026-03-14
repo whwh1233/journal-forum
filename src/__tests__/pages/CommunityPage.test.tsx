@@ -1,8 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '../helpers/testUtils';
+import { render, screen, waitFor, fireEvent, act } from '../helpers/testUtils';
 import CommunityPage from '@/features/posts/pages/CommunityPage';
 import { postService } from '@/features/posts/services/postService';
 import * as authHook from '@/hooks/useAuth';
+
+// Create mock functions at module level so they can be accessed in tests
+const mockToastWarning = vi.fn();
+const mockToastSuccess = vi.fn();
+const mockToastError = vi.fn();
+const mockToastInfo = vi.fn();
 
 vi.mock('@/features/posts/services/postService', () => ({
   postService: { getPosts: vi.fn() },
@@ -11,10 +17,10 @@ vi.mock('@/hooks/useAuth');
 vi.mock('@/contexts/PageContext', () => ({ usePageTitle: vi.fn() }));
 vi.mock('@/hooks/useToast', () => ({
   useToast: () => ({
-    success: vi.fn(),
-    error: vi.fn(),
-    warning: vi.fn(),
-    info: vi.fn(),
+    success: mockToastSuccess,
+    error: mockToastError,
+    warning: mockToastWarning,
+    info: mockToastInfo,
     addToast: vi.fn(),
     removeToast: vi.fn(),
     notify: vi.fn(),
@@ -103,5 +109,56 @@ describe('CommunityPage', () => {
     });
     render(<CommunityPage />);
     expect(screen.getByText('筛选')).toBeInTheDocument();
+  });
+
+  it('shows toast warning instead of alert when unauthenticated user tries to post', () => {
+    // Mock unauthenticated state
+    vi.mocked(authHook.useAuth).mockReturnValue({
+      ...mockAuthReturn,
+      user: null,
+      isAuthenticated: false,
+    });
+
+    vi.mocked(postService.getPosts).mockResolvedValue({
+      posts: [], pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
+    });
+
+    render(<CommunityPage />);
+
+    const createBtn = screen.getByRole('button', { name: /发布帖子/ });
+    fireEvent.click(createBtn);
+
+    // toast.warning should be called with the message
+    expect(mockToastWarning).toHaveBeenCalledWith('请先登录后再发布帖子');
+  });
+
+  it('debounces search input — only fires fetch after 300ms of no typing', async () => {
+    vi.mocked(postService.getPosts).mockResolvedValue({
+      posts: [], pagination: { total: 0, page: 1, limit: 20, totalPages: 0 },
+    });
+
+    render(<CommunityPage />);
+
+    // Wait for initial mount fetch to settle
+    await waitFor(() => {
+      expect(vi.mocked(postService.getPosts)).toHaveBeenCalled();
+    });
+
+    // Clear mock calls after initial mount
+    vi.mocked(postService.getPosts).mockClear();
+
+    // Find search input and type rapidly
+    const searchInput = screen.getByPlaceholderText(/搜索帖子/);
+    fireEvent.change(searchInput, { target: { value: 'S' } });
+    fireEvent.change(searchInput, { target: { value: 'SC' } });
+    fireEvent.change(searchInput, { target: { value: 'SCI' } });
+
+    // Immediately after typing, no fetch should have fired (still debouncing)
+    expect(vi.mocked(postService.getPosts)).not.toHaveBeenCalled();
+
+    // After debounce delay (300ms), exactly one fetch should fire
+    await waitFor(() => {
+      expect(vi.mocked(postService.getPosts)).toHaveBeenCalledTimes(1);
+    }, { timeout: 500 });
   });
 });
