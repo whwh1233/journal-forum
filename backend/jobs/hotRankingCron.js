@@ -10,12 +10,6 @@ const {
 let isRunning = false;
 
 async function updatePostTimeDecay() {
-  if (isRunning) {
-    console.log('[HotRanking] Skipping — previous job still running');
-    return;
-  }
-  isRunning = true;
-
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
 
@@ -45,8 +39,6 @@ async function updatePostTimeDecay() {
     console.log(`[HotRanking] Updated ${recentPosts.length} post scores, zeroed old posts`);
   } catch (error) {
     console.error('[HotRanking] Post decay update failed:', error);
-  } finally {
-    isRunning = false;
   }
 }
 
@@ -82,9 +74,18 @@ async function updateJournalHotScores() {
 
 function startHotRankingCron() {
   cron.schedule('0 * * * *', async () => {
-    console.log('[HotRanking] Starting hourly update...');
-    await updatePostTimeDecay();
-    await updateJournalHotScores();
+    if (isRunning) {
+      console.log('[HotRanking] Skipping — previous job still running');
+      return;
+    }
+    isRunning = true;
+    try {
+      console.log('[HotRanking] Starting hourly update...');
+      await updatePostTimeDecay();
+      await updateJournalHotScores();
+    } finally {
+      isRunning = false;
+    }
   });
 
   console.log('[HotRanking] Cron jobs scheduled (hourly)');

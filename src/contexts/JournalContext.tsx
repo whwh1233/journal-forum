@@ -179,7 +179,7 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
       } else {
         newSortFields[field] = newOrder;
       }
-      return { ...state, sortFields: newSortFields };
+      return { ...state, sortFields: newSortFields, hotSortMode: null };
     }
     case 'SET_SORT_EXPANDED':
       return { ...state, sortExpanded: action.payload };

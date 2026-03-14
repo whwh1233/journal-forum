@@ -72,7 +72,24 @@ const updateJournalRatingCache = async (journalId) => {
         ? Math.round((validAvgs.reduce((a, b) => a + b, 0) / validAvgs.length) * 10) / 10
         : 0;
 
-    // Upsert 到缓存表
+    // Compute hot ranking scores before upsert
+    const { Op } = require('sequelize');
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
+
+    const [recentCommentCount, recentFavoriteCount, totalFavoriteCount, journal] = await Promise.all([
+      Comment.count({ where: { journalId, parentId: null, isDeleted: false, createdAt: { [Op.gte]: sevenDaysAgo } } }),
+      Favorite.count({ where: { journalId, createdAt: { [Op.gte]: sevenDaysAgo } } }),
+      Favorite.count({ where: { journalId } }),
+      Journal.findByPk(journalId, { attributes: ['impactFactor'] })
+    ]);
+
+    const impactFactor = journal ? journal.impactFactor : null;
+    const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, rating);
+    const allTimeScore = calculateJournalAllTimeScore(
+      topLevelComments.length, totalFavoriteCount, rating, impactFactor
+    );
+
+    // Single upsert with all fields (rating + hot ranking scores)
     await JournalRatingCache.upsert({
         journalId,
         rating,
@@ -81,39 +98,11 @@ const updateJournalRatingCache = async (journalId) => {
         editorAttitude: averages.editorAttitude,
         acceptDifficulty: averages.acceptDifficulty,
         reviewQuality: averages.reviewQuality,
-        overallExperience: averages.overallExperience
+        overallExperience: averages.overallExperience,
+        hotScore,
+        allTimeScore,
+        favoriteCount: totalFavoriteCount
     });
-
-    // Update hot ranking scores
-    const { Op } = require('sequelize');
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
-
-    // Count recent comments (7 days)
-    const recentCommentCount = await Comment.count({
-      where: { journalId, parentId: null, isDeleted: false, createdAt: { [Op.gte]: sevenDaysAgo } }
-    });
-
-    // Count recent favorites (7 days)
-    const recentFavoriteCount = await Favorite.count({
-      where: { journalId, createdAt: { [Op.gte]: sevenDaysAgo } }
-    });
-
-    // Count total favorites
-    const totalFavoriteCount = await Favorite.count({ where: { journalId } });
-
-    // Get impactFactor from Journal table
-    const journal = await Journal.findByPk(journalId, { attributes: ['impactFactor'] });
-    const impactFactor = journal ? journal.impactFactor : null;
-
-    const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, rating);
-    const allTimeScore = calculateJournalAllTimeScore(
-      topLevelComments.length, totalFavoriteCount, rating, impactFactor
-    );
-
-    await JournalRatingCache.update(
-      { hotScore, allTimeScore, favoriteCount: totalFavoriteCount },
-      { where: { journalId } }
-    );
 
     return {
         rating,
