@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { BadgeProvider } from '@/contexts/BadgeContext';
 import { PostProvider } from '@/contexts/PostContext';
 import { AnnouncementProvider } from '@/contexts/AnnouncementContext';
+import { NotificationProvider } from '@/contexts/NotificationContext';
 import { PageProvider, usePageTitle } from '@/contexts/PageContext';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
@@ -243,6 +244,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <AnnouncementProvider>
+        <NotificationProvider>
           <BadgeProvider>
             <JournalProvider>
               <ToastProvider>
@@ -258,6 +260,7 @@ function App() {
               </ToastProvider>
             </JournalProvider>
           </BadgeProvider>
+        </NotificationProvider>
         </AnnouncementProvider>
       </AuthProvider>
     </ThemeProvider>
