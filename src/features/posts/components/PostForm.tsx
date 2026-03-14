@@ -1,26 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
 import {
-  Bold,
-  Italic,
-  Code,
-  List,
-  ListOrdered,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Quote,
-  Heading,
   X,
-  Eye,
-  Edit3,
   Save,
   Send,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
 import { Post, CreatePostData, PostCategory, CATEGORY_LABELS } from '../types/post';
+import { MarkdownEditor } from '../../../components/MarkdownEditor';
 import './PostForm.css';
 
 interface PostFormProps {
@@ -47,12 +34,10 @@ const PostForm: React.FC<PostFormProps> = ({
   const [journalId, setJournalId] = useState<number | undefined>(initialData?.journalId);
   const [journalTitle, setJournalTitle] = useState(initialData?.journalTitle || '');
 
-  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('split');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDraftRestore, setShowDraftRestore] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
   const draftStateRef = useRef({ title, content, category, tags, journalId });
 
@@ -117,76 +102,6 @@ const PostForm: React.FC<PostFormProps> = ({
     localStorage.removeItem(DRAFT_KEY);
     setShowDraftRestore(false);
   };
-
-  // Markdown toolbar actions
-  const insertMarkdown = (before: string, after: string = '', placeholder: string = '') => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end) || placeholder;
-    const newText = content.substring(0, start) + before + selectedText + after + content.substring(end);
-
-    setContent(newText);
-
-    // Set cursor position
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(
-        start + before.length,
-        start + before.length + selectedText.length
-      );
-    }, 0);
-  };
-
-  const toolbarButtons = [
-    {
-      icon: <Bold size={18} />,
-      label: '粗体',
-      action: () => insertMarkdown('**', '**', '粗体文字')
-    },
-    {
-      icon: <Italic size={18} />,
-      label: '斜体',
-      action: () => insertMarkdown('*', '*', '斜体文字')
-    },
-    {
-      icon: <Heading size={18} />,
-      label: '标题',
-      action: () => insertMarkdown('## ', '', '标题')
-    },
-    {
-      icon: <Code size={18} />,
-      label: '代码',
-      action: () => insertMarkdown('`', '`', '代码')
-    },
-    {
-      icon: <Quote size={18} />,
-      label: '引用',
-      action: () => insertMarkdown('> ', '', '引用内容')
-    },
-    {
-      icon: <List size={18} />,
-      label: '无序列表',
-      action: () => insertMarkdown('- ', '', '列表项')
-    },
-    {
-      icon: <ListOrdered size={18} />,
-      label: '有序列表',
-      action: () => insertMarkdown('1. ', '', '列表项')
-    },
-    {
-      icon: <LinkIcon size={18} />,
-      label: '链接',
-      action: () => insertMarkdown('[', '](url)', '链接文字')
-    },
-    {
-      icon: <ImageIcon size={18} />,
-      label: '图片',
-      action: () => insertMarkdown('![', '](image-url)', '图片描述')
-    }
-  ];
 
   // Handle tag input
   const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -355,82 +270,20 @@ const PostForm: React.FC<PostFormProps> = ({
           </div>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="post-form-toolbar">
-          <div className="post-form-toolbar-group">
-            {toolbarButtons.map((button, index) => (
-              <button
-                key={index}
-                className="post-form-toolbar-button"
-                title={button.label}
-                onClick={button.action}
-              >
-                {button.icon}
-              </button>
-            ))}
-          </div>
-
-          <div className="post-form-view-toggle">
-            <button
-              className={`post-form-view-button ${viewMode === 'edit' ? 'post-form-view-button--active' : ''}`}
-              onClick={() => setViewMode('edit')}
-            >
-              <Edit3 size={16} />
-              <span>编辑</span>
-            </button>
-            <button
-              className={`post-form-view-button ${viewMode === 'split' ? 'post-form-view-button--active' : ''}`}
-              onClick={() => setViewMode('split')}
-            >
-              <span>分栏</span>
-            </button>
-            <button
-              className={`post-form-view-button ${viewMode === 'preview' ? 'post-form-view-button--active' : ''}`}
-              onClick={() => setViewMode('preview')}
-            >
-              <Eye size={16} />
-              <span>预览</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Editor & Preview */}
-        <div className={`post-form-editor-container post-form-editor-container--${viewMode}`}>
-          {(viewMode === 'edit' || viewMode === 'split') && (
-            <div className="post-form-editor">
-              <label className="post-form-label">
-                内容 <span className="post-form-required">*</span>
-              </label>
-              <textarea
-                ref={textareaRef}
-                className={`post-form-textarea ${errors.content ? 'post-form-textarea--error' : ''}`}
-                placeholder="在这里编写帖子内容，支持 Markdown 语法..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-              {errors.content && <span className="post-form-error">{errors.content}</span>}
-            </div>
-          )}
-
-          {(viewMode === 'preview' || viewMode === 'split') && (
-            <div className="post-form-preview">
-              <div className="post-form-label">预览</div>
-              <div className="post-form-preview-content">
-                {content ? (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    rehypePlugins={[rehypeHighlight]}
-                  >
-                    {content}
-                  </ReactMarkdown>
-                ) : (
-                  <div className="post-form-preview-empty">
-                    暂无内容
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+        {/* Content Editor */}
+        <div className="post-form-field">
+          <label className="post-form-label">
+            内容 <span className="post-form-required">*</span>
+          </label>
+          <MarkdownEditor
+            mode="full"
+            value={content}
+            onChange={setContent}
+            placeholder="写下你的想法..."
+            minRows={12}
+            disabled={false}
+          />
+          {errors.content && <span className="post-form-error">{errors.content}</span>}
         </div>
 
         {/* Actions */}
