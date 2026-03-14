@@ -37,20 +37,23 @@ exports.getPosts = async (req, res) => {
         let order;
         switch (sortBy) {
             case 'latest':
-                order = [['createdAt', 'DESC']];
+                order = [['isPinned', 'DESC'], ['createdAt', 'DESC']];
                 break;
             case 'likes':
-                order = [['likeCount', 'DESC']];
+                order = [['isPinned', 'DESC'], ['likeCount', 'DESC']];
                 break;
             case 'comments':
-                order = [['commentCount', 'DESC']];
+                order = [['isPinned', 'DESC'], ['commentCount', 'DESC']];
                 break;
             case 'views':
-                order = [['viewCount', 'DESC']];
+                order = [['isPinned', 'DESC'], ['viewCount', 'DESC']];
+                break;
+            case 'allTime':
+                order = [['isPinned', 'DESC'], ['allTimeScore', 'DESC'], ['createdAt', 'DESC']];
                 break;
             case 'hot':
             default:
-                order = [['hotScore', 'DESC'], ['createdAt', 'DESC']];
+                order = [['isPinned', 'DESC'], ['hotScore', 'DESC'], ['createdAt', 'DESC']];
         }
 
         const { count, rows: posts } = await Post.findAndCountAll({
