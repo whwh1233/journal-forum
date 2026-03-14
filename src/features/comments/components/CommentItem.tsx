@@ -7,6 +7,7 @@ import DimensionRatingDisplay from './DimensionRatingDisplay';
 import FollowButton from '../../follow/components/FollowButton';
 import { BadgeList } from '../../badges';
 import { likeComment } from '../../../services/commentService';
+import { MarkdownEditor, MarkdownContent } from '../../../components/MarkdownEditor';
 import type { Comment } from '../../../types';
 import './CommentItem.css';
 
@@ -129,11 +130,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
       <div className="comment-content">
         {isEditing ? (
           <div className="comment-edit">
-            <textarea
-              className="comment-edit-textarea"
+            <MarkdownEditor
               value={editContent}
-              onChange={e => setEditContent(e.target.value)}
-              rows={3}
+              onChange={setEditContent}
+              mode="compact"
+              minRows={3}
               disabled={isSubmitting}
             />
             <div className="comment-edit-actions">
@@ -158,9 +159,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
           </div>
         ) : (
           <>
-            <p className={comment.isDeleted ? 'comment-deleted' : ''}>
-              {comment.content}
-            </p>
+            {comment.isDeleted ? (
+              <p className="comment-deleted">{comment.content}</p>
+            ) : (
+              <MarkdownContent content={comment.content} />
+            )}
             {comment.dimensionRatings && !comment.isDeleted && (
               <DimensionRatingDisplay
                 dimensionRatings={comment.dimensionRatings}
