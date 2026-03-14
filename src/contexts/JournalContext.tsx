@@ -52,6 +52,7 @@ interface FilterState {
   minRating: number;
   sortFields: SortFields;
   sortExpanded: boolean;
+  hotSortMode: 'hot' | 'allTime' | null;
 }
 
 // Journal上下文状态
@@ -82,7 +83,8 @@ type JournalAction =
   | { type: 'SET_MIN_RATING'; payload: number }
   | { type: 'TOGGLE_SORT_FIELD'; payload: string }
   | { type: 'SET_SORT_EXPANDED'; payload: boolean }
-  | { type: 'CLEAR_FILTERS' };
+  | { type: 'CLEAR_FILTERS' }
+  | { type: 'SET_HOT_SORT_MODE'; payload: 'hot' | 'allTime' | null };
 
 // 初始状态
 const initialState: JournalState = {
@@ -99,6 +101,7 @@ const initialState: JournalState = {
   minRating: 0,
   sortFields: {},
   sortExpanded: false,
+  hotSortMode: null,
   pagination: null,
   hasMore: true
 };
@@ -188,7 +191,14 @@ function journalReducer(state: JournalState, action: JournalAction): JournalStat
         selectedCategoryId: null,
         minRating: 0,
         sortFields: {},
+        hotSortMode: null,
         filteredJournals: state.journals
+      };
+    case 'SET_HOT_SORT_MODE':
+      return {
+        ...state,
+        hotSortMode: action.payload,
+        sortFields: action.payload ? {} : state.sortFields
       };
     default:
       return state;
@@ -250,7 +260,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(journalReducer, initialState);
 
   // 将 sortFields 转换为 API 参数字符串
-  const sortByParam = sortFieldsToString(state.sortFields);
+  const sortByParam = state.hotSortMode || sortFieldsToString(state.sortFields);
 
   // 刷新期刊数据（重新加载第一页）
   const refreshJournals = useCallback(async () => {

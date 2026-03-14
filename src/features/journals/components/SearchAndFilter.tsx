@@ -142,10 +142,12 @@ const SearchAndFilter: React.FC = () => {
     setMinRating,
     toggleSortField,
     setSortExpanded,
+    hotSortMode,
+    setHotSortMode,
     clearFilters
   } = useJournals();
 
-  const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || hasActiveSorts;
+  const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || hasActiveSorts || hotSortMode;
 
   const levelOptions = useMemo(() => levels?.map(l => ({ id: l.name, name: l.name })) || [], [levels]);
   const categoryOptions = useMemo(() => categories?.map(c => ({
@@ -218,6 +220,21 @@ const SearchAndFilter: React.FC = () => {
           <span className="ft-value">{hasActiveSorts ? '多维度排序' : '配置排序'}</span>
           <ChevronDown size={14} className={`ft-chevron${sortExpanded ? ' open' : ''}`} />
         </button>
+
+        <div className="hot-sort-group">
+          <button
+            className={`filter-trigger${hotSortMode === 'hot' ? ' has-value' : ''}`}
+            onClick={() => setHotSortMode(hotSortMode === 'hot' ? null : 'hot')}
+          >
+            <span className="ft-label">近期热门</span>
+          </button>
+          <button
+            className={`filter-trigger${hotSortMode === 'allTime' ? ' has-value' : ''}`}
+            onClick={() => setHotSortMode(hotSortMode === 'allTime' ? null : 'allTime')}
+          >
+            <span className="ft-label">历史最热</span>
+          </button>
+        </div>
 
         {hasActiveFilters && (
           <>

@@ -32,6 +32,10 @@ export function useJournals() {
     dispatch({ type: 'CLEAR_FILTERS' });
   }, [dispatch]);
 
+  const setHotSortMode = useCallback((mode: 'hot' | 'allTime' | null) => {
+    dispatch({ type: 'SET_HOT_SORT_MODE', payload: mode });
+  }, [dispatch]);
+
   // 检查是否有激活的排序
   const hasActiveSorts = Object.keys(state.sortFields).length > 0;
 
@@ -49,6 +53,7 @@ export function useJournals() {
     minRating: state.minRating,
     sortFields: state.sortFields,
     sortExpanded: state.sortExpanded,
+    hotSortMode: state.hotSortMode,
     hasActiveSorts,
     hasMore: state.hasMore,
     pagination: state.pagination,
@@ -59,6 +64,7 @@ export function useJournals() {
     toggleSortField,
     setSortExpanded,
     clearFilters,
+    setHotSortMode,
     refreshJournals,
     loadMoreJournals
   };
