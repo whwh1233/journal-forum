@@ -1,28 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { addFavorite, removeFavorite, checkFavorite } from '../../../services/favoriteService';
+import { addFavorite, removeFavorite } from '../../../services/favoriteService';
 import { Bookmark } from 'lucide-react';
 import './FavoriteButton.css';
 
 interface FavoriteButtonProps {
   journalId: string;
   showText?: boolean;
+  initialFavorited?: boolean;
 }
 
-const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId, showText = true }) => {
+const FavoriteButton: React.FC<FavoriteButtonProps> = ({ journalId, showText = true, initialFavorited = false }) => {
   const { user } = useAuth();
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(initialFavorited);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const checkStatus = async () => {
-      if (user) {
-        const status = await checkFavorite(journalId);
-        setIsFavorited(status);
-      }
-    };
-    checkStatus();
-  }, [journalId, user]);
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();

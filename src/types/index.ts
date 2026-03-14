@@ -31,6 +31,7 @@ export interface Journal {
   levels?: string[];
   ratingCache?: JournalRatingCache;
   category?: string;
+  isFavorited?: boolean;
 }
 
 export interface JournalLevel {

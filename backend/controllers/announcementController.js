@@ -70,13 +70,19 @@ const getBanners = async (req, res) => {
                 type: 'banner',
                 status: 'active',
                 targetType: 'all',
-                [Op.or]: [
-                    { startTime: null },
-                    { startTime: { [Op.lte]: now } }
-                ],
-                [Op.or]: [
-                    { endTime: null },
-                    { endTime: { [Op.gt]: now } }
+                [Op.and]: [
+                    {
+                        [Op.or]: [
+                            { startTime: null },
+                            { startTime: { [Op.lte]: now } }
+                        ]
+                    },
+                    {
+                        [Op.or]: [
+                            { endTime: null },
+                            { endTime: { [Op.gt]: now } }
+                        ]
+                    }
                 ]
             },
             order: [

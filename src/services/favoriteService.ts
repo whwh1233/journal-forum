@@ -26,7 +26,7 @@ export const removeFavorite = async (journalId: string): Promise<void> => {
   });
 };
 
-// 检查是否已收藏
+// 检查是否已收藏（单个，仅在详情页等独立场景使用）
 export const checkFavorite = async (journalId: string): Promise<boolean> => {
   const token = localStorage.getItem('authToken');
   if (!token) {

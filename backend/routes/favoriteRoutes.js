@@ -4,12 +4,16 @@ const {
   addFavorite,
   removeFavorite,
   checkFavorite,
+  batchCheckFavorites,
   getUserFavorites
 } = require('../controllers/favoriteController');
 const { protect } = require('../middleware/auth');
 
 // 添加收藏（需要登录）
 router.post('/', protect, addFavorite);
+
+// 批量检查收藏状态（需要登录）
+router.post('/check/batch', protect, batchCheckFavorites);
 
 // 取消收藏（需要登录）
 router.delete('/:journalId', protect, removeFavorite);
