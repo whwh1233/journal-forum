@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Filter, X, TrendingUp, Users, Tag, Search } from 'lucide-react';
+import { PlusCircle, Filter, X, TrendingUp, Tag, Search } from 'lucide-react';
 import PostList from '../components/PostList';
 import { postService } from '../services/postService';
 import { Post, PostFilters, PostPagination, PostCategory, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
@@ -196,34 +196,27 @@ const CommunityPage: React.FC = () => {
           {/* Left Sidebar - Filters */}
           <aside className={`community-sidebar community-sidebar--left ${showFilterDrawer ? 'community-sidebar--open' : ''}`}>
             <div className="community-sidebar-header">
-              <h3>筛选条件</h3>
+              <h3>分类统计</h3>
               <button className="community-sidebar-close" onClick={() => setShowFilterDrawer(false)}>
                 <X size={20} />
               </button>
             </div>
 
             <div className="community-filter-section">
-              <h4 className="community-filter-title">分类</h4>
               <div className="community-filter-list">
-                <button
-                  className={`community-filter-item ${!filters.category ? 'community-filter-item--active' : ''}`}
-                  onClick={() => handleFilterChange('category', undefined)}
-                >
-                  <span>全部分类</span>
-                  <span className="community-filter-count">{pagination.total}</span>
-                </button>
+                <div className="community-stat-row">
+                  <span className="community-stat-label">全部</span>
+                  <span className="community-stat-badge">{pagination.total}</span>
+                </div>
                 {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                  <button
-                    key={value}
-                    className={`community-filter-item ${filters.category === value ? 'community-filter-item--active' : ''}`}
-                    onClick={() => handleFilterChange('category', value)}
-                  >
-                    <span>{label}</span>
-                  </button>
+                  <div key={value} className="community-stat-row">
+                    {/* key=value (PostCategory enum key) — labels may not be unique across locales */}
+                    <span className="community-stat-label">{label}</span>
+                    <span className="community-stat-badge">—</span>
+                  </div>
                 ))}
               </div>
             </div>
-
           </aside>
 
           {/* Main Content */}
@@ -242,6 +235,19 @@ const CommunityPage: React.FC = () => {
 
           {/* Right Sidebar - Info */}
           <aside className="community-sidebar community-sidebar--right">
+            {/* 社区公告 */}
+            <div className="community-widget">
+              <div className="community-widget-header">
+                <h3>社区公告</h3>
+              </div>
+              <div className="community-widget-content">
+                <div className="community-info-text">
+                  欢迎来到学术交流社区！在这里您可以分享投稿经验、讨论学术问题、寻求帮助和交流心得。
+                </div>
+              </div>
+            </div>
+
+            {/* 热门标签 */}
             <div className="community-widget">
               <div className="community-widget-header">
                 <TrendingUp size={20} />
@@ -255,7 +261,8 @@ const CommunityPage: React.FC = () => {
                       className="community-tag-cloud-item"
                       onClick={() => handleFilterChange('tag', tag)}
                     >
-                      <Tag size={14} />
+                      <Tag size={16} />
+                      {/* size=16: --text-xs (12px) × 1.25 = 15 → round up to even = 16, per design system */}
                       <span>{tag}</span>
                     </button>
                   ))}
@@ -263,25 +270,21 @@ const CommunityPage: React.FC = () => {
               </div>
             </div>
 
+            {/* 社区统计 — replaces 活跃用户 */}
             <div className="community-widget">
               <div className="community-widget-header">
-                <Users size={20} />
-                <h3>活跃用户</h3>
+                <h3>社区统计</h3>
               </div>
               <div className="community-widget-content">
-                <div className="community-info-text">
-                  近期活跃用户数据正在统计中...
-                </div>
-              </div>
-            </div>
-
-            <div className="community-widget">
-              <div className="community-widget-header">
-                <h3>社区公告</h3>
-              </div>
-              <div className="community-widget-content">
-                <div className="community-info-text">
-                  欢迎来到学术交流社区！在这里您可以分享投稿经验、讨论学术问题、寻求帮助和交流心得。
+                <div className="community-stat-grid">
+                  <div className="community-stat-item">
+                    <span className="community-stat-number">{pagination.total}</span>
+                    <span className="community-stat-desc">总帖子</span>
+                  </div>
+                  <div className="community-stat-item">
+                    <span className="community-stat-number">6</span>
+                    <span className="community-stat-desc">讨论分类</span>
+                  </div>
                 </div>
               </div>
             </div>
