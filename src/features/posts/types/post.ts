@@ -4,6 +4,25 @@ export type PostCategory = 'experience' | 'discussion' | 'question' | 'news' | '
 
 export type PostStatus = 'published' | 'draft' | 'reported';
 
+export interface TagInfo {
+  id: number;
+  name: string;
+  isOfficial: boolean;
+  status: 'approved' | 'pending';
+  postCount?: number;
+  createdBy?: string;
+}
+
+export interface PostCategoryInfo {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  postCount?: number;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
 export interface Post {
   id: number;
   userId: string;
@@ -31,6 +50,10 @@ export interface Post {
   userFavorited?: boolean;
   userFollowed?: boolean;
 
+  categoryId?: number;
+  postCategory?: PostCategoryInfo;
+  tags_assoc?: TagInfo[];
+
   createdAt: string;
   updatedAt: string;
 }
@@ -54,8 +77,9 @@ export interface PostComment {
 export interface CreatePostData {
   title: string;
   content: string;
-  category: PostCategory;
-  tags: string[];
+  categoryId: number;
+  tagIds?: number[];
+  newTags?: string[];
   journalId?: number;
   status?: PostStatus;
 }
@@ -63,8 +87,9 @@ export interface CreatePostData {
 export interface UpdatePostData {
   title?: string;
   content?: string;
-  category?: PostCategory;
-  tags?: string[];
+  categoryId?: number;
+  tagIds?: number[];
+  newTags?: string[];
   journalId?: number;
 }
 
@@ -91,6 +116,7 @@ export interface PostPagination {
   totalPages: number;
 }
 
+/** @deprecated Use PostCategoryInfo from the database instead */
 export const CATEGORY_LABELS: Record<PostCategory, string> = {
   experience: '投稿经验',
   discussion: '学术讨论',
