@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import DimensionRatingInput from './DimensionRatingInput';
+import { MarkdownEditor } from '../../../components/MarkdownEditor';
 import type { DimensionRatings } from '../../../types';
 import './CommentForm.css';
 
@@ -87,12 +88,12 @@ const CommentForm: React.FC<CommentFormProps> = ({
         />
       )}
 
-      <textarea
-        className="comment-form-textarea"
+      <MarkdownEditor
         value={content}
-        onChange={e => setContent(e.target.value)}
+        onChange={setContent}
         placeholder={isReply ? '写下你的回复...' : '写下你的评论...'}
-        rows={isReply ? 3 : 4}
+        mode="compact"
+        minRows={isReply ? 3 : 4}
         disabled={isSubmitting}
       />
 
