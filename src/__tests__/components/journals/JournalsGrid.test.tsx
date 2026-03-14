@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import JournalsGrid from '@/features/journals/components/JournalsGrid';
 import { Journal } from '@/types';
+import { useJournals } from '@/hooks/useJournals';
 
 // Mock the useJournals hook
 const mockLoadMoreJournals = vi.fn();
@@ -65,8 +66,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should render loading state', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: [],
       loading: true,
       loadingMore: false,
@@ -81,12 +81,11 @@ describe('JournalsGrid', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText(/加载中/)).toBeInTheDocument();
   });
 
   it('should render error state', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: [],
       loading: false,
       loadingMore: false,
@@ -101,12 +100,11 @@ describe('JournalsGrid', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/Error: Failed to load journals/)).toBeInTheDocument();
+    expect(screen.getByText(/错误: Failed to load journals/)).toBeInTheDocument();
   });
 
   it('should render no results state when journals array is empty', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: [],
       loading: false,
       loadingMore: false,
@@ -121,12 +119,11 @@ describe('JournalsGrid', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('No matching journals found.')).toBeInTheDocument();
+    expect(screen.getByText('没有找到符合条件的期刊。')).toBeInTheDocument();
   });
 
   it('should render journal cards', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -147,8 +144,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should render correct number of journal cards', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -168,8 +164,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should open detail panel when journal card is clicked', async () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -194,8 +189,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should close detail panel when close button is clicked', async () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -228,8 +222,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should show loading more indicator when loadingMore is true', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: true,
@@ -244,12 +237,11 @@ describe('JournalsGrid', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Loading more...')).toBeInTheDocument();
+    expect(screen.getByText(/加载更多/)).toBeInTheDocument();
   });
 
   it('should show end of list message when no more journals', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -264,12 +256,11 @@ describe('JournalsGrid', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('All journals loaded')).toBeInTheDocument();
+    expect(screen.getByText('已加载全部期刊')).toBeInTheDocument();
   });
 
   it('should have journals-grid class for CSS styling', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -288,8 +279,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should use journal journalId as key for each card', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -310,8 +300,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should handle clicking different journal cards', async () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,
@@ -343,8 +332,7 @@ describe('JournalsGrid', () => {
   });
 
   it('should have load more trigger element', () => {
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue({
+    vi.mocked(useJournals).mockReturnValue({
       filteredJournals: mockJournals,
       loading: false,
       loadingMore: false,

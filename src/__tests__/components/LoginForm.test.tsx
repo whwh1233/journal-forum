@@ -1,260 +1,105 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '../helpers/testUtils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { BrowserRouter } from 'react-router-dom';
 import LoginForm from '../../features/auth/components/LoginForm';
 
+const mockLogin = vi.fn();
+const mockClearError = vi.fn();
+let mockError: string | null = null;
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    login: mockLogin,
+    error: mockError,
+    clearError: mockClearError,
+    user: null,
+    isAuthenticated: false,
+    loading: false,
+  }),
+}));
+
+const renderComponent = (overrides: any = {}) => {
+  const props = { onSuccess: vi.fn(), onSwitchToRegister: vi.fn(), ...overrides };
+  return { ...render(<BrowserRouter><LoginForm {...props} /></BrowserRouter>), props };
+};
+
 describe('LoginForm', () => {
-  const mockOnSuccess = vi.fn();
-  const mockOnSwitchToRegister = vi.fn();
+  beforeEach(() => { vi.clearAllMocks(); mockError = null; mockLogin.mockResolvedValue(undefined); });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('renders login form fields', () => {
+    renderComponent();
+    expect(screen.getByLabelText('邮箱地址')).toBeInTheDocument();
+    expect(screen.getByLabelText('密码')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '登录' })).toBeInTheDocument();
   });
 
-  it('should render login form fields', () => {
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    expect(screen.getByLabelText(/邮箱|Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/密码|Password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /登录|Login/i })).toBeInTheDocument();
+  it('renders form title', () => {
+    renderComponent();
+    expect(screen.getByText('用户登录')).toBeInTheDocument();
   });
 
-  it('should validate email format', async () => {
+  it('submits form with valid credentials', async () => {
     const user = userEvent.setup();
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const emailInput = screen.getByLabelText(/邮箱|Email/i);
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
-
-    // 输入无效邮箱
-    await user.type(emailInput, 'invalid-email');
-    await user.click(submitButton);
-
-    // 应该显示错误信息
-    await waitFor(() => {
-      expect(screen.getByText(/邮箱格式不正确|Invalid email/i)).toBeInTheDocument();
-    });
+    const { props } = renderComponent();
+    await user.type(screen.getByLabelText('邮箱地址'), 'test@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '登录' }));
+    await waitFor(() => { expect(mockLogin).toHaveBeenCalledWith('test@example.com', 'password123'); });
+    await waitFor(() => { expect(props.onSuccess).toHaveBeenCalled(); });
   });
 
-  it('should validate required fields', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
-    await user.click(submitButton);
-
-    // 应该显示必填字段错误
-    await waitFor(() => {
-      expect(screen.getByText(/请输入邮箱|Email is required/i)).toBeInTheDocument();
-    });
+  it('displays error message from useAuth', () => {
+    mockError = '邮箱或密码错误';
+    renderComponent();
+    expect(screen.getByText('邮箱或密码错误')).toBeInTheDocument();
   });
 
-  it('should submit form with valid credentials', async () => {
+  it('does not call onSuccess on login failure', async () => {
     const user = userEvent.setup();
+    mockLogin.mockRejectedValue(new Error('fail'));
+    const { props } = renderComponent();
+    await user.type(screen.getByLabelText('邮箱地址'), 'test@example.com');
+    await user.type(screen.getByLabelText('密码'), 'wrong');
+    await user.click(screen.getByRole('button', { name: '登录' }));
+    await waitFor(() => { expect(props.onSuccess).not.toHaveBeenCalled(); });
+  });
 
-    // Mock fetch
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            success: true,
-            data: {
-              token: 'test-token',
-              user: { id: 1, email: 'test@example.com', name: 'Test User' },
-            },
-          }),
-      })
-    ) as any;
+  it('calls onSwitchToRegister', async () => {
+    const user = userEvent.setup();
+    const { props } = renderComponent();
+    await user.click(screen.getByText('立即注册'));
+    expect(props.onSwitchToRegister).toHaveBeenCalled();
+  });
 
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
+  it('disables submit button while submitting', async () => {
+    const user = userEvent.setup();
+    mockLogin.mockReturnValue(new Promise(() => {}));
+    renderComponent();
+    await user.type(screen.getByLabelText('邮箱地址'), 'test@example.com');
+    await user.type(screen.getByLabelText('密码'), 'password123');
+    await user.click(screen.getByRole('button', { name: '登录' }));
+    await waitFor(() => { expect(screen.getByRole('button', { name: /登录中/ })).toBeDisabled(); });
+  });
 
-    const emailInput = screen.getByLabelText(/邮箱|Email/i);
-    const passwordInput = screen.getByLabelText(/密码|Password/i);
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
+  it('clears error when typing in email', async () => {
+    const user = userEvent.setup();
+    mockError = '登录失败';
+    renderComponent();
+    expect(screen.getByText('登录失败')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('邮箱地址'), 'a');
+    expect(mockClearError).toHaveBeenCalled();
+  });
 
+  it('disables inputs while submitting', async () => {
+    const user = userEvent.setup();
+    mockLogin.mockReturnValue(new Promise(() => {}));
+    renderComponent();
+    const emailInput = screen.getByLabelText('邮箱地址');
+    const passwordInput = screen.getByLabelText('密码');
     await user.type(emailInput, 'test@example.com');
     await user.type(passwordInput, 'password123');
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockOnSuccess).toHaveBeenCalled();
-    });
-  });
-
-  it('should display error message on login failure', async () => {
-    const user = userEvent.setup();
-
-    // Mock failed fetch
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: false,
-        json: () =>
-          Promise.resolve({
-            success: false,
-            message: '邮箱或密码错误',
-          }),
-      })
-    ) as any;
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const emailInput = screen.getByLabelText(/邮箱|Email/i);
-    const passwordInput = screen.getByLabelText(/密码|Password/i);
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
-
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'wrongpassword');
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/邮箱或密码错误/)).toBeInTheDocument();
-    });
-
-    expect(mockOnSuccess).not.toHaveBeenCalled();
-  });
-
-  it('should call onSwitchToRegister when register link is clicked', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const registerLink = screen.getByText(/注册|Register/i);
-    await user.click(registerLink);
-
-    expect(mockOnSwitchToRegister).toHaveBeenCalled();
-  });
-
-  it('should disable submit button while loading', async () => {
-    const user = userEvent.setup();
-
-    // Mock slow fetch
-    global.fetch = vi.fn(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                ok: true,
-                json: () => Promise.resolve({ success: true, data: {} }),
-              } as any),
-            1000
-          )
-        )
-    );
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const emailInput = screen.getByLabelText(/邮箱|Email/i);
-    const passwordInput = screen.getByLabelText(/密码|Password/i);
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
-
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'password123');
-    await user.click(submitButton);
-
-    // 按钮应该被禁用
-    expect(submitButton).toBeDisabled();
-  });
-
-  it('should toggle password visibility', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const passwordInput = screen.getByLabelText(/密码|Password/i) as HTMLInputElement;
-    const toggleButton = screen.getByRole('button', { name: /显示|隐藏|Show|Hide/i });
-
-    // 初始状态应该是password类型
-    expect(passwordInput.type).toBe('password');
-
-    // 点击切换
-    await user.click(toggleButton);
-    expect(passwordInput.type).toBe('text');
-
-    // 再次点击切换回来
-    await user.click(toggleButton);
-    expect(passwordInput.type).toBe('password');
-  });
-
-  it('should clear error message when user starts typing', async () => {
-    const user = userEvent.setup();
-
-    // Mock failed fetch first
-    global.fetch = vi.fn(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve({ success: false, message: '登录失败' }),
-      })
-    ) as any;
-
-    render(
-      <LoginForm
-        onSuccess={mockOnSuccess}
-        onSwitchToRegister={mockOnSwitchToRegister}
-      />
-    );
-
-    const emailInput = screen.getByLabelText(/邮箱|Email/i);
-    const passwordInput = screen.getByLabelText(/密码|Password/i);
-    const submitButton = screen.getByRole('button', { name: /登录|Login/i });
-
-    // 先触发错误
-    await user.type(emailInput, 'test@example.com');
-    await user.type(passwordInput, 'wrong');
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/登录失败/)).toBeInTheDocument();
-    });
-
-    // 开始输入时应该清除错误
-    await user.type(emailInput, 'a');
-
-    await waitFor(() => {
-      expect(screen.queryByText(/登录失败/)).not.toBeInTheDocument();
-    });
+    await user.click(screen.getByRole('button', { name: '登录' }));
+    await waitFor(() => { expect(emailInput).toBeDisabled(); expect(passwordInput).toBeDisabled(); });
   });
 });

@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { postService } from '@/features/posts/services/postService';
 import PostCommentItem from '@/features/posts/components/PostCommentItem';
 import { PostComment } from '@/features/posts/types/post';
 
 // Mock the useAuth hook
-vi.mock('../../../hooks/useAuth', () => ({
+vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn()
 }));
 
@@ -71,8 +73,7 @@ describe('PostCommentItem', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const { useAuth } = require('../../../hooks/useAuth');
-    useAuth.mockReturnValue({ user: mockUser });
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
   });
 
   describe('Basic Rendering', () => {
@@ -115,7 +116,7 @@ describe('PostCommentItem', () => {
       );
 
       // Should show either relative or absolute date format
-      const dateElement = screen.getByText(/2024|ago|just now/i);
+      const dateElement = screen.getByText(/2024|前|刚刚/);
       expect(dateElement).toBeInTheDocument();
     });
 
@@ -134,7 +135,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('(edited)')).toBeInTheDocument();
+      expect(screen.getByText('(已编辑)')).toBeInTheDocument();
     });
 
     it('should render like count', () => {
@@ -201,8 +202,8 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.queryByText('Reply')).not.toBeInTheDocument();
-      expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+      expect(screen.queryByText('回复')).not.toBeInTheDocument();
+      expect(screen.queryByText('删除')).not.toBeInTheDocument();
     });
   });
 
@@ -217,7 +218,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const likeButton = screen.getByTitle('Mark as helpful');
+      const likeButton = screen.getByTitle('标记为有用');
       expect(likeButton).toBeInTheDocument();
     });
 
@@ -241,8 +242,7 @@ describe('PostCommentItem', () => {
     });
 
     it('should call toggleCommentLike when like button is clicked', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.toggleCommentLike.mockResolvedValue({ liked: true, likeCount: 6 });
+      vi.mocked(postService.toggleCommentLike).mockResolvedValue({ liked: true, likeCount: 6 });
 
       render(
         <BrowserRouter>
@@ -253,7 +253,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const likeButton = screen.getByTitle('Mark as helpful');
+      const likeButton = screen.getByTitle('标记为有用');
       fireEvent.click(likeButton);
 
       await waitFor(() => {
@@ -262,8 +262,7 @@ describe('PostCommentItem', () => {
     });
 
     it('should update like count after successful like toggle', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.toggleCommentLike.mockResolvedValue({ liked: true, likeCount: 6 });
+      vi.mocked(postService.toggleCommentLike).mockResolvedValue({ liked: true, likeCount: 6 });
 
       render(
         <BrowserRouter>
@@ -274,7 +273,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const likeButton = screen.getByTitle('Mark as helpful');
+      const likeButton = screen.getByTitle('标记为有用');
       fireEvent.click(likeButton);
 
       await waitFor(() => {
@@ -283,8 +282,7 @@ describe('PostCommentItem', () => {
     });
 
     it('should disable like button when user is not logged in', () => {
-      const { useAuth } = require('../../../hooks/useAuth');
-      useAuth.mockReturnValue({ user: null });
+      vi.mocked(useAuth).mockReturnValue({ user: null } as any);
 
       render(
         <BrowserRouter>
@@ -295,7 +293,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const likeButton = screen.getByTitle('Mark as helpful');
+      const likeButton = screen.getByTitle('标记为有用');
       expect(likeButton).toBeDisabled();
     });
   });
@@ -312,7 +310,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('Reply')).toBeInTheDocument();
+      expect(screen.getByText('回复')).toBeInTheDocument();
     });
 
     it('should not show reply button when level >= 2', () => {
@@ -326,7 +324,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.queryByText('Reply')).not.toBeInTheDocument();
+      expect(screen.queryByText('回复')).not.toBeInTheDocument();
     });
 
     it('should show reply form when reply button is clicked', () => {
@@ -340,7 +338,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const replyButton = screen.getByText('Reply');
+      const replyButton = screen.getByText('回复');
       fireEvent.click(replyButton);
 
       expect(screen.getByTestId('post-comment-form')).toBeInTheDocument();
@@ -358,7 +356,7 @@ describe('PostCommentItem', () => {
       );
 
       // Open reply form
-      fireEvent.click(screen.getByText('Reply'));
+      fireEvent.click(screen.getByText('回复'));
       expect(screen.getByTestId('post-comment-form')).toBeInTheDocument();
 
       // Close reply form
@@ -377,7 +375,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const replyButton = screen.getByText('Reply');
+      const replyButton = screen.getByText('回复');
 
       // Open
       fireEvent.click(replyButton);
@@ -400,12 +398,11 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('Delete')).toBeInTheDocument();
+      expect(screen.getByText('删除')).toBeInTheDocument();
     });
 
     it('should show delete button for admin user', () => {
-      const { useAuth } = require('../../../hooks/useAuth');
-      useAuth.mockReturnValue({ user: mockAdminUser });
+      vi.mocked(useAuth).mockReturnValue({ user: mockAdminUser } as any);
 
       const otherUserComment: PostComment = {
         ...mockComment,
@@ -421,7 +418,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('Delete')).toBeInTheDocument();
+      expect(screen.getByText('删除')).toBeInTheDocument();
     });
 
     it('should not show delete button for other users', () => {
@@ -439,12 +436,11 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+      expect(screen.queryByText('删除')).not.toBeInTheDocument();
     });
 
     it('should call deleteComment when delete is confirmed', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.deleteComment.mockResolvedValue({});
+      vi.mocked(postService.deleteComment).mockResolvedValue({});
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
       render(
@@ -456,7 +452,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const deleteButton = screen.getByText('Delete');
+      const deleteButton = screen.getByText('删除');
       fireEvent.click(deleteButton);
 
       await waitFor(() => {
@@ -465,8 +461,7 @@ describe('PostCommentItem', () => {
     });
 
     it('should call onCommentUpdated after successful delete', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.deleteComment.mockResolvedValue({});
+      vi.mocked(postService.deleteComment).mockResolvedValue({});
       vi.spyOn(window, 'confirm').mockReturnValue(true);
 
       render(
@@ -478,7 +473,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const deleteButton = screen.getByText('Delete');
+      const deleteButton = screen.getByText('删除');
       fireEvent.click(deleteButton);
 
       await waitFor(() => {
@@ -487,7 +482,6 @@ describe('PostCommentItem', () => {
     });
 
     it('should not delete when user cancels confirmation', async () => {
-      const { postService } = require('@/features/posts/services/postService');
       vi.spyOn(window, 'confirm').mockReturnValue(false);
 
       render(
@@ -499,7 +493,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      const deleteButton = screen.getByText('Delete');
+      const deleteButton = screen.getByText('删除');
       fireEvent.click(deleteButton);
 
       expect(postService.deleteComment).not.toHaveBeenCalled();
@@ -614,8 +608,7 @@ describe('PostCommentItem', () => {
     });
 
     it('should not show follow button when user is not logged in', () => {
-      const { useAuth } = require('../../../hooks/useAuth');
-      useAuth.mockReturnValue({ user: null });
+      vi.mocked(useAuth).mockReturnValue({ user: null } as any);
 
       render(
         <BrowserRouter>
@@ -646,7 +639,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('just now')).toBeInTheDocument();
+      expect(screen.getByText('刚刚')).toBeInTheDocument();
     });
 
     it('should show minutes ago for comments within an hour', () => {
@@ -665,7 +658,7 @@ describe('PostCommentItem', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText(/10.*minutes ago/)).toBeInTheDocument();
+      expect(screen.getByText(/10分钟前/)).toBeInTheDocument();
     });
   });
 });

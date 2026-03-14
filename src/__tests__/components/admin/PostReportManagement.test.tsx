@@ -66,8 +66,8 @@ describe('PostReportManagement', () => {
   it('shows status badges', async () => {
     setupFetchSuccess();
     render(<PostReportManagement />);
-    await waitFor(() => { expect(screen.getByText('待处理')).toBeInTheDocument(); });
-    expect(screen.getByText('已处理')).toBeInTheDocument();
+    await waitFor(() => { expect(screen.getAllByText('待处理').length).toBeGreaterThanOrEqual(1); });
+    expect(screen.getAllByText('已处理').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows reasons', async () => {

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { useJournals } from '@/hooks/useJournals';
 import SearchAndFilter from '@/features/journals/components/SearchAndFilter';
 
 // Mock the useJournals hook
@@ -19,14 +20,14 @@ vi.mock('@/hooks/useJournals', () => ({
 vi.mock('@/contexts/JournalContext', () => ({
   SORT_FIELD_PRIORITY: ['commentCount', 'impactFactor', 'rating', 'overallExperience', 'reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality'],
   SORT_FIELD_LABELS: {
-    commentCount: 'Comment Count',
-    impactFactor: 'Impact Factor',
-    rating: 'Overall Rating',
-    overallExperience: 'Overall Experience',
-    reviewSpeed: 'Review Speed',
-    editorAttitude: 'Editor Attitude',
-    acceptDifficulty: 'Accept Difficulty',
-    reviewQuality: 'Review Quality'
+    commentCount: '评论数',
+    impactFactor: '影响因子',
+    rating: '综合评分',
+    overallExperience: '综合体验',
+    reviewSpeed: '审稿速度',
+    editorAttitude: '编辑态度',
+    acceptDifficulty: '录用难度',
+    reviewQuality: '审稿质量'
   }
 }));
 
@@ -77,43 +78,40 @@ const defaultUseJournalsReturn = {
 describe('SearchAndFilter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    const { useJournals } = require('@/hooks/useJournals');
-    useJournals.mockReturnValue(defaultUseJournalsReturn);
+    vi.mocked(useJournals).mockReturnValue(defaultUseJournalsReturn);
   });
 
   describe('Search Input', () => {
     it('should render search input', () => {
       render(<SearchAndFilter />);
 
-      const searchInput = screen.getByPlaceholderText(/Search journal name, ISSN or level.../);
+      const searchInput = screen.getByPlaceholderText(/搜索期刊名称/);
       expect(searchInput).toBeInTheDocument();
     });
 
     it('should call setSearchQuery when typing in search input', () => {
       render(<SearchAndFilter />);
 
-      const searchInput = screen.getByPlaceholderText(/Search journal name, ISSN or level.../);
+      const searchInput = screen.getByPlaceholderText(/搜索期刊名称/);
       fireEvent.change(searchInput, { target: { value: 'nature' } });
 
       expect(mockSetSearchQuery).toHaveBeenCalledWith('nature');
     });
 
     it('should display current search query value', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         searchQuery: 'test query'
       });
 
       render(<SearchAndFilter />);
 
-      const searchInput = screen.getByPlaceholderText(/Search journal name, ISSN or level.../);
+      const searchInput = screen.getByPlaceholderText(/搜索期刊名称/);
       expect(searchInput).toHaveValue('test query');
     });
 
     it('should show clear button when search query is not empty', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         searchQuery: 'test'
       });
@@ -125,8 +123,7 @@ describe('SearchAndFilter', () => {
     });
 
     it('should clear search query when clear button is clicked', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         searchQuery: 'test'
       });
@@ -146,13 +143,13 @@ describe('SearchAndFilter', () => {
     it('should render level filter', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Level')).toBeInTheDocument();
+      expect(screen.getByText('等级')).toBeInTheDocument();
     });
 
     it('should open level dropdown when clicked', () => {
       render(<SearchAndFilter />);
 
-      const levelTrigger = screen.getByText('All Levels');
+      const levelTrigger = screen.getByText('全部等级');
       fireEvent.click(levelTrigger);
 
       expect(screen.getByText('SCI')).toBeInTheDocument();
@@ -163,7 +160,7 @@ describe('SearchAndFilter', () => {
     it('should call setSelectedCategory when level is selected', async () => {
       render(<SearchAndFilter />);
 
-      const levelTrigger = screen.getByText('All Levels');
+      const levelTrigger = screen.getByText('全部等级');
       fireEvent.click(levelTrigger);
 
       const sciOption = screen.getByText('SCI');
@@ -177,13 +174,13 @@ describe('SearchAndFilter', () => {
     it('should render category filter', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Category')).toBeInTheDocument();
+      expect(screen.getByText('分类')).toBeInTheDocument();
     });
 
     it('should open cascaded category dropdown when clicked', () => {
       render(<SearchAndFilter />);
 
-      const categoryTrigger = screen.getByText('All Categories');
+      const categoryTrigger = screen.getByText('全部分类');
       fireEvent.click(categoryTrigger);
 
       expect(screen.getByText('Science')).toBeInTheDocument();
@@ -193,7 +190,7 @@ describe('SearchAndFilter', () => {
     it('should show subcategories when hovering over parent category', async () => {
       render(<SearchAndFilter />);
 
-      const categoryTrigger = screen.getByText('All Categories');
+      const categoryTrigger = screen.getByText('全部分类');
       fireEvent.click(categoryTrigger);
 
       const scienceOption = screen.getByText('Science');
@@ -208,7 +205,7 @@ describe('SearchAndFilter', () => {
     it('should call setSelectedCategoryId when category is selected', () => {
       render(<SearchAndFilter />);
 
-      const categoryTrigger = screen.getByText('All Categories');
+      const categoryTrigger = screen.getByText('全部分类');
       fireEvent.click(categoryTrigger);
 
       const scienceOption = screen.getByText('Science');
@@ -222,27 +219,27 @@ describe('SearchAndFilter', () => {
     it('should render rating filter', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Rating')).toBeInTheDocument();
+      expect(screen.getByText('评分')).toBeInTheDocument();
     });
 
     it('should open rating dropdown when clicked', () => {
       render(<SearchAndFilter />);
 
-      const ratingTrigger = screen.getByText('All Ratings');
+      const ratingTrigger = screen.getByText('全部评分');
       fireEvent.click(ratingTrigger);
 
-      expect(screen.getByText('4 stars or above')).toBeInTheDocument();
-      expect(screen.getByText('3 stars or above')).toBeInTheDocument();
-      expect(screen.getByText('2 stars or above')).toBeInTheDocument();
+      expect(screen.getByText('4星以上')).toBeInTheDocument();
+      expect(screen.getByText('3星以上')).toBeInTheDocument();
+      expect(screen.getByText('2星以上')).toBeInTheDocument();
     });
 
     it('should call setMinRating when rating option is selected', () => {
       render(<SearchAndFilter />);
 
-      const ratingTrigger = screen.getByText('All Ratings');
+      const ratingTrigger = screen.getByText('全部评分');
       fireEvent.click(ratingTrigger);
 
-      const fourStarOption = screen.getByText('4 stars or above');
+      const fourStarOption = screen.getByText('4星以上');
       fireEvent.click(fourStarOption);
 
       expect(mockSetMinRating).toHaveBeenCalledWith(4);
@@ -253,43 +250,41 @@ describe('SearchAndFilter', () => {
     it('should render sort button', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Sort')).toBeInTheDocument();
+      expect(screen.getByText('排序功能')).toBeInTheDocument();
     });
 
     it('should toggle sort panel when sort button is clicked', () => {
       render(<SearchAndFilter />);
 
-      const sortButton = screen.getByText('Configure Sort');
+      const sortButton = screen.getByText('配置排序');
       fireEvent.click(sortButton);
 
       expect(mockSetSortExpanded).toHaveBeenCalledWith(true);
     });
 
     it('should display sort panel when sortExpanded is true', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Sort Configuration')).toBeInTheDocument();
-      expect(screen.getByText('Comment Count')).toBeInTheDocument();
-      expect(screen.getByText('Impact Factor')).toBeInTheDocument();
-      expect(screen.getByText('Overall Rating')).toBeInTheDocument();
+      expect(screen.getByText('排序配置管理')).toBeInTheDocument();
+      expect(screen.getByText('评论数')).toBeInTheDocument();
+      expect(screen.getByText('影响因子')).toBeInTheDocument();
+      expect(screen.getByText('综合评分')).toBeInTheDocument();
     });
 
     it('should call toggleSortField when sort field is clicked', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true
       });
 
       render(<SearchAndFilter />);
 
-      const commentCountSort = screen.getByText('Comment Count').closest('button');
+      const commentCountSort = screen.getByText('评论数').closest('button');
       if (commentCountSort) {
         fireEvent.click(commentCountSort);
       }
@@ -298,8 +293,7 @@ describe('SearchAndFilter', () => {
     });
 
     it('should show active state for active sort fields', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true,
         sortFields: { commentCount: 'desc' }
@@ -312,8 +306,7 @@ describe('SearchAndFilter', () => {
     });
 
     it('should display descending icon for desc sort order', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true,
         sortFields: { commentCount: 'desc' }
@@ -321,12 +314,11 @@ describe('SearchAndFilter', () => {
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Descending')).toBeInTheDocument();
+      expect(screen.getByText('降序排列')).toBeInTheDocument();
     });
 
     it('should display ascending icon for asc sort order', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true,
         sortFields: { commentCount: 'asc' }
@@ -334,12 +326,11 @@ describe('SearchAndFilter', () => {
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Ascending')).toBeInTheDocument();
+      expect(screen.getByText('升序排列')).toBeInTheDocument();
     });
 
     it('should close sort panel when close button is clicked', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         sortExpanded: true
       });
@@ -359,67 +350,62 @@ describe('SearchAndFilter', () => {
     it('should not show clear button when no filters are active', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.queryByText('Reset Filters')).not.toBeInTheDocument();
+      expect(screen.queryByText(/重置筛选/)).not.toBeInTheDocument();
     });
 
     it('should show clear button when search query is active', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         searchQuery: 'test'
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Reset Filters')).toBeInTheDocument();
+      expect(screen.getByText(/重置筛选/)).toBeInTheDocument();
     });
 
     it('should show clear button when category is selected', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         selectedCategory: 'SCI'
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Reset Filters')).toBeInTheDocument();
+      expect(screen.getByText(/重置筛选/)).toBeInTheDocument();
     });
 
     it('should show clear button when rating filter is active', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         minRating: 4
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Reset Filters')).toBeInTheDocument();
+      expect(screen.getByText(/重置筛选/)).toBeInTheDocument();
     });
 
     it('should show clear button when sort is active', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         hasActiveSorts: true
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Reset Filters')).toBeInTheDocument();
+      expect(screen.getByText(/重置筛选/)).toBeInTheDocument();
     });
 
     it('should call clearFilters when clear button is clicked', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         searchQuery: 'test'
       });
 
       render(<SearchAndFilter />);
 
-      const clearButton = screen.getByText('Reset Filters');
+      const clearButton = screen.getByText(/重置筛选/);
       fireEvent.click(clearButton);
 
       expect(mockClearFilters).toHaveBeenCalled();
@@ -431,37 +417,36 @@ describe('SearchAndFilter', () => {
       const { container } = render(<SearchAndFilter />);
 
       const section = container.querySelector('.search-filter-section');
-      expect(section).toHaveAttribute('aria-label', 'Search and filter journals');
+      expect(section).toHaveAttribute('aria-label', '搜索和筛选期刊');
     });
 
     it('should have proper structure for screen readers', () => {
       render(<SearchAndFilter />);
 
       // Filter labels should be present
-      expect(screen.getByText('Level')).toBeInTheDocument();
-      expect(screen.getByText('Category')).toBeInTheDocument();
-      expect(screen.getByText('Rating')).toBeInTheDocument();
-      expect(screen.getByText('Sort')).toBeInTheDocument();
+      expect(screen.getByText('等级')).toBeInTheDocument();
+      expect(screen.getByText('分类')).toBeInTheDocument();
+      expect(screen.getByText('评分')).toBeInTheDocument();
+      expect(screen.getByText('排序功能')).toBeInTheDocument();
     });
   });
 
   describe('Multi-sort indicator', () => {
     it('should show "Multi-dimension Sort" when has active sorts', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         hasActiveSorts: true
       });
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Multi-dimension Sort')).toBeInTheDocument();
+      expect(screen.getByText('多维度排序')).toBeInTheDocument();
     });
 
     it('should show "Configure Sort" when no active sorts', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('Configure Sort')).toBeInTheDocument();
+      expect(screen.getByText('配置排序')).toBeInTheDocument();
     });
   });
 
@@ -470,7 +455,7 @@ describe('SearchAndFilter', () => {
       render(<SearchAndFilter />);
 
       // Open level dropdown
-      const levelTrigger = screen.getByText('All Levels');
+      const levelTrigger = screen.getByText('全部等级');
       fireEvent.click(levelTrigger);
 
       // Verify dropdown is open
@@ -485,8 +470,7 @@ describe('SearchAndFilter', () => {
     });
 
     it('should show check icon for selected option', () => {
-      const { useJournals } = require('@/hooks/useJournals');
-      useJournals.mockReturnValue({
+      vi.mocked(useJournals).mockReturnValue({
         ...defaultUseJournalsReturn,
         selectedCategory: 'SCI'
       });

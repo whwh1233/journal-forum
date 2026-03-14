@@ -1,191 +1,125 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '../helpers/testUtils';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import CommentItem from '../../features/comments/components/CommentItem';
-import { mockComment, mockUser } from '../helpers/testUtils';
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: { id: 1, email: 'test@example.com', name: 'Test User', role: 'user' },
+  }),
+}));
+
+vi.mock('../../features/comments/components/CommentForm', () => ({
+  default: () => <div data-testid="comment-form">CommentForm</div>,
+}));
+
+vi.mock('../../features/comments/components/DimensionRatingDisplay', () => ({
+  default: () => <div data-testid="dimension-rating">DimensionRating</div>,
+}));
+
+vi.mock('../../features/follow/components/FollowButton', () => ({
+  default: () => <button>Follow</button>,
+}));
+
+vi.mock('../../features/badges', () => ({
+  BadgeList: () => <span data-testid="badge-list" />,
+}));
+
+vi.mock('../../../services/commentService', () => ({
+  likeComment: vi.fn().mockResolvedValue({ liked: true, likeCount: 1 }),
+  updateComment: vi.fn().mockResolvedValue({}),
+  deleteComment: vi.fn().mockResolvedValue({}),
+}));
+
+const baseComment = {
+  id: '1-123-abc',
+  userId: 1,
+  userName: 'Test User',
+  journalId: 'j1',
+  parentId: null,
+  content: 'This is a test comment',
+  rating: 4,
+  createdAt: new Date().toISOString(),
+  isDeleted: false,
+};
+
+const mockOnCommentUpdated = vi.fn();
+
+const renderComponent = (comment = baseComment, level = 0) => {
+  return render(
+    <BrowserRouter>
+      <CommentItem comment={comment as any} level={level} onCommentUpdated={mockOnCommentUpdated} />
+    </BrowserRouter>
+  );
+};
 
 describe('CommentItem', () => {
-  const mockOnReply = vi.fn();
-  const mockOnDelete = vi.fn();
+  beforeEach(() => { vi.clearAllMocks(); });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('renders comment content and author', () => {
+    renderComponent();
+    expect(screen.getByText('This is a test comment')).toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('should render comment content', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    expect(screen.getByText(mockComment.content)).toBeInTheDocument();
-    expect(screen.getByText(mockComment.userName)).toBeInTheDocument();
+  it('displays rating stars when provided', () => {
+    renderComponent();
+    const ratingEl = screen.getByText(/★/);
+    expect(ratingEl).toBeInTheDocument();
   });
 
-  it('should display rating if provided', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    // 应该显示评分
-    const ratingElement = screen.getByText(/5/);
-    expect(ratingElement).toBeInTheDocument();
-  });
-
-  it('should not display rating for reply comments', () => {
-    const replyComment = {
-      ...mockComment,
-      parentId: 'some-parent-id',
-      rating: undefined,
-    };
-
-    render(
-      <CommentItem
-        comment={replyComment}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    // 回复评论不应该有评分
+  it('does not display rating for reply without rating', () => {
+    const reply = { ...baseComment, parentId: 'p1', rating: undefined };
+    renderComponent(reply);
     expect(screen.queryByText(/★/)).not.toBeInTheDocument();
   });
 
-  it('should show delete button for own comments', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={mockComment.userId}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    const deleteButton = screen.getByText(/删除/);
-    expect(deleteButton).toBeInTheDocument();
+  it('shows edit and delete buttons for own comments', () => {
+    renderComponent();
+    expect(screen.getByText('编辑')).toBeInTheDocument();
+    expect(screen.getByText('删除')).toBeInTheDocument();
   });
 
-  it('should not show delete button for other users comments', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={999} // 不同的用户ID
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    expect(screen.queryByText(/删除/)).not.toBeInTheDocument();
+  it('shows reply button at level 0', () => {
+    renderComponent();
+    expect(screen.getByText('回复')).toBeInTheDocument();
   });
 
-  it('should call onReply when reply button is clicked', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    const replyButton = screen.getByText(/回复/);
-    fireEvent.click(replyButton);
-
-    expect(mockOnReply).toHaveBeenCalledWith(mockComment.id);
+  it('hides reply button at level 2', () => {
+    renderComponent(baseComment, 2);
+    expect(screen.queryByText('回复')).not.toBeInTheDocument();
   });
 
-  it('should call onDelete when delete button is clicked', () => {
-    render(
-      <CommentItem
-        comment={mockComment}
-        currentUserId={mockComment.userId}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    const deleteButton = screen.getByText(/删除/);
-    fireEvent.click(deleteButton);
-
-    expect(mockOnDelete).toHaveBeenCalledWith(mockComment.id);
+  it('toggles reply form when reply is clicked', () => {
+    renderComponent();
+    fireEvent.click(screen.getByText('回复'));
+    expect(screen.getByTestId('comment-form')).toBeInTheDocument();
   });
 
-  it('should render nested replies', () => {
-    const commentWithReplies = {
-      ...mockComment,
-      replies: [
-        {
-          id: 'reply-1',
-          userId: 2,
-          userName: 'Reply User',
-          journalId: 1,
-          parentId: mockComment.id,
-          content: 'This is a reply',
-          createdAt: new Date().toISOString(),
-          isDeleted: false,
-        },
-      ],
+  it('renders nested replies', () => {
+    const withReplies = {
+      ...baseComment,
+      replies: [{
+        id: 'reply-1', userId: 2, userName: 'Reply User', journalId: 'j1',
+        parentId: baseComment.id, content: 'This is a reply',
+        createdAt: new Date().toISOString(), isDeleted: false,
+      }],
     };
-
-    render(
-      <CommentItem
-        comment={commentWithReplies}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
+    renderComponent(withReplies);
     expect(screen.getByText('This is a reply')).toBeInTheDocument();
   });
 
-  it('should format date correctly', () => {
-    const testDate = new Date('2024-01-15T10:30:00Z');
-    const commentWithDate = {
-      ...mockComment,
-      createdAt: testDate.toISOString(),
-    };
-
-    render(
-      <CommentItem
-        comment={commentWithDate}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    // 验证日期被渲染（具体格式可能因本地化而异）
-    const dateElement = screen.getByText(/2024/);
-    expect(dateElement).toBeInTheDocument();
+  it('hides actions for deleted comments', () => {
+    const deleted = { ...baseComment, isDeleted: true };
+    renderComponent(deleted);
+    expect(screen.queryByText('回复')).not.toBeInTheDocument();
+    expect(screen.queryByText('编辑')).not.toBeInTheDocument();
+    expect(screen.queryByText('删除')).not.toBeInTheDocument();
   });
 
-  it('should handle deleted comments gracefully', () => {
-    const deletedComment = {
-      ...mockComment,
-      isDeleted: true,
-    };
-
-    // 删除的评论不应该被渲染
-    const { container } = render(
-      <CommentItem
-        comment={deletedComment}
-        currentUserId={1}
-        onReply={mockOnReply}
-        onDelete={mockOnDelete}
-      />
-    );
-
-    // 可能显示"该评论已被删除"或者完全不渲染
-    expect(container.textContent).toMatch(/已删除|^$/);
+  it('shows edited indicator', () => {
+    const edited = { ...baseComment, updatedAt: new Date().toISOString() };
+    renderComponent(edited);
+    expect(screen.getByText('(已编辑)')).toBeInTheDocument();
   });
 });

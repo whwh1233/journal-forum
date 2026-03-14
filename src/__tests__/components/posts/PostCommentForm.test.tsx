@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { postService } from '@/features/posts/services/postService';
+import { useAuth } from '@/hooks/useAuth';
 import PostCommentForm from '@/features/posts/components/PostCommentForm';
 
 // Mock the useAuth hook
-vi.mock('../../../hooks/useAuth', () => ({
+vi.mock('@/hooks/useAuth', () => ({
   useAuth: vi.fn()
 }));
 
@@ -28,14 +30,12 @@ describe('PostCommentForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default: user is logged in
-    const { useAuth } = require('../../../hooks/useAuth');
-    useAuth.mockReturnValue({ user: mockUser });
+    vi.mocked(useAuth).mockReturnValue({ user: mockUser } as any);
   });
 
   describe('When user is not logged in', () => {
     it('should show login prompt for comment', () => {
-      const { useAuth } = require('../../../hooks/useAuth');
-      useAuth.mockReturnValue({ user: null });
+      vi.mocked(useAuth).mockReturnValue({ user: null } as any);
 
       render(
         <BrowserRouter>
@@ -46,12 +46,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText(/Please log in to post a comment/)).toBeInTheDocument();
+      expect(screen.getByText(/请先登录后发表/)).toBeInTheDocument();
     });
 
     it('should show login prompt for reply', () => {
-      const { useAuth } = require('../../../hooks/useAuth');
-      useAuth.mockReturnValue({ user: null });
+      vi.mocked(useAuth).mockReturnValue({ user: null } as any);
 
       render(
         <BrowserRouter>
@@ -64,7 +63,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText(/Please log in to post a reply/)).toBeInTheDocument();
+      expect(screen.getByText(/请先登录后发表/)).toBeInTheDocument();
     });
   });
 
@@ -79,7 +78,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       expect(textarea).toBeInTheDocument();
     });
 
@@ -95,7 +94,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your reply...');
+      const textarea = screen.getByPlaceholderText('写下你的回复...');
       expect(textarea).toBeInTheDocument();
     });
 
@@ -109,7 +108,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const submitButton = screen.getByText('Post Comment');
+      const submitButton = screen.getByText('发表评论');
       expect(submitButton).toBeInTheDocument();
     });
 
@@ -125,7 +124,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const submitButton = screen.getByText('Reply');
+      const submitButton = screen.getByText('回复');
       expect(submitButton).toBeInTheDocument();
     });
 
@@ -140,7 +139,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const cancelButton = screen.getByText('Cancel');
+      const cancelButton = screen.getByText('取消');
       expect(cancelButton).toBeInTheDocument();
     });
 
@@ -154,7 +153,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      expect(screen.queryByText('Cancel')).not.toBeInTheDocument();
+      expect(screen.queryByText('取消')).not.toBeInTheDocument();
     });
 
     it('should call onCancel when cancel button is clicked', () => {
@@ -168,7 +167,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const cancelButton = screen.getByText('Cancel');
+      const cancelButton = screen.getByText('取消');
       fireEvent.click(cancelButton);
 
       expect(mockOnCancel).toHaveBeenCalled();
@@ -184,7 +183,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
       expect(textarea).toHaveValue('Test comment content');
@@ -202,16 +201,15 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
-      expect(mockAlert).toHaveBeenCalledWith('Please enter comment content');
+      expect(mockAlert).toHaveBeenCalledWith('请输入评论内容');
       mockAlert.mockRestore();
     });
 
     it('should submit comment successfully', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
+      vi.mocked(postService).createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
 
       render(
         <BrowserRouter>
@@ -222,11 +220,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(postService.createComment).toHaveBeenCalledWith(1, {
@@ -241,8 +239,7 @@ describe('PostCommentForm', () => {
     });
 
     it('should submit reply with parentId', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockResolvedValue({ id: 2, content: 'Test reply' });
+      vi.mocked(postService).createComment.mockResolvedValue({ id: 2, content: 'Test reply' });
 
       render(
         <BrowserRouter>
@@ -255,11 +252,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your reply...');
+      const textarea = screen.getByPlaceholderText('写下你的回复...');
       fireEvent.change(textarea, { target: { value: 'Test reply content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(postService.createComment).toHaveBeenCalledWith(1, {
@@ -270,8 +267,7 @@ describe('PostCommentForm', () => {
     });
 
     it('should clear textarea after successful submission', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
+      vi.mocked(postService).createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
 
       render(
         <BrowserRouter>
@@ -282,11 +278,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(textarea).toHaveValue('');
@@ -294,8 +290,7 @@ describe('PostCommentForm', () => {
     });
 
     it('should call onCancel after successful reply submission', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockResolvedValue({ id: 1, content: 'Test reply' });
+      vi.mocked(postService).createComment.mockResolvedValue({ id: 1, content: 'Test reply' });
 
       render(
         <BrowserRouter>
@@ -309,11 +304,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your reply...');
+      const textarea = screen.getByPlaceholderText('写下你的回复...');
       fireEvent.change(textarea, { target: { value: 'Test reply content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(mockOnCancel).toHaveBeenCalled();
@@ -321,8 +316,7 @@ describe('PostCommentForm', () => {
     });
 
     it('should show submitting state during submission', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      vi.mocked(postService).createComment.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
       render(
         <BrowserRouter>
@@ -333,20 +327,19 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
-        expect(screen.getByText('Posting...')).toBeInTheDocument();
+        expect(screen.getByText('发布中...')).toBeInTheDocument();
       });
     });
 
     it('should disable textarea and buttons during submission', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      vi.mocked(postService).createComment.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
       render(
         <BrowserRouter>
@@ -358,21 +351,20 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(textarea).toBeDisabled();
-        expect(screen.getByText('Cancel')).toBeDisabled();
+        expect(screen.getByText('取消')).toBeDisabled();
       });
     });
 
     it('should show error alert when submission fails', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockRejectedValue(new Error('Network error'));
+      vi.mocked(postService).createComment.mockRejectedValue(new Error('Network error'));
 
       const mockAlert = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
@@ -385,11 +377,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: 'Test comment content' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(mockAlert).toHaveBeenCalledWith('Network error');
@@ -408,7 +400,7 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      let textarea = screen.getByPlaceholderText('Write your comment...');
+      let textarea = screen.getByPlaceholderText('写下你的评论...');
       expect(textarea).toHaveAttribute('rows', '4');
 
       rerender(
@@ -422,13 +414,12 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      textarea = screen.getByPlaceholderText('Write your reply...');
+      textarea = screen.getByPlaceholderText('写下你的回复...');
       expect(textarea).toHaveAttribute('rows', '3');
     });
 
     it('should trim whitespace from content before submission', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
+      vi.mocked(postService).createComment.mockResolvedValue({ id: 1, content: 'Test comment' });
 
       render(
         <BrowserRouter>
@@ -439,11 +430,11 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: '  Test comment content  ' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
       await waitFor(() => {
         expect(postService.createComment).toHaveBeenCalledWith(1, {
@@ -465,13 +456,13 @@ describe('PostCommentForm', () => {
         </BrowserRouter>
       );
 
-      const textarea = screen.getByPlaceholderText('Write your comment...');
+      const textarea = screen.getByPlaceholderText('写下你的评论...');
       fireEvent.change(textarea, { target: { value: '   ' } });
 
-      const form = screen.getByRole('form');
-      fireEvent.submit(form);
+      const form = document.querySelector('.post-comment-form') as HTMLFormElement;
+      fireEvent.submit(form!);
 
-      expect(mockAlert).toHaveBeenCalledWith('Please enter comment content');
+      expect(mockAlert).toHaveBeenCalledWith('请输入评论内容');
       mockAlert.mockRestore();
     });
   });

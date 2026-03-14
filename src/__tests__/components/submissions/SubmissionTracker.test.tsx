@@ -4,17 +4,17 @@ import userEvent from "@testing-library/user-event";
 import { BrowserRouter } from "react-router-dom";
 import SubmissionTracker from "@/features/submissions/SubmissionTracker";
 
-vi.mock("../../services/submissionService", () => ({
+vi.mock("@/services/submissionService", () => ({
   getUserManuscripts: vi.fn(), createManuscript: vi.fn(), deleteManuscript: vi.fn(),
   addSubmission: vi.fn(), deleteSubmission: vi.fn(), addStatusHistory: vi.fn(),
 }));
-vi.mock("../../services/journalSearchService", () => ({ getJournalById: vi.fn() }));
-vi.mock("../../services/favoriteService", () => ({ toggleFavorite: vi.fn() }));
-vi.mock("../../components/common/JournalPicker", () => ({ default: () => <div data-testid="journal-picker" /> }));
-vi.mock("../../components/common/journalPickerUtils", () => ({ isCustomJournal: () => false }));
-vi.mock("../../components/common/JournalInfoCard", () => ({ default: ({ journal }: any) => <div data-testid="journal-info-card">{journal?.name}</div> }));
+vi.mock("@/services/journalSearchService", () => ({ getJournalById: vi.fn() }));
+vi.mock("@/services/favoriteService", () => ({ toggleFavorite: vi.fn() }));
+vi.mock("@/components/common/JournalPicker", () => ({ default: () => <div data-testid="journal-picker" /> }));
+vi.mock("@/components/common/journalPickerUtils", () => ({ isCustomJournal: () => false }));
+vi.mock("@/components/common/JournalInfoCard", () => ({ default: ({ journal }: any) => <div data-testid="journal-info-card">{journal?.name}</div> }));
 
-import { getUserManuscripts, createManuscript, deleteManuscript } from "../../services/submissionService";
+import { getUserManuscripts, createManuscript, deleteManuscript } from "@/services/submissionService";
 
 const mockManuscripts = [
   {

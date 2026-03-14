@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import JournalDetailPanel from '@/features/journals/components/JournalDetailPanel';
 import { Journal, RatingSummary } from '@/types';
+import { getRatingSummary } from '@/services/commentService';
 
 // Mock the services
 vi.mock('@/services/commentService', () => ({
@@ -85,8 +86,7 @@ describe('JournalDetailPanel', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    const { getRatingSummary } = require('@/services/commentService');
-    getRatingSummary.mockResolvedValue(mockRatingSummary);
+    vi.mocked(getRatingSummary).mockResolvedValue(mockRatingSummary);
   });
 
   it('should not render when journal is null and not open', () => {
@@ -216,7 +216,7 @@ describe('JournalDetailPanel', () => {
       </BrowserRouter>
     );
 
-    const closeButton = screen.getByLabelText('close');
+    const closeButton = screen.getByLabelText('关闭');
     fireEvent.click(closeButton);
 
     expect(mockOnClose).toHaveBeenCalled();
@@ -268,7 +268,7 @@ describe('JournalDetailPanel', () => {
       </BrowserRouter>
     );
 
-    const recordButton = screen.getByLabelText('record submission');
+    const recordButton = screen.getByLabelText('记录投稿');
     fireEvent.click(recordButton);
 
     expect(mockOnClose).toHaveBeenCalled();
@@ -369,9 +369,9 @@ describe('JournalDetailPanel', () => {
     );
 
     expect(screen.getByText('Minimal Journal')).toBeInTheDocument();
-    expect(screen.getByText('not available')).toBeInTheDocument(); // ISSN fallback
-    expect(screen.getByText('No levels available')).toBeInTheDocument(); // Levels fallback
-    expect(screen.getByText('No introduction available')).toBeInTheDocument(); // Introduction fallback
+    expect(screen.getByText('无')).toBeInTheDocument(); // ISSN fallback
+    expect(screen.getByText('暂无')).toBeInTheDocument(); // Levels fallback
+    expect(screen.getByText('暂无简介')).toBeInTheDocument(); // Introduction fallback
   });
 
   it('should disable body scroll when open', () => {

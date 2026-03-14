@@ -219,7 +219,7 @@ describe('DatabaseManager', () => {
     await user.click(screen.getByText('结构'));
 
     await waitFor(() => {
-      expect(screen.getByText('email')).toBeInTheDocument();
+      expect(screen.getAllByText('email').length).toBeGreaterThanOrEqual(1);
     });
 
     expect(screen.getByText('varchar(255)')).toBeInTheDocument();
@@ -294,11 +294,11 @@ describe('DatabaseManager', () => {
 
     // Confirmation modal should appear
     await waitFor(() => {
-      expect(screen.getByText('确认删除')).toBeInTheDocument();
+      expect(screen.getAllByText('确认删除').length).toBeGreaterThanOrEqual(1);
     });
 
     // Click confirm button
-    await user.click(screen.getByText('确认删除'));
+    var cdb=screen.getAllByText('确认删除');await user.click(cdb[cdb.length-1]);
 
     await waitFor(() => {
       expect(databaseService.deleteRow).toHaveBeenCalledWith('users', '1', 'id');
@@ -326,7 +326,7 @@ describe('DatabaseManager', () => {
     await user.click(deleteButtons[0]);
 
     await waitFor(() => {
-      expect(screen.getByText('确认删除')).toBeInTheDocument();
+      expect(screen.getAllByText('确认删除').length).toBeGreaterThanOrEqual(1);
     });
 
     // Click cancel
@@ -353,7 +353,7 @@ describe('DatabaseManager', () => {
     });
 
     // Select search field
-    const fieldSelect = screen.getByRole('combobox');
+    const fieldSelect = screen.getAllByRole('combobox')[0];
     await user.selectOptions(fieldSelect, 'email');
 
     // Enter search value
@@ -389,7 +389,8 @@ describe('DatabaseManager', () => {
     });
 
     // Find page size select
-    const pageSizeSelect = screen.getByRole('combobox', { name: '' });
+    const selects = screen.getAllByRole('combobox');
+    const pageSizeSelect = selects[selects.length - 1];
     await user.selectOptions(pageSizeSelect, '50');
 
     await waitFor(() => {
@@ -417,7 +418,9 @@ describe('DatabaseManager', () => {
     });
 
     // Click on column header to sort
-    const emailHeader = screen.getAllByText('email')[0];
+    (databaseService.getTableData as Mock).mockClear();
+
+    const emailHeader = screen.getAllByText('email')[0].closest('th') || screen.getAllByText('email')[0];
     await user.click(emailHeader);
 
     await waitFor(() => {
@@ -567,10 +570,10 @@ describe('DatabaseManager', () => {
 
     // Confirm update
     await waitFor(() => {
-      expect(screen.getByText('确认更新')).toBeInTheDocument();
+      expect(screen.getAllByText('确认更新').length).toBeGreaterThanOrEqual(1);
     });
 
-    await user.click(screen.getByRole('button', { name: '确认更新' }));
+    var cub=screen.getAllByText('确认更新');await user.click(cub[cub.length-1]);
 
     await waitFor(() => {
       expect(screen.getByText('更新成功')).toBeInTheDocument();

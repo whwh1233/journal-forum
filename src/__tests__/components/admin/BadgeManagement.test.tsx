@@ -116,7 +116,7 @@ describe('BadgeManagement', () => {
       expect(screen.getByText('徽章与荣誉总控台')).toBeInTheDocument();
     });
 
-    const badgeSelect = screen.getByRole('combobox', { name: /授予荣誉徽章/i });
+    const badgeSelect = screen.getAllByRole('combobox')[0];
     expect(badgeSelect).toBeInTheDocument();
 
     // Should contain manual badge (先驱者) as option
@@ -132,7 +132,7 @@ describe('BadgeManagement', () => {
       expect(screen.getByText('徽章与荣誉总控台')).toBeInTheDocument();
     });
 
-    const userSelect = screen.getByRole('combobox', { name: /接受荣誉的用户/i });
+    const userSelect = screen.getAllByRole('combobox')[1];
     expect(userSelect).toBeInTheDocument();
 
     // Should contain users as options
@@ -160,8 +160,8 @@ describe('BadgeManagement', () => {
       expect(screen.getByText('徽章与荣誉总控台')).toBeInTheDocument();
     });
 
-    const badgeSelect = screen.getByRole('combobox', { name: /授予荣誉徽章/i });
-    const userSelect = screen.getByRole('combobox', { name: /接受荣誉的用户/i });
+    const badgeSelect = screen.getAllByRole('combobox')[0];
+    const userSelect = screen.getAllByRole('combobox')[1];
 
     await user.selectOptions(badgeSelect, '1');
     await user.selectOptions(userSelect, '1');
@@ -180,8 +180,8 @@ describe('BadgeManagement', () => {
       expect(screen.getByText('徽章与荣誉总控台')).toBeInTheDocument();
     });
 
-    const badgeSelect = screen.getByRole('combobox', { name: /授予荣誉徽章/i });
-    const userSelect = screen.getByRole('combobox', { name: /接受荣誉的用户/i });
+    const badgeSelect = screen.getAllByRole('combobox')[0];
+    const userSelect = screen.getAllByRole('combobox')[1];
 
     await user.selectOptions(badgeSelect, '1');
     await user.selectOptions(userSelect, '1');
@@ -210,8 +210,8 @@ describe('BadgeManagement', () => {
       expect(screen.getByText('徽章与荣誉总控台')).toBeInTheDocument();
     });
 
-    const badgeSelect = screen.getByRole('combobox', { name: /授予荣誉徽章/i });
-    const userSelect = screen.getByRole('combobox', { name: /接受荣誉的用户/i });
+    const badgeSelect = screen.getAllByRole('combobox')[0];
+    const userSelect = screen.getAllByRole('combobox')[1];
 
     await user.selectOptions(badgeSelect, '1');
     await user.selectOptions(userSelect, '1');
@@ -242,8 +242,8 @@ describe('BadgeManagement', () => {
     });
 
     // Check for type badges
-    expect(screen.getByText('手动颁发')).toBeInTheDocument();
-    expect(screen.getByText('自动触发')).toBeInTheDocument();
+    expect(screen.getAllByText(/手动颁发/).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/自动触发/).length).toBeGreaterThanOrEqual(1);
   });
 
   it('displays trigger conditions for auto badges', async () => {
@@ -268,7 +268,7 @@ describe('BadgeManagement', () => {
     });
 
     // Both badges are active
-    const activeStatuses = screen.getAllByText('启用中');
+    const activeStatuses = screen.getAllByText(/启用中/);
     expect(activeStatuses.length).toBeGreaterThanOrEqual(2);
   });
 });

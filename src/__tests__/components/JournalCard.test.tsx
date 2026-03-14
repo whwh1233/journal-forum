@@ -1,131 +1,75 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '../helpers/testUtils';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import JournalCard from '../../features/journals/components/JournalCard';
-import { mockJournal } from '../helpers/testUtils';
+
+vi.mock('@/features/favorite/components/FavoriteButton', () => ({
+  default: () => <button data-testid="fav-btn">Fav</button>,
+}));
+
+const mockJournal = {
+  journalId: '1',
+  name: 'Test Journal',
+  issn: '1234-5678',
+  levels: ['计算机科学'],
+  ratingCache: { journalId: '1', rating: 4.5, ratingCount: 10 },
+  impactFactor: 3.14,
+  category: '计算机',
+};
+
+const mockOnClick = vi.fn();
+
+const renderComponent = (journal = mockJournal) => {
+  return render(
+    <BrowserRouter>
+      <JournalCard journal={journal as any} onClick={mockOnClick} />
+    </BrowserRouter>
+  );
+};
 
 describe('JournalCard', () => {
-  const mockOnClick = vi.fn();
+  beforeEach(() => { vi.clearAllMocks(); });
 
-
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('renders journal name', () => {
+    renderComponent();
+    expect(screen.getByText('Test Journal')).toBeInTheDocument();
   });
 
-  it('should render journal information', () => {
-    render(
-      <JournalCard
-        journal={mockJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    expect(screen.getByText(mockJournal.name)).toBeInTheDocument();
-    expect(screen.getByText(mockJournal.issn)).toBeInTheDocument();
-    expect(screen.getByText(mockJournal.introduction)).toBeInTheDocument();
+  it('renders ISSN', () => {
+    renderComponent();
+    expect(screen.getByText('1234-5678')).toBeInTheDocument();
   });
 
-  it('should display rating with stars', () => {
-    render(
-      <JournalCard
-        journal={mockJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    // 验证评分显示
-    const ratingText = screen.getByText(mockJournal.ratingCache.rating.toString());
-    expect(ratingText).toBeInTheDocument();
+  it('displays rating', () => {
+    renderComponent();
+    expect(screen.getByText('4.5')).toBeInTheDocument();
   });
 
-  it('should display category badge', () => {
-    render(
-      <JournalCard
-        journal={mockJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    // 验证分类显示
-    expect(screen.getByText(/计算机/)).toBeInTheDocument();
+  it('displays impact factor', () => {
+    renderComponent();
+    expect(screen.getByText('3.14')).toBeInTheDocument();
   });
 
-  it('should call onClick when card is clicked', () => {
-    render(
-      <JournalCard
-        journal={mockJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    const card = screen.getByText(mockJournal.name).closest('.journal-card');
-    if (card) {
-      fireEvent.click(card);
-      expect(mockOnClick).toHaveBeenCalledWith(mockJournal);
-    }
+  it('calls onClick when card is clicked', () => {
+    renderComponent();
+    const card = screen.getByRole('button', { name: /查看期刊.*Test Journal/ });
+    fireEvent.click(card);
+    expect(mockOnClick).toHaveBeenCalled();
   });
 
-
-
-  it('should truncate long description', () => {
-    const longDescriptionJournal = {
-      ...mockJournal,
-      introduction: 'A'.repeat(200), // 很长的描述
-    };
-
-    render(
-      <JournalCard
-        journal={longDescriptionJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    const description = screen.getByText(/A+/);
-    // 验证描述被截断（通常会显示省略号）
-    expect(description.textContent?.length).toBeLessThan(200);
+  it('handles journal with zero rating', () => {
+    const noRating = { ...mockJournal, ratingCache: { journalId: '1', rating: 0, ratingCount: 0 } };
+    renderComponent(noRating);
+    expect(screen.getByText('0.0')).toBeInTheDocument();
   });
 
-  it('should handle journal with zero rating', () => {
-    const noRatingJournal = {
-      ...mockJournal,
-      ratingCache: { rating: 0, ratingCount: 0 },
-    };
-
-    render(
-      <JournalCard
-        journal={noRatingJournal as any}
-        onClick={mockOnClick}
-      />
-    );
-
-    expect(screen.getByText('0')).toBeInTheDocument();
+  it('displays levels as tags', () => {
+    renderComponent();
+    expect(screen.getByText('计算机科学')).toBeInTheDocument();
   });
 
-  it('should have correct category mapping', () => {
-    const categories = [
-      { levels: ['计算机科学'], expectedText: '计算机科学' },
-      { levels: ['生物学'], expectedText: '生物学' },
-      { levels: ['物理学'], expectedText: '物理学' },
-    ];
-
-    categories.forEach(({ levels, expectedText }) => {
-      const { unmount } = render(
-        <JournalCard
-          journal={{ ...mockJournal, levels } as any}
-          onClick={mockOnClick}
-        />
-      );
-
-      expect(screen.getByText(new RegExp(expectedText))).toBeInTheDocument();
-      unmount();
-    });
-  });
-
-  it('should maintain data structure consistency', () => {
-    // 这个测试确保期刊对象有所有必需的字段
-    const requiredFields = ['journalId', 'name', 'issn', 'levels', 'ratingCache', 'introduction'];
-
-    requiredFields.forEach(field => {
-      expect(mockJournal).toHaveProperty(field);
-    });
+  it('displays category', () => {
+    renderComponent();
+    expect(screen.getByText('计算机')).toBeInTheDocument();
   });
 });

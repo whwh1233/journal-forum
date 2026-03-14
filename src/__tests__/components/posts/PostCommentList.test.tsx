@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { postService } from '@/features/posts/services/postService';
 import PostCommentList from '@/features/posts/components/PostCommentList';
 import { PostComment } from '@/features/posts/types/post';
 
@@ -74,8 +75,7 @@ describe('PostCommentList', () => {
 
   describe('Loading State', () => {
     it('should show loading state initially', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve([]), 100)));
+      vi.mocked(postService).getComments.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve([]), 100)));
 
       render(
         <BrowserRouter>
@@ -83,14 +83,13 @@ describe('PostCommentList', () => {
         </BrowserRouter>
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.getByText('加载中...')).toBeInTheDocument();
     });
   });
 
   describe('Error State', () => {
     it('should show error message when loading fails', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockRejectedValue(new Error('Network error'));
+      vi.mocked(postService).getComments.mockRejectedValue(new Error('Network error'));
 
       render(
         <BrowserRouter>
@@ -99,15 +98,14 @@ describe('PostCommentList', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Failed to load comments')).toBeInTheDocument();
+        expect(screen.getByText('加载评论失败')).toBeInTheDocument();
       });
     });
   });
 
   describe('Empty State', () => {
     it('should show empty message when no comments', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue([]);
+      vi.mocked(postService).getComments.mockResolvedValue([]);
 
       render(
         <BrowserRouter>
@@ -116,15 +114,14 @@ describe('PostCommentList', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText(/No comments yet/)).toBeInTheDocument();
+        expect(screen.getByText(/还没有评论/)).toBeInTheDocument();
       });
     });
   });
 
   describe('Comments Display', () => {
     it('should display comments after loading', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -140,8 +137,7 @@ describe('PostCommentList', () => {
     });
 
     it('should display comment count in header', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -150,13 +146,12 @@ describe('PostCommentList', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Comments (3)')).toBeInTheDocument();
+        expect(screen.getByText('评论 (3)')).toBeInTheDocument();
       });
     });
 
     it('should render correct number of comment items', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -174,8 +169,7 @@ describe('PostCommentList', () => {
 
   describe('Comment Form', () => {
     it('should render PostCommentForm component', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -190,8 +184,7 @@ describe('PostCommentList', () => {
     });
 
     it('should reload comments when new comment is added', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -218,8 +211,7 @@ describe('PostCommentList', () => {
 
   describe('Sorting', () => {
     it('should render sort selector', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -228,13 +220,12 @@ describe('PostCommentList', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByText('Sort:')).toBeInTheDocument();
+        expect(screen.getByText(/排序/)).toBeInTheDocument();
       });
     });
 
     it('should have three sort options', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -249,14 +240,13 @@ describe('PostCommentList', () => {
 
       const options = screen.getAllByRole('option');
       expect(options).toHaveLength(3);
-      expect(options[0]).toHaveTextContent('Newest');
-      expect(options[1]).toHaveTextContent('Oldest');
-      expect(options[2]).toHaveTextContent('Most Helpful');
+      expect(options[0]).toHaveTextContent('最新');
+      expect(options[1]).toHaveTextContent('最早');
+      expect(options[2]).toHaveTextContent('最有用');
     });
 
     it('should sort by newest by default', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -271,8 +261,7 @@ describe('PostCommentList', () => {
     });
 
     it('should reload comments when sort changes', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -293,8 +282,7 @@ describe('PostCommentList', () => {
     });
 
     it('should sort comments by newest first', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { container } = render(
         <BrowserRouter>
@@ -313,8 +301,7 @@ describe('PostCommentList', () => {
     });
 
     it('should sort comments by oldest first when selected', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { container } = render(
         <BrowserRouter>
@@ -337,8 +324,7 @@ describe('PostCommentList', () => {
     });
 
     it('should sort comments by most helpful when selected', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { container } = render(
         <BrowserRouter>
@@ -363,8 +349,7 @@ describe('PostCommentList', () => {
 
   describe('Comment Updates', () => {
     it('should reload comments when onCommentUpdated is called', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       render(
         <BrowserRouter>
@@ -391,8 +376,7 @@ describe('PostCommentList', () => {
 
   describe('Post ID Changes', () => {
     it('should reload comments when postId changes', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { rerender } = render(
         <BrowserRouter>
@@ -418,8 +402,7 @@ describe('PostCommentList', () => {
 
   describe('CSS Classes', () => {
     it('should have correct container class', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { container } = render(
         <BrowserRouter>
@@ -433,8 +416,7 @@ describe('PostCommentList', () => {
     });
 
     it('should have header with title and sort', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue(mockComments);
+      vi.mocked(postService).getComments.mockResolvedValue(mockComments);
 
       const { container } = render(
         <BrowserRouter>
@@ -450,8 +432,7 @@ describe('PostCommentList', () => {
     });
 
     it('should have loading class during loading', () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockImplementation(() => new Promise(() => {}));
+      vi.mocked(postService).getComments.mockImplementation(() => new Promise(() => {}));
 
       const { container } = render(
         <BrowserRouter>
@@ -463,8 +444,7 @@ describe('PostCommentList', () => {
     });
 
     it('should have error class on error', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockRejectedValue(new Error('Error'));
+      vi.mocked(postService).getComments.mockRejectedValue(new Error('Error'));
 
       const { container } = render(
         <BrowserRouter>
@@ -478,8 +458,7 @@ describe('PostCommentList', () => {
     });
 
     it('should have empty class when no comments', async () => {
-      const { postService } = require('@/features/posts/services/postService');
-      postService.getComments.mockResolvedValue([]);
+      vi.mocked(postService).getComments.mockResolvedValue([]);
 
       const { container } = render(
         <BrowserRouter>

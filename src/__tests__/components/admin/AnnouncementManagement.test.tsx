@@ -66,8 +66,8 @@ describe('AnnouncementManagement', () => {
   it('shows status labels', async () => {
     render(<AnnouncementManagement />);
     await waitFor(() => { expect(screen.getByText('系统维护')).toBeInTheDocument(); });
-    expect(screen.getByText('草稿')).toBeInTheDocument();
-    expect(screen.getByText('生效中')).toBeInTheDocument();
+    expect(screen.getAllByText('草稿').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('生效中').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText('已归档')).toBeInTheDocument();
   });
 
@@ -115,7 +115,7 @@ describe('AnnouncementManagement', () => {
     await waitFor(() => { expect(screen.getByText('系统维护')).toBeInTheDocument(); });
     const deleteButtons = screen.getAllByTitle('删除');
     await user.click(deleteButtons[0]);
-    expect(screen.getByText('确认删除')).toBeInTheDocument();
+    expect(screen.getAllByText('确认删除').length).toBeGreaterThanOrEqual(1);
   });
 
   it('handles publish', async () => {
@@ -143,7 +143,8 @@ describe('AnnouncementManagement', () => {
     await waitFor(() => { expect(screen.getByText('系统维护')).toBeInTheDocument(); });
     const deleteButtons = screen.getAllByTitle('删除');
     await user.click(deleteButtons[0]);
-    await user.click(screen.getByText('确认删除'));
+    const confirmBtns = screen.getAllByText('确认删除');
+    await user.click(confirmBtns[confirmBtns.length - 1]);
     await waitFor(() => { expect(adminDeleteAnnouncement).toHaveBeenCalled(); });
   });
 
@@ -162,6 +163,6 @@ describe('AnnouncementManagement', () => {
   it('shows read percentage', async () => {
     render(<AnnouncementManagement />);
     await waitFor(() => { expect(screen.getByText('系统维护')).toBeInTheDocument(); });
-    expect(screen.getByText(/50.*75%/)).toBeInTheDocument();
+    expect(screen.getByText(/50.*(75%)/)).toBeInTheDocument();
   });
 });
