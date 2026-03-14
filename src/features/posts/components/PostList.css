@@ -420,19 +420,17 @@
   }
 }
 
-/* Dark Mode Adjustments */
-@media (prefers-color-scheme: dark) {
-  .post-skeleton-avatar,
-  .post-skeleton-text,
-  .post-skeleton-badge,
-  .post-skeleton-title,
-  .post-skeleton-tag,
-  .post-skeleton-stat,
-  .post-skeleton-time {
-    background: var(--gray-700);
-  }
+/* Dark Mode — matches site-wide [data-theme="dark"] toggle system */
+[data-theme="dark"] .post-skeleton-avatar,
+[data-theme="dark"] .post-skeleton-text,
+[data-theme="dark"] .post-skeleton-badge,
+[data-theme="dark"] .post-skeleton-title,
+[data-theme="dark"] .post-skeleton-tag,
+[data-theme="dark"] .post-skeleton-stat,
+[data-theme="dark"] .post-skeleton-time {
+  background: var(--gray-700);
+}
 
-  .post-list-empty-icon {
-    color: var(--gray-600);
-  }
+[data-theme="dark"] .post-list-empty-icon {
+  color: var(--gray-600);
 }
