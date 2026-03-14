@@ -142,11 +142,32 @@ interface MarkdownEditorProps {
 
 ## 安全考虑
 
-- 文件类型校验：后端 multer fileFilter 检查 MIME type
-- 文件大小限制：multer limits 设为 5MB
-- 文件名安全：不使用原始文件名，生成随机文件名
-- Markdown 渲染 XSS 防护：使用 DOMPurify 或 rehype-sanitize 过滤危险标签
+- **文件类型双重校验**: multer fileFilter 检查扩展名 + MIME type（MIME 可被伪造，需同时校验扩展名）
+- **文件大小限制**: multer limits 设为 5MB
+- **文件名安全**: 不使用原始文件名，生成随机文件名
+- **上传频率限制**: 上传接口独立限流，每用户每分钟最多 10 次上传，防止滥用耗尽磁盘
+- **Markdown 渲染 XSS 防护**: 使用 rehype-sanitize 过滤危险标签
+- **Helmet CSP 配置**: 确保 `img-src` 允许 `'self'`，使 `/uploads/images/` 下的图片可正常加载
 - 仅登录用户可上传
+
+## 孤立图片处理
+
+用户上传图片后可能未提交内容，产生孤立文件。当前阶段标记为 **已知问题，暂不处理**，原因：
+- 初期上传量不大，磁盘空间压力低
+- 清理逻辑需扫描所有帖子/评论内容匹配 URL，复杂度较高
+
+后续可添加定时清理任务：扫描 `uploads/images/` 中超过 24 小时且未被任何内容引用的文件。
+
+## 目录创建
+
+`localStorage.js` 初始化时需检查并自动创建 `backend/uploads/images/` 目录（参照现有头像上传中 `uploads/avatars/` 的处理方式）。
+
+## 上传交互细节
+
+- 上传中：图片按钮显示 spinner，编辑器中光标处插入占位符 `![上传中...]()`
+- 上传成功：占位符替换为 `![image](url)`
+- 上传失败：移除占位符，显示 toast 错误提示
+- 上传期间禁用提交按钮，防止提交包含占位符的内容
 
 ## 影响范围
 
@@ -161,12 +182,21 @@ interface MarkdownEditorProps {
 - `src/components/MarkdownEditor/MarkdownEditor.css`
 
 ### 修改文件
-- `backend/server.js` — 注册上传路由
-- `src/features/posts/components/PostForm.tsx` — 使用 MarkdownEditor
-- `src/features/posts/components/PostCommentForm.tsx` — 升级为 MarkdownEditor
-- `src/features/comments/components/CommentForm.tsx` — 升级为 MarkdownEditor
-- 评论显示组件 — 从纯文本渲染改为 Markdown 渲染
+- `backend/server.js` — 注册上传路由，确认 Helmet CSP 配置
+- `src/features/posts/components/PostForm.tsx` — 使用 MarkdownEditor(mode="full")
+- `src/features/posts/components/PostCommentForm.tsx` — 升级为 MarkdownEditor(mode="compact")
+- `src/features/comments/components/CommentForm.tsx` — 升级为 MarkdownEditor(mode="compact")
+- `src/features/comments/components/CommentItem.tsx` — 从纯文本渲染改为 Markdown 渲染，编辑模式也升级为 MarkdownEditor
+- `src/features/posts/components/PostCommentItem.tsx` — 从纯文本渲染改为 Markdown 渲染
 
 ### 新增依赖（如需要）
-- Markdown 渲染库（如项目中尚未有）
 - 图片 Lightbox 库（或自行实现简单版本）
+- 注：react-markdown、remark-gfm、rehype-highlight 等 Markdown 渲染依赖项目中已有
+
+## 未来增强（Out of Scope）
+
+- 剪贴板粘贴图片（Ctrl+V）
+- 拖拽上传图片
+- 服务端图片压缩/缩放（sharp）
+- 孤立图片自动清理
+- 云存储迁移（OSS/S3）
