@@ -141,6 +141,7 @@
 
   /* Responsive Breakpoints */
   --breakpoint-mobile: 375px;
+  --breakpoint-small: 480px;
   --breakpoint-tablet: 768px;
   --breakpoint-desktop: 1024px;
   --breakpoint-wide: 1440px;

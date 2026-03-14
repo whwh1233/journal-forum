@@ -36,7 +36,7 @@
   margin-bottom: var(--space-4);
   background: var(--color-warning-light);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-warning);
+  border: var(--border-width) solid var(--color-warning);
   animation: newPostPageFadeIn 0.2s var(--ease-out);
 }
 
@@ -60,6 +60,7 @@
   cursor: pointer;
   border: 1.5px solid transparent;
   transition: all var(--duration-fast) var(--ease-out);
+  /* Note: 1.5px border-width not yet added to design system */
 }
 
 .new-post-cancel-confirm__btn--secondary {
