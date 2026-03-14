@@ -1,5 +1,6 @@
 const { Post, User, Journal, PostLike, PostFavorite, PostFollow, PostReport } = require('../models');
 const { Op } = require('sequelize');
+const notificationService = require('../services/notificationService');
 
 // 获取帖子列表（带筛选、排序、分页）
 exports.getPosts = async (req, res) => {
@@ -198,6 +199,32 @@ exports.createPost = async (req, res) => {
             ]
         });
 
+        // Notify: follow_new_content (to all followers of post author)
+        try {
+            const { Follow } = require('../models');
+            const followers = await Follow.findAll({
+                where: { followingId: req.user.id },
+                attributes: ['followerId']
+            });
+            const followerIds = followers.map(f => f.followerId);
+            if (followerIds.length > 0) {
+                await notificationService.createBulk(followerIds, {
+                    senderId: req.user.id,
+                    type: 'follow_new_content',
+                    entityType: 'post',
+                    entityId: fullPost.id,
+                    content: {
+                        title: `你关注的 ${req.user.name} 发布了新内容`,
+                        body: title ? title.substring(0, 100) : '',
+                        contentTitle: title || '',
+                        contentType: 'post'
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Notification (follow_new_content) failed:', err.message);
+        }
+
         res.status(201).json(fullPost);
     } catch (error) {
         console.error('创建帖子失败:', error);
@@ -312,6 +339,25 @@ exports.toggleLike = async (req, res) => {
             // 点赞
             await PostLike.create({ postId: id, userId: req.user.id });
             await post.increment('likeCount');
+
+            // Notify: like (to post author)
+            try {
+                await notificationService.create({
+                    recipientId: post.userId,
+                    senderId: req.user.id,
+                    type: 'like',
+                    entityType: 'post',
+                    entityId: id,
+                    content: {
+                        title: `${req.user.name} 赞了你的帖子`,
+                        body: post.title || '',
+                        postTitle: post.title || ''
+                    }
+                });
+            } catch (err) {
+                console.error('Notification (like) failed:', err.message);
+            }
+
             res.json({ liked: true, likeCount: post.likeCount + 1 });
         }
     } catch (error) {
