@@ -268,9 +268,9 @@ describe('SearchAndFilter', () => {
         sortExpanded: true
       });
 
-      render(<SearchAndFilter />);
+      const { container } = render(<SearchAndFilter />);
 
-      expect(screen.getByText('排序')).toBeInTheDocument();
+      expect(container.querySelector('.header-label')).toBeInTheDocument();
       expect(screen.getByText('评论数')).toBeInTheDocument();
       expect(screen.getByText('影响因子')).toBeInTheDocument();
       expect(screen.getByText('综合评分')).toBeInTheDocument();

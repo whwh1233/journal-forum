@@ -147,13 +147,6 @@ const SearchAndFilter: React.FC = () => {
 
   const hasActiveFilters = searchQuery || selectedCategory || selectedCategoryId || minRating > 0 || hasActiveSorts;
 
-  const getSortIcon = (field: string) => {
-    const order = sortFields[field];
-    if (order === 'desc') return <ArrowDown size={14} className="sort-icon desc" />;
-    if (order === 'asc') return <ArrowUp size={14} className="sort-icon asc" />;
-    return <Circle size={10} className="sort-icon none" />;
-  };
-
   const levelOptions = useMemo(() => levels?.map(l => ({ id: l.name, name: l.name })) || [], [levels]);
   const categoryOptions = useMemo(() => categories?.map(c => ({
     id: c.id,
@@ -239,12 +232,9 @@ const SearchAndFilter: React.FC = () => {
       {sortExpanded && (
         <div className="sort-panel-container">
           <div className="sort-panel-header">
-            <div className="header-info">
-              <span className="title">排序配置管理</span>
-              <span className="desc">支持多重排序组合，点击卡片进行切换控制</span>
-            </div>
+            <span className="header-label">排序</span>
             <button className="close-panel-btn" onClick={() => setSortExpanded(false)}>
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
           <div className="sort-field-grid">
@@ -254,17 +244,13 @@ const SearchAndFilter: React.FC = () => {
               return (
                 <button
                   key={field}
-                  className={`sort-item-card ${isActive ? `active ${order}` : ''}`}
+                  className={`sort-item-card${isActive ? ` active ${order}` : ' inactive'}`}
                   onClick={() => toggleSortField(field)}
                 >
-                  <div className="sort-item-content">
-                    <span className="field-name">{SORT_FIELD_LABELS[field]}</span>
-                    <div className="sort-status">
-                      {getSortIcon(field)}
-                      <span className="status-text">{order === 'desc' ? '降序排列' : order === 'asc' ? '升序排列' : '暂未启用'}</span>
-                    </div>
-                  </div>
-                  {isActive && <div className="active-glow" />}
+                  <span className="field-name">{SORT_FIELD_LABELS[field]}</span>
+                  {order === 'desc' ? <ArrowDown size={13} className="sort-icon" /> :
+                   order === 'asc'  ? <ArrowUp size={13} className="sort-icon" /> :
+                                      <Circle size={10} className="sort-icon" />}
                 </button>
               );
             })}
