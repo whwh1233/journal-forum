@@ -11,6 +11,14 @@ const NewPostPage: React.FC = () => {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
+  const handleCancel = () => {
+    setShowCancelConfirm(true);
+  };
+
+  const handleConfirmCancel = () => navigate('/community');
+  const handleDismissCancel = () => setShowCancelConfirm(false);
 
   const handleSubmit = async (data: CreatePostData) => {
     try {
@@ -26,12 +34,6 @@ const NewPostPage: React.FC = () => {
     }
   };
 
-  const handleCancel = () => {
-    if (window.confirm('确定要放弃发布吗？未保存的内容将会丢失。')) {
-      navigate('/community');
-    }
-  };
-
   return (
     <div className="new-post-page">
       <div className="new-post-page-container">
@@ -39,6 +41,28 @@ const NewPostPage: React.FC = () => {
           <div className="new-post-page-error">
             <p>{error}</p>
             <button onClick={() => setError(null)}>关闭</button>
+          </div>
+        )}
+
+        {showCancelConfirm && (
+          <div className="new-post-cancel-confirm">
+            <span className="new-post-cancel-confirm__text">
+              确定放弃发布吗？未保存的内容将会丢失。
+            </span>
+            <div className="new-post-cancel-confirm__actions">
+              <button
+                className="new-post-cancel-confirm__btn new-post-cancel-confirm__btn--secondary"
+                onClick={handleDismissCancel}
+              >
+                继续编辑
+              </button>
+              <button
+                className="new-post-cancel-confirm__btn new-post-cancel-confirm__btn--danger"
+                onClick={handleConfirmCancel}
+              >
+                放弃并离开
+              </button>
+            </div>
           </div>
         )}
 

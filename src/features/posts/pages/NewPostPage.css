@@ -26,6 +26,69 @@
   position: relative;
 }
 
+/* Cancel Confirmation Panel */
+.new-post-cancel-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-4);
+  background: var(--color-warning-light);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-warning);
+  animation: newPostPageFadeIn 0.2s var(--ease-out);
+}
+
+.new-post-cancel-confirm__text {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  flex: 1;
+}
+
+.new-post-cancel-confirm__actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.new-post-cancel-confirm__btn {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.new-post-cancel-confirm__btn--secondary {
+  background: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.new-post-cancel-confirm__btn--secondary:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.new-post-cancel-confirm__btn--danger {
+  background: var(--color-error);
+  color: white;
+}
+
+.new-post-cancel-confirm__btn--danger:hover {
+  filter: brightness(0.9);
+}
+
+@media (max-width: 480px) {
+  .new-post-cancel-confirm {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* Error Message - 现代化错误提示 */
 .new-post-page-error {
   display: flex;

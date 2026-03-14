@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '../helpers/testUtils';
+import { render, screen, waitFor, fireEvent } from '../helpers/testUtils';
 import NewPostPage from '@/features/posts/pages/NewPostPage';
 import { postService } from '@/features/posts/services/postService';
 
@@ -46,18 +46,36 @@ describe('NewPostPage', () => {
     await waitFor(() => { expect(screen.getByText('发布失败')).toBeInTheDocument(); });
   });
 
-  it('should confirm before cancelling', () => {
-    global.confirm = vi.fn(() => true);
+  it('shows inline cancel confirmation instead of window.confirm', () => {
+    // Ensure window.confirm is NOT called
+    const confirmSpy = vi.spyOn(window, 'confirm');
+
     render(<NewPostPage />);
-    screen.getByText('取消').click();
-    expect(global.confirm).toHaveBeenCalledWith('确定要放弃发布吗？未保存的内容将会丢失。');
-    expect(mockNavigate).toHaveBeenCalledWith('/community');
+
+    // Trigger cancel (PostForm mock renders a "取消" button)
+    const cancelBtn = screen.getByRole('button', { name: /取消/i });
+    fireEvent.click(cancelBtn);
+
+    // window.confirm should NOT have been called
+    expect(confirmSpy).not.toHaveBeenCalled();
+
+    // Inline confirmation panel should appear
+    expect(screen.getByText(/确定放弃发布/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /继续编辑/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /放弃并离开/ })).toBeInTheDocument();
+
+    confirmSpy.mockRestore();
   });
 
-  it('should not navigate when cancel declined', () => {
-    global.confirm = vi.fn(() => false);
+  it('dismisses cancel confirmation when user clicks 继续编辑', () => {
     render(<NewPostPage />);
-    screen.getByText('取消').click();
-    expect(mockNavigate).not.toHaveBeenCalled();
+
+    const cancelBtn = screen.getByRole('button', { name: /取消/i });
+    fireEvent.click(cancelBtn);
+
+    const continueBtn = screen.getByRole('button', { name: /继续编辑/ });
+    fireEvent.click(continueBtn);
+
+    expect(screen.queryByText(/确定放弃发布/)).not.toBeInTheDocument();
   });
 });
