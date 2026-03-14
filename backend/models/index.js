@@ -24,7 +24,11 @@ const Submission = require('./Submission');
 const SubmissionStatusHistory = require('./SubmissionStatusHistory');
 const Announcement = require('./Announcement');
 const UserAnnouncementRead = require('./UserAnnouncementRead');
-const Notification = require('./Notification');// ==================== 关联定义 ====================
+const Notification = require('./Notification');
+const PostCategory = require('./PostCategory');
+const Tag = require('./Tag');
+const PostTagMap = require('./PostTagMap');
+const SystemConfig = require('./SystemConfig');// ==================== 关联定义 ====================
 
 // ==================== 关联定义 ====================
 
@@ -119,6 +123,30 @@ Post.belongsTo(Journal, {
 });
 User.hasMany(Post, { foreignKey: 'userId', as: 'posts' });
 Journal.hasMany(Post, { foreignKey: 'journalId', as: 'relatedPosts' });
+
+// PostCategory 关联
+Post.belongsTo(PostCategory, { foreignKey: 'categoryId', as: 'postCategory' });
+PostCategory.hasMany(Post, { foreignKey: 'categoryId', as: 'posts' });
+
+// Tag 关联
+Tag.belongsTo(User, { foreignKey: 'createdBy', as: 'creator' });
+User.hasMany(Tag, { foreignKey: 'createdBy', as: 'createdTags' });
+
+// Post N:M Tag (through PostTagMap)
+Post.belongsToMany(Tag, {
+  through: PostTagMap,
+  foreignKey: 'postId',
+  otherKey: 'tagId',
+  as: 'tags_assoc'
+});
+Tag.belongsToMany(Post, {
+  through: PostTagMap,
+  foreignKey: 'tagId',
+  otherKey: 'postId',
+  as: 'posts'
+});
+PostTagMap.belongsTo(Post, { foreignKey: 'postId' });
+PostTagMap.belongsTo(Tag, { foreignKey: 'tagId' });
 
 // PostLike 关联
 PostLike.belongsTo(Post, { foreignKey: 'postId', onDelete: 'CASCADE' });
@@ -222,5 +250,9 @@ module.exports = {
     Announcement,
     UserAnnouncementRead,
     Notification,
+    PostCategory,
+    Tag,
+    PostTagMap,
+    SystemConfig,
     syncDatabase
 };
