@@ -12,6 +12,24 @@ nul
 /blob-report/
 /playwright/.cache/
 .superpowers/
+docs/superpowers/
+
+# Local Claude config
+.claude/settings.local.json
+
+# User uploads
+backend/uploads/
+
+# Temp scripts & test output
+_write_test.js
+gen_tests.js
+write_postform.js
+write_tests.js
+test_output.txt
+scripts/gen-tests.cjs
+scripts/write-file.cjs
+scripts/t1.txt
+scripts/test_b64.txt
 
 # E2E test artifacts
 e2e/screenshots/*
