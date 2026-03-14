@@ -1,5 +1,6 @@
 const { Badge, UserBadge, User, Comment, Favorite, Follow } = require('../models');
 const { Op } = require('sequelize');
+const notificationService = require('./notificationService');
 
 /**
  * 徽章服务层 - Sequelize 版
@@ -74,6 +75,25 @@ class BadgeService {
         grantedAt: new Date(),
         isNew: true
       });
+
+      // Notify: badge_earned
+      try {
+        await notificationService.create({
+          recipientId: userId,
+          senderId: null,
+          type: 'badge_earned',
+          entityType: 'badge',
+          entityId: badge.id,
+          content: {
+            title: `恭喜你获得了「${badge.name}」徽章`,
+            body: badge.description || '',
+            badgeName: badge.name,
+            badgeDescription: badge.description || ''
+          }
+        });
+      } catch (err) {
+        console.error('Notification (badge_earned) failed:', err.message);
+      }
 
       grantedBadges.push({
         ...badge.toJSON(),
