@@ -1,17 +1,17 @@
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: var(--color-page-bg);
 }
 
 .app-layout-main {
   flex: 1;
   margin-left: var(--nav-width-collapsed);
-  min-height: 100vh;
   overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
-  /* margin-left 只在用户切换侧边栏时变化，路由切换时不会重新触发 */
   transition: margin-left 0.22s ease;
   width: 100%;
 }
@@ -21,10 +21,7 @@
 }
 
 .app-layout-main .container {
-  background: var(--panel-bg, var(--color-background));
-  border-radius: var(--radius-lg);
   padding: var(--space-5);
-  box-shadow: var(--shadow-md);
 }
 
 @media (max-width: 768px) {

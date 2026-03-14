@@ -1,7 +1,7 @@
 .journals-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  gap: var(--space-5);
   animation: fadeInUp var(--transition-slow) ease-out;
 }
 
@@ -50,9 +50,9 @@
 }
 
 .error {
-  color: #dc3545;
-  background: rgba(220, 53, 69, 0.05);
-  border-color: rgba(220, 53, 69, 0.3);
+  color: var(--color-error);
+  background: var(--color-error-light);
+  border-color: var(--color-error);
   font-weight: 500;
 }
 

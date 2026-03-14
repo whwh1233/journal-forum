@@ -7,8 +7,8 @@
   transition: all var(--duration-normal) var(--ease-in-out);
   position: relative;
   cursor: pointer;
-  margin-bottom: var(--space-5);
   width: 100%;
+  height: 100%;
 }
 
 .journal-card.scheme-e-production:hover {
@@ -19,15 +19,15 @@
 
 .card-layout {
   display: flex;
-  height: 240px;
-  overflow: hidden;
+  min-height: 240px;
+  height: 100%;
 }
 
 /* Left Cover (1/3) */
 .card-cover-side {
   width: 175px;
-  aspect-ratio: 8 / 11;
   flex-shrink: 0;
+  align-self: stretch;
   background-color: var(--color-surface);
   position: relative;
   overflow: hidden;
@@ -88,26 +88,24 @@
 }
 
 .card-title {
-  font-size: var(--text-lg);
-  font-weight: 800;
+  font-size: var(--text-md);
+  font-weight: 700;
   color: var(--color-text);
   margin: 0;
-  line-height: 1.25;
-  height: 1.25em;
-  white-space: nowrap;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* Levels */
 .card-levels {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
   margin-bottom: var(--space-2);
-  height: var(--size-sm);
-  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -123,7 +121,7 @@
 }
 
 .level-tag.primary-highlight {
-  border-color: var(--blue-500);
+  border-color: var(--color-info-dark);
   background-color: var(--color-info-light);
   color: var(--color-info-dark);
 }

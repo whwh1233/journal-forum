@@ -45,10 +45,7 @@ const HomeContent: React.FC = () => {
     <div className="home-content">
       <div className="container">
         <SearchAndFilter />
-        <section className="journals-section">
-          <h2>期刊列表</h2>
-          <JournalsGrid />
-        </section>
+        <JournalsGrid />
       </div>
     </div>
   );
