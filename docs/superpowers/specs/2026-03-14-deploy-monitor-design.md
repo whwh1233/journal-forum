@@ -183,16 +183,20 @@ router.use(superAdminProtect);
       "status": "connected",
       "responseTime": 12
     },
-    "pm2": [
-      {
-        "name": "backend",
-        "status": "online",
-        "cpu": 2.1,
-        "memory": 85.6,  // MB，后端从 PM2 的 bytes 转换
-        "uptime": 3600,
-        "restarts": 0
-      }
-    ]
+    "pm2": {
+      "status": "ok",
+      "error": null,
+      "processes": [
+        {
+          "name": "backend",
+          "status": "online",
+          "cpu": 2.1,
+          "memory": 85.6,
+          "uptime": 3600,
+          "restarts": 0
+        }
+      ]
+    }
   }
 }
 ```
