@@ -19,6 +19,7 @@ const submissionRoutes = require('./routes/submissionRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const deployRoutes = require('./routes/deployRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
@@ -129,6 +130,7 @@ app.use('/api/submissions', submissionRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/deploy', deployRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // 404处理
 app.use(notFound);
