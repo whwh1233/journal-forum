@@ -34,13 +34,15 @@ CREATE TABLE online_post_categories (
   name VARCHAR(50) NOT NULL,
   slug VARCHAR(50) NOT NULL UNIQUE,
   description VARCHAR(200) DEFAULT NULL,
-  sortOrder INT DEFAULT 0,
-  postCount INT DEFAULT 0,
-  isActive BOOLEAN DEFAULT true,
-  createdAt DATETIME NOT NULL,
-  updatedAt DATETIME NOT NULL
+  sort_order INT DEFAULT 0,
+  post_count INT DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
 );
 ```
+
+> Sequelize 模型中使用 camelCase 属性 + `field: 'snake_case'` 映射，与项目现有约定一致。
 
 初始数据（迁移自现有枚举）：
 
@@ -59,14 +61,14 @@ CREATE TABLE online_post_categories (
 CREATE TABLE online_tags (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(10) NOT NULL,
-  normalizedName VARCHAR(10) NOT NULL UNIQUE,
+  normalized_name VARCHAR(10) NOT NULL UNIQUE,
   status ENUM('approved', 'pending') DEFAULT 'pending',
-  isOfficial BOOLEAN DEFAULT false,
-  createdBy CHAR(36) NOT NULL,
-  postCount INT DEFAULT 0,
-  createdAt DATETIME NOT NULL,
-  updatedAt DATETIME NOT NULL,
-  FOREIGN KEY (createdBy) REFERENCES online_users(id)
+  is_official BOOLEAN DEFAULT false,
+  created_by CHAR(36) NOT NULL,
+  post_count INT DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  FOREIGN KEY (created_by) REFERENCES users(id)
 );
 ```
 
@@ -79,12 +81,12 @@ CREATE TABLE online_tags (
 
 ```sql
 CREATE TABLE online_post_tag_map (
-  postId INT NOT NULL,
-  tagId INT NOT NULL,
-  createdAt DATETIME NOT NULL,
-  PRIMARY KEY (postId, tagId),
-  FOREIGN KEY (postId) REFERENCES online_posts(id) ON DELETE CASCADE,
-  FOREIGN KEY (tagId) REFERENCES online_tags(id) ON DELETE CASCADE
+  post_id INT NOT NULL,
+  tag_id INT NOT NULL,
+  created_at DATETIME NOT NULL,
+  PRIMARY KEY (post_id, tag_id),
+  FOREIGN KEY (post_id) REFERENCES online_posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES online_tags(id) ON DELETE CASCADE
 );
 ```
 
@@ -92,10 +94,11 @@ CREATE TABLE online_post_tag_map (
 
 ```sql
 CREATE TABLE online_system_config (
-  configKey VARCHAR(50) PRIMARY KEY,
-  configValue VARCHAR(200) NOT NULL,
+  config_key VARCHAR(50) PRIMARY KEY,
+  config_value VARCHAR(200) NOT NULL,
   description VARCHAR(200) DEFAULT NULL,
-  updatedAt DATETIME NOT NULL
+  created_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL
 );
 ```
 
@@ -121,9 +124,10 @@ CREATE TABLE online_system_config (
 
 Query 参数：
 - `search` — 模糊搜索（匹配 name）
-- `status` — 筛选状态（approved/pending），默认 approved
 - `sort` — 排序：postCount（默认）、latest
 - `page` / `limit` — 分页
+
+> 此接口仅返回 approved 标签。Pending 标签不通过此接口暴露。
 
 响应：
 ```json
@@ -148,7 +152,9 @@ Query 参数：
 ```
 
 #### `GET /api/tags/suggest?q=xxx` （需登录）
-输入时实时推荐。按 normalizedName 模糊匹配，优先返回 official 标签，其次 approved 标签。对当前用户额外返回其创建的 pending 标签。最多返回 10 条。
+输入时实时推荐。按 normalizedName 前缀匹配（`LIKE 'xxx%'`），优先返回 official 标签，其次 approved 标签。对当前用户额外返回其创建的 pending 标签。最多返回 10 条。
+
+当 `q` 为空或未传时，返回热门标签（按 postCount 降序 top 10）+ 当前用户的 pending 标签。
 
 响应：
 ```json
@@ -174,13 +180,23 @@ Query 参数：
 3. 若已存在 → 返回已有标签（不创建）
 4. 若不存在 → 创建，status = pending，isOfficial = false
 
-响应：
+响应（新创建）：
 ```json
 {
   "tag": { "id": 10, "name": "SCI论文", "status": "pending", "isNew": true },
   "message": "标签已创建，审核通过后将对所有人可见"
 }
 ```
+
+响应（已存在）：
+```json
+{
+  "tag": { "id": 1, "name": "SCI论文", "status": "approved", "isNew": false },
+  "message": "已有同名标签"
+}
+```
+
+> 若已存在的标签为其他用户的 pending 状态：仍返回该标签（不重复创建），但对当前用户标记为不可见，前端提示"该标签名已被占用，等待审核中"。
 
 ### 分类公开接口 `/api/post-categories`
 
@@ -214,7 +230,17 @@ Query 参数：
 审核通过 pending 标签。
 
 #### `PUT /api/admin/tags/:id/reject`
-拒绝 pending 标签：删除标签 + 清理关联。（未来通知系统就绪后通知创建者）
+拒绝 pending 标签：硬删除标签 + 清理 PostTagMap 关联。被拒绝的 normalizedName 不做保留，用户可重新创建。（未来通知系统就绪后通知创建者）
+
+#### `POST /api/admin/tags/batch-reject`
+批量拒绝 pending 标签。
+
+请求：
+```json
+{ "tagIds": [3, 5, 8] }
+```
+
+逻辑：遍历每个 tagId，执行与单个 reject 相同的逻辑（删除标签 + 清理关联）。
 
 #### `POST /api/admin/tags/merge`
 合并标签。
@@ -268,6 +294,18 @@ Query 参数：
 #### `PUT /api/admin/post-categories/:id/toggle`
 启用/停用分类。
 
+> 停用的分类：不出现在发帖的分类选择器中，但已有帖子仍正常显示该分类。不提供 DELETE 接口。
+
+#### `PUT /api/admin/post-categories/reorder`
+批量更新排序。
+
+请求：
+```json
+{ "orderedIds": [3, 1, 2, 5, 4, 6] }
+```
+
+逻辑：按数组顺序设置 sortOrder = 0, 1, 2, ...
+
 #### `POST /api/admin/post-categories/:id/migrate`
 迁移分类下的帖子到目标分类（预留接口）。
 
@@ -298,7 +336,22 @@ Query 参数：
 2. 合并 tagIds + newTags 创建的标签 ID，校验总数 ≤ maxTagsPerPost（从 SystemConfig 读取）
 3. newTags 中的每个标签：检查 normalizedName 是否已存在，存在则用已有的，不存在则创建 pending 标签
 4. 清除旧的 PostTagMap 关联，插入新的
-5. 更新相关标签的 postCount
+5. 更新相关标签和分类的 postCount
+
+### postCount 维护规则
+
+Tag.postCount 和 PostCategory.postCount 均为冗余缓存字段，需在以下操作时维护：
+
+| 操作 | Tag.postCount | PostCategory.postCount |
+|------|---------------|------------------------|
+| 创建帖子 | 关联标签 +1 | 目标分类 +1 |
+| 编辑帖子（改标签/分类） | 移除的标签 -1，新增的标签 +1 | 旧分类 -1，新分类 +1 |
+| 删除帖子（软删除） | 关联标签 -1 | 所属分类 -1 |
+| 恢复帖子 | 关联标签 +1 | 所属分类 +1 |
+| 合并标签 | 重新 COUNT 计算 | 不影响 |
+| 删除标签 | 标签移除 | 不影响 |
+
+> postCount 仅统计 status='published' 且 isDeleted=false 的帖子。如出现不一致，管理后台可提供"重新计算"按钮（SELECT COUNT 修正）。
 
 ---
 
@@ -422,8 +475,10 @@ Query 参数：
 1. **创建新表**: PostCategory, Tag, PostTagMap, SystemConfig
 2. **迁移分类**:
    - 将 6 个枚举值写入 PostCategory 表
-   - 遍历所有帖子，将 `category` 字符串映射为 `categoryId`
-   - 更新每个分类的 postCount
+   - 在 Post 表新增 `category_id` INT 列（不删除旧 `category` 列）
+   - 遍历所有帖子，根据 `category` 字符串映射填充 `category_id`
+   - 更新每个分类的 postCount（仅统计 published + 非删除的帖子）
+   - 删除旧 `category` 列及其索引，在 `category_id` 上创建新索引
 3. **迁移标签**:
    - 遍历所有帖子的 `tags` JSON 数组
    - 对每个标签：`normalizedName = tag.toLowerCase().trim()`
@@ -432,7 +487,7 @@ Query 参数：
    - 创建 PostTagMap 关联
    - 计算每个标签的 postCount
 4. **验证**: 对比迁移前后帖子数、标签数、分类分布
-5. **清理**: 迁移确认无误后，可删除 Post 表的旧 `category` 和 `tags` 字段（建议保留一段时间作为回退）
+5. **清理**: 迁移确认无误后，可删除 Post 表的旧 `tags` JSON 字段（建议保留一段时间作为回退）
 
 ### 回退策略
 
@@ -472,7 +527,7 @@ Query 参数：
 - `backend/models/index.js` — 注册新模型，添加关联关系
 - `backend/controllers/postController.js` — 发帖/编辑逻辑改用 categoryId + tagIds/newTags，列表查询 JOIN Tag 表
 - `backend/routes/postRoutes.js` — 无大改动
-- `backend/routes/adminRoutes.js` — 注册标签/分类管理路由
+- `backend/routes/adminRoutes.js` — 注册管理员标签/分类路由（`/api/admin/tags/*` 和 `/api/admin/post-categories/*` 在此文件中挂载，使用 admin 中间件保护）
 
 **前端:**
 - `src/features/posts/types/post.ts` — 更新 Post 类型定义（categoryId, tags 从 string[] 改为 Tag[]）
