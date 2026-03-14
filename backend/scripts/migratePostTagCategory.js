@@ -69,9 +69,15 @@ function log(msg) {
 // ---------------------------------------------------------------------------
 
 async function syncDB() {
-  log('Step 1: Syncing database tables (alter: true) ...');
+  log('Step 1: Syncing new tables (alter: true) ...');
   if (!DRY_RUN) {
-    await syncDatabase({ alter: true });
+    // 仅同步本次新增的 4 张表，避免触发已有表的外键约束问题
+    await PostCategory.sync({ alter: true });
+    await Tag.sync({ alter: true });
+    await PostTagMap.sync({ alter: true });
+    await SystemConfig.sync({ alter: true });
+    // 同步 Post 表的新 category_id 列
+    await Post.sync({ alter: true });
   }
   log('  Done.');
 }
