@@ -20,7 +20,7 @@
     └── 追加 deploy-history.json（历史记录，保留最近 50 条）
               │
               ▼
-后端 API (/api/deploy/*)  ← superAdminAuth 中间件
+后端 API (/api/deploy/*)  ← superAdminProtect 中间件（router 内部挂载）
     │
     ├── GET /status   → 读 deploy-status.json
     ├── GET /history  → 读 deploy-history.json
@@ -61,8 +61,10 @@
 - `gitBranch`：当前分支名
 - `commitMessage` / `commitAuthor`：最近一次提交信息
 - `deployTime`：部署执行时间（ISO 8601）
-- `frontendBuild` / `backendDeps` / `pm2Restart`：各步骤状态（`success` / `failed`）
-- `overallStatus`：整体状态（任一步骤失败即为 `failed`）
+- `frontendBuild` / `backendDeps` / `pm2Restart`：各步骤状态（`pending` / `success` / `failed`）
+- `overallStatus`：整体状态（`pending` / `success` / `failed`，任一步骤失败即为 `failed`，部署中断时保持 `pending`）
+
+前端应处理 `pending` 状态（黄色圆点 + "部署中"），表示部署脚本可能正在执行或中途崩溃。
 
 ### deploy-history.json（部署历史）
 
@@ -103,9 +105,15 @@ backend/
 
 ### 路由注册
 
-在 `server.js` 中挂载：
+在 `server.js` 中挂载（与 databaseRoutes 同模式）：
 ```js
-app.use('/api/deploy', superAdminAuth, deployRoutes);
+app.use('/api/deploy', deployRoutes);
+```
+
+在 `deployRoutes.js` 内部应用中间件（与 databaseRoutes.js 一致）：
+```js
+const { superAdminProtect } = require('../middleware/superAdminAuth');
+router.use(superAdminProtect);
 ```
 
 ### 端点设计
@@ -146,7 +154,7 @@ app.use('/api/deploy', superAdminAuth, deployRoutes);
 {
   "success": true,
   "data": [
-    { "version": "0.1.0", "gitHash": "8ce119b", "deployTime": "...", "overallStatus": "success" }
+    { "version": "0.1.0", "gitHash": "8ce119b", "commitMessage": "feat: ...", "commitAuthor": "wwj", "deployTime": "...", "overallStatus": "success" }
   ],
   "total": 5
 }
@@ -159,7 +167,7 @@ app.use('/api/deploy', superAdminAuth, deployRoutes);
 采集内容：
 1. **后端进程**：`process.uptime()`、`process.version`
 2. **数据库**：Sequelize 执行 `SELECT 1`，测量响应时间（ms）
-3. **PM2 进程**：`child_process.exec('pm2 jlist')` 解析 JSON 输出
+3. **PM2 进程**：`child_process.exec('pm2 jlist')` 解析 JSON 输出（超时 5 秒）
 
 响应：
 ```json
@@ -180,7 +188,7 @@ app.use('/api/deploy', superAdminAuth, deployRoutes);
         "name": "backend",
         "status": "online",
         "cpu": 2.1,
-        "memory": 85.6,
+        "memory": 85.6,  // MB，后端从 PM2 的 bytes 转换
         "uptime": 3600,
         "restarts": 0
       }
@@ -189,7 +197,14 @@ app.use('/api/deploy', superAdminAuth, deployRoutes);
 }
 ```
 
-PM2 命令执行失败时，`pm2` 字段返回 `{ error: "PM2 not available" }`。
+PM2 响应始终为统一结构：
+```json
+{
+  "status": "ok",       // "ok" | "error"
+  "error": null,        // 错误信息，正常时为 null
+  "processes": [...]    // 进程列表，出错时为空数组
+}
+```
 
 ## 模块 3：前端面板
 
@@ -228,9 +243,10 @@ src/features/admin/
 ### 交互设计
 
 - 页面加载时并行请求 3 个 API（status、history、health）
-- 健康状态用绿色（正常）/ 红色（异常）圆点指示
+- 健康状态每 30 秒自动刷新
+- 状态指示圆点：绿色（正常）/ 红色（异常）/ 黄色（pending/部署中）
 - 部署历史按时间倒序排列
-- 加载状态和错误状态的处理
+- 加载状态和错误状态复用现有 admin 面板的模式
 
 ### 路由集成
 
@@ -246,7 +262,7 @@ src/features/admin/
 
 ## 部署脚本完整改造
 
-附完整的改造后部署脚本模板（使用 node -e 写 JSON，避免 jq 依赖）：
+附改造后部署脚本关键片段（通过环境变量传值，避免注入风险）：
 
 ```bash
 #!/bin/bash
@@ -255,24 +271,31 @@ BRANCH="main"
 STATUS_FILE="$PROJECT_PATH/backend/deploy-status.json"
 HISTORY_FILE="$PROJECT_PATH/backend/deploy-history.json"
 
-# 初始化状态
+# 采集 Git 信息
 VERSION=$(node -e "console.log(require('$PROJECT_PATH/package.json').version)")
 GIT_HASH=$(git rev-parse --short HEAD)
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT_MSG=$(git log -1 --pretty=format:"%s")
 COMMIT_AUTHOR=$(git log -1 --pretty=format:"%an")
-DEPLOY_TIME=$(date -u +"%Y-%m-%dT%H:%M:%S+08:00")
+DEPLOY_TIME=$(date +"%Y-%m-%dT%H:%M:%S+08:00")  # 本地时间（服务器为 UTC+8）
 
-# 写初始状态（所有步骤 pending）
+# 写初始状态（所有步骤 pending）—— 通过环境变量传值避免 shell 注入
+DEPLOY_VERSION="$VERSION" \
+DEPLOY_HASH="$GIT_HASH" \
+DEPLOY_BRANCH="$GIT_BRANCH" \
+DEPLOY_MSG="$COMMIT_MSG" \
+DEPLOY_AUTHOR="$COMMIT_AUTHOR" \
+DEPLOY_TIME_VAL="$DEPLOY_TIME" \
+STATUS_FILE_PATH="$STATUS_FILE" \
 node -e "
 const fs = require('fs');
-fs.writeFileSync('$STATUS_FILE', JSON.stringify({
-  version: '$VERSION',
-  gitHash: '$GIT_HASH',
-  gitBranch: '$GIT_BRANCH',
-  commitMessage: $(git log -1 --pretty=format:'"%s"'),
-  commitAuthor: '$COMMIT_AUTHOR',
-  deployTime: '$DEPLOY_TIME',
+fs.writeFileSync(process.env.STATUS_FILE_PATH, JSON.stringify({
+  version: process.env.DEPLOY_VERSION,
+  gitHash: process.env.DEPLOY_HASH,
+  gitBranch: process.env.DEPLOY_BRANCH,
+  commitMessage: process.env.DEPLOY_MSG,
+  commitAuthor: process.env.DEPLOY_AUTHOR,
+  deployTime: process.env.DEPLOY_TIME_VAL,
   frontendBuild: 'pending',
   backendDeps: 'pending',
   pm2Restart: 'pending',
@@ -280,8 +303,48 @@ fs.writeFileSync('$STATUS_FILE', JSON.stringify({
 }, null, 2));
 "
 
-# 各步骤执行后用类似方式更新对应字段...
-# 最终追加到 history 文件
+# --- 步骤更新示例（前端构建后）---
+update_status() {
+  local field=$1 value=$2
+  FIELD="$field" VALUE="$value" STATUS_FILE_PATH="$STATUS_FILE" \
+  node -e "
+  const fs = require('fs');
+  const status = JSON.parse(fs.readFileSync(process.env.STATUS_FILE_PATH, 'utf8'));
+  status[process.env.FIELD] = process.env.VALUE;
+  fs.writeFileSync(process.env.STATUS_FILE_PATH, JSON.stringify(status, null, 2));
+  "
+}
+
+npm run build
+if [ $? -eq 0 ]; then
+  update_status "frontendBuild" "success"
+else
+  update_status "frontendBuild" "failed"
+  update_status "overallStatus" "failed"
+fi
+
+# --- 部署结束后追加历史记录 ---
+STATUS_FILE_PATH="$STATUS_FILE" HISTORY_FILE_PATH="$HISTORY_FILE" \
+node -e "
+const fs = require('fs');
+const status = JSON.parse(fs.readFileSync(process.env.STATUS_FILE_PATH, 'utf8'));
+if (status.overallStatus === 'pending') status.overallStatus = 'success';
+fs.writeFileSync(process.env.STATUS_FILE_PATH, JSON.stringify(status, null, 2));
+
+const historyPath = process.env.HISTORY_FILE_PATH;
+let history = [];
+try { history = JSON.parse(fs.readFileSync(historyPath, 'utf8')); } catch(e) {}
+history.unshift({
+  version: status.version,
+  gitHash: status.gitHash,
+  commitMessage: status.commitMessage,
+  commitAuthor: status.commitAuthor,
+  deployTime: status.deployTime,
+  overallStatus: status.overallStatus
+});
+if (history.length > 50) history = history.slice(0, 50);
+fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
+"
 ```
 
 ## 不涉及的内容
