@@ -1,4 +1,5 @@
 const { Manuscript, Submission, SubmissionStatusHistory, Journal } = require('../models');
+const notificationService = require('../services/notificationService');
 
 // ==================== 稿件 (Manuscript) ====================
 
@@ -324,6 +325,25 @@ const addStatusHistory = async (req, res) => {
         if (manuscript) {
             manuscript.currentStatus = status;
             await manuscript.save();
+        }
+
+        // Notify: submission_status
+        try {
+            await notificationService.create({
+                recipientId: submission.userId || req.user.id,
+                senderId: null,
+                type: 'submission_status',
+                entityType: 'submission',
+                entityId: submissionId,
+                content: {
+                    title: `投稿状态已更新为「${status}」`,
+                    body: note || '',
+                    status: status,
+                    submissionTitle: manuscript ? manuscript.title : ''
+                }
+            });
+        } catch (err) {
+            console.error('Notification (submission_status) failed:', err.message);
         }
 
         res.status(201).json(history);
