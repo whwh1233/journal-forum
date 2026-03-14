@@ -23,7 +23,9 @@ import {
   BadgeManagement,
   DatabaseManager,
   AnnouncementManagement,
-  DeployMonitor
+  DeployMonitor,
+  AdminTagsPanel,
+  AdminPostCategoriesPanel
 } from '@/features/admin';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
@@ -204,6 +206,22 @@ const AppContent: React.FC = () => {
             element={
               <AdminRoute>
                 <AnnouncementManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/tags"
+            element={
+              <AdminRoute>
+                <AdminTagsPanel />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/post-categories"
+            element={
+              <AdminRoute>
+                <AdminPostCategoriesPanel />
               </AdminRoute>
             }
           />
