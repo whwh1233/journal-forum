@@ -59,6 +59,29 @@ const JournalRatingCache = sequelize.define('JournalRatingCache', {
       const val = this.getDataValue('overallExperience');
       return val === null ? null : parseFloat(val);
     }
+  },
+  hotScore: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+    field: 'hot_score',
+    get() {
+      const val = this.getDataValue('hotScore');
+      return val === null ? 0 : parseFloat(val);
+    }
+  },
+  allTimeScore: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+    field: 'all_time_score',
+    get() {
+      const val = this.getDataValue('allTimeScore');
+      return val === null ? 0 : parseFloat(val);
+    }
+  },
+  favoriteCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    field: 'favorite_count'
   }
 }, {
   tableName: 'journal_rating_cache',
