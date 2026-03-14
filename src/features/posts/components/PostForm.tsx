@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
@@ -54,6 +54,12 @@ const PostForm: React.FC<PostFormProps> = ({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
+  const draftStateRef = useRef({ title, content, category, tags, journalId });
+
+  // Keep ref in sync with latest form state (no interval rebuilding)
+  useEffect(() => {
+    draftStateRef.current = { title, content, category, tags, journalId };
+  }, [title, content, category, tags, journalId]);
 
   // Check for draft on mount
   useEffect(() => {
@@ -72,35 +78,23 @@ const PostForm: React.FC<PostFormProps> = ({
     }
   }, [mode, initialData]);
 
-  // Auto-save draft
+  // Auto-save draft — interval created once on mount, reads latest state via ref
   useEffect(() => {
-    if (mode === 'create') {
-      autoSaveTimerRef.current = setInterval(() => {
-        saveDraft();
-      }, AUTO_SAVE_INTERVAL);
-
-      return () => {
-        if (autoSaveTimerRef.current) {
-          clearInterval(autoSaveTimerRef.current);
-        }
-      };
-    }
-  }, [title, content, category, tags, journalId, mode]);
-
-  const saveDraft = useCallback(() => {
-    if (title || content) {
-      const draft = {
-        title,
-        content,
-        category,
-        tags,
-        journalId,
-        savedAt: new Date().toISOString()
-      };
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-      setLastSaved(new Date());
-    }
-  }, [title, content, category, tags, journalId]);
+    if (mode !== 'create') return;
+    autoSaveTimerRef.current = setInterval(() => {
+      const { title: t, content: c, category: cat, tags: tgs, journalId: jid } = draftStateRef.current;
+      if (t || c) {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({
+          title: t, content: c, category: cat, tags: tgs, journalId: jid,
+          savedAt: new Date().toISOString()
+        }));
+        setLastSaved(new Date());
+      }
+    }, AUTO_SAVE_INTERVAL);
+    return () => {
+      if (autoSaveTimerRef.current) clearInterval(autoSaveTimerRef.current);
+    };
+  }, [mode]); // depends only on mode — NOT on form state
 
   const restoreDraft = () => {
     const draft = localStorage.getItem(DRAFT_KEY);
@@ -243,7 +237,8 @@ const PostForm: React.FC<PostFormProps> = ({
       content: content.trim(),
       category,
       tags,
-      journalId
+      journalId,
+      status: isDraft ? 'draft' : 'published',
     };
 
     onSubmit(data);

@@ -1,8 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PostForm from '@/features/posts/components/PostForm';
 import { CreatePostData } from '@/features/posts/types/post';
+
+// Mock markdown packages
+vi.mock('react-markdown', () => ({
+  default: ({ children }: { children: string }) => <div data-testid="markdown-preview">{children}</div>
+}));
+
+vi.mock('remark-gfm', () => ({ default: () => {} }));
+vi.mock('rehype-highlight', () => ({ default: () => {} }));
 
 const DRAFT_KEY = 'post_draft';
 
@@ -22,7 +30,7 @@ describe('PostForm', () => {
   });
 
   it('should render form with all fields', () => {
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     expect(screen.getByLabelText(/标题/)).toBeInTheDocument();
     expect(screen.getByLabelText(/内容/)).toBeInTheDocument();
@@ -33,7 +41,7 @@ describe('PostForm', () => {
   });
 
   it('should render all category options', () => {
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const categorySelect = screen.getByLabelText(/分类/);
     expect(categorySelect).toBeInTheDocument();
@@ -48,7 +56,7 @@ describe('PostForm', () => {
   });
 
   it('should show markdown toolbar buttons', () => {
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Check for toolbar buttons (by title/aria-label)
     expect(screen.getByTitle('粗体')).toBeInTheDocument();
@@ -62,7 +70,7 @@ describe('PostForm', () => {
   });
 
   it('should have three view mode tabs', () => {
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     expect(screen.getByText('编辑')).toBeInTheDocument();
     expect(screen.getByText('预览')).toBeInTheDocument();
@@ -72,7 +80,7 @@ describe('PostForm', () => {
   it('should submit form with valid data', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Fill in form
     await user.type(screen.getByLabelText(/标题/), 'Test Post Title');
@@ -92,7 +100,8 @@ describe('PostForm', () => {
         title: 'Test Post Title',
         content: 'Test content with **markdown**',
         category: 'discussion',
-        tags: ['tag1', 'tag2', 'tag3']
+        tags: ['tag1', 'tag2', 'tag3'],
+        status: 'published',
       });
     });
   });
@@ -100,7 +109,7 @@ describe('PostForm', () => {
   it('should validate required fields', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Try to submit without filling fields
     const submitButton = screen.getByText('发布');
@@ -120,7 +129,7 @@ describe('PostForm', () => {
   it('should call onCancel when cancel button is clicked', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const cancelButton = screen.getByText('取消');
     await user.click(cancelButton);
@@ -138,6 +147,7 @@ describe('PostForm', () => {
 
     render(
       <PostForm
+        mode="edit"
         onSubmit={mockOnSubmit}
         onCancel={mockOnCancel}
         initialData={initialData}
@@ -153,7 +163,7 @@ describe('PostForm', () => {
   it('should autosave draft to localStorage', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/标题/), 'Draft Title');
     await user.type(screen.getByLabelText(/内容/), 'Draft content');
@@ -183,7 +193,7 @@ describe('PostForm', () => {
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     expect(screen.getByText(/检测到未发布的草稿/)).toBeInTheDocument();
     expect(screen.getByText('恢复草稿')).toBeInTheDocument();
@@ -202,7 +212,7 @@ describe('PostForm', () => {
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const restoreButton = screen.getByText('恢复草稿');
     await user.click(restoreButton);
@@ -225,7 +235,7 @@ describe('PostForm', () => {
 
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const discardButton = screen.getByText('放弃草稿');
     await user.click(discardButton);
@@ -239,7 +249,7 @@ describe('PostForm', () => {
   it('should insert markdown on toolbar button click', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const contentTextarea = screen.getByLabelText(/内容/) as HTMLTextAreaElement;
     contentTextarea.focus();
@@ -254,7 +264,7 @@ describe('PostForm', () => {
   it('should switch between view modes', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/内容/), '# Test Markdown');
 
@@ -278,7 +288,7 @@ describe('PostForm', () => {
   it('should parse tags correctly', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/标题/), 'Test');
     await user.type(screen.getByLabelText(/内容/), 'Content');
@@ -303,7 +313,7 @@ describe('PostForm', () => {
   it('should handle empty tags gracefully', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/标题/), 'Test');
     await user.type(screen.getByLabelText(/内容/), 'Content');
@@ -324,7 +334,7 @@ describe('PostForm', () => {
   it('should support optional journalId field', async () => {
     const user = userEvent.setup({ delay: null });
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/标题/), 'Test');
     await user.type(screen.getByLabelText(/内容/), 'Content');
@@ -355,7 +365,7 @@ describe('PostForm', () => {
     };
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
 
-    render(<PostForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Discard draft modal
     const discardButton = screen.getByText('放弃草稿');
@@ -378,7 +388,7 @@ describe('PostForm', () => {
     const user = userEvent.setup({ delay: null });
     const slowSubmit = vi.fn(() => new Promise(resolve => setTimeout(resolve, 1000)));
 
-    render(<PostForm onSubmit={slowSubmit} onCancel={mockOnCancel} />);
+    render(<PostForm mode="create" onSubmit={slowSubmit} onCancel={mockOnCancel} />);
 
     await user.type(screen.getByLabelText(/标题/), 'Test');
     await user.type(screen.getByLabelText(/内容/), 'Content');
@@ -388,5 +398,43 @@ describe('PostForm', () => {
 
     // Button should be disabled during submission
     expect(submitButton.disabled).toBe(true);
+  });
+
+  it('auto-saves draft after 30s even with continuous state changes', async () => {
+    // Note: PostForm tests in this file do NOT use BrowserRouter — render PostForm directly.
+    // vi.useFakeTimers() is already called in beforeEach, so no need to call it again.
+    // The global localStorage is a custom mock object (see setup.ts), so spy on it directly.
+    const setItemSpy = vi.spyOn(localStorage, 'setItem');
+
+    render(<PostForm mode="create" onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    const titleInput = screen.getByLabelText(/标题/i);
+
+    // Simulate user typing (changes state repeatedly)
+    // Wrap each change + timer advance in act() so React flushes effects (including draftStateRef sync)
+    await act(async () => {
+      fireEvent.change(titleInput, { target: { value: '测试' } });
+      vi.advanceTimersByTime(5000);
+    });
+    await act(async () => {
+      fireEvent.change(titleInput, { target: { value: '测试标题' } });
+      vi.advanceTimersByTime(5000);
+    });
+    await act(async () => {
+      fireEvent.change(titleInput, { target: { value: '测试标题完整' } });
+    });
+
+    // Advance past 30s — autosave should have fired exactly once at 30s mark
+    await act(async () => {
+      vi.advanceTimersByTime(30000);
+    });
+
+    expect(setItemSpy).toHaveBeenCalledWith(
+      'post_draft',
+      expect.stringContaining('测试标题完整')
+    );
+
+    // Note: vi.useRealTimers() is called in afterEach — no need to call it here.
+    setItemSpy.mockRestore();
   });
 });
