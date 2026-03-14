@@ -30,6 +30,7 @@ const DefaultCover: React.FC<{ name: string }> = ({ name }) => {
 
 const JournalCard: React.FC<JournalCardProps> = ({ journal, onClick }) => {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -55,13 +56,19 @@ const JournalCard: React.FC<JournalCardProps> = ({ journal, onClick }) => {
         {/* 左侧封面 (1/3) */}
         <div className="card-cover-side">
           {hasCover ? (
-            <img
-              src={journal.coverImageUrl}
-              alt={journal.name}
-              className="card-cover-img"
-              onError={() => setImgError(true)}
-              loading="lazy"
-            />
+            <>
+              <div className={`card-cover-skeleton ${imgLoaded ? 'hidden' : ''}`}>
+                <div className="card-cover-skeleton-shimmer" />
+              </div>
+              <img
+                src={journal.coverImageUrl}
+                alt={journal.name}
+                className={`card-cover-img ${imgLoaded ? 'loaded' : ''}`}
+                onLoad={() => setImgLoaded(true)}
+                onError={() => setImgError(true)}
+                loading="lazy"
+              />
+            </>
           ) : (
             <DefaultCover name={journal.name} />
           )}
@@ -71,7 +78,7 @@ const JournalCard: React.FC<JournalCardProps> = ({ journal, onClick }) => {
         <div className="card-content-side">
           {/* 收藏按钮 - 浮动右上角 */}
           <div className="card-favorite-float" onClick={(e) => e.stopPropagation()}>
-            <FavoriteButton journalId={journal.journalId} showText={false} />
+            <FavoriteButton journalId={journal.journalId} showText={false} initialFavorited={journal.isFavorited} />
           </div>
 
           {/* 标题 - 最上方，限 2 行 */}
