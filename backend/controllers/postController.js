@@ -1,7 +1,33 @@
-const { Post, User, Journal, PostLike, PostFavorite, PostFollow, PostReport } = require('../models');
+const { Post, User, Journal, PostLike, PostFavorite, PostFollow, PostReport, Tag, PostTagMap, PostCategory, SystemConfig } = require('../models');
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
 const { updatePostScores, calculatePostAllTimeScore } = require('../utils/hotScore');
+
+// Helper: filter pending tags — only show approved tags or pending tags created by the current user
+const filterPendingTags = (post, userId) => {
+    if (post.tags_assoc) {
+        post.tags_assoc = post.tags_assoc.filter(
+            t => t.status === 'approved' || (userId && t.createdBy === userId)
+        );
+    }
+    return post;
+};
+
+// Common includes for Tag and PostCategory
+const tagInclude = {
+    model: Tag,
+    as: 'tags_assoc',
+    attributes: ['id', 'name', 'isOfficial', 'status', 'createdBy'],
+    through: { attributes: [] },
+    required: false
+};
+
+const postCategoryInclude = {
+    model: PostCategory,
+    as: 'postCategory',
+    attributes: ['id', 'name', 'slug'],
+    required: false
+};
 
 // 获取帖子列表（带筛选、排序、分页）
 exports.getPosts = async (req, res) => {
@@ -21,11 +47,31 @@ exports.getPosts = async (req, res) => {
         const where = { isDeleted: false, status: 'published' };
 
         // 筛选条件
-        if (category) where.category = category;
+        if (category) {
+            if (isNaN(category)) {
+                const cat = await PostCategory.findOne({ where: { slug: category } });
+                if (cat) where.categoryId = cat.id;
+            } else {
+                where.categoryId = parseInt(category);
+            }
+        }
         if (journalId) where.journalId = journalId;
         if (userId) where.userId = userId;
-        // MySQL不支持@>操作符，使用LIKE查询JSON数组
-        if (tag) where.tags = { [Op.like]: `%"${tag}"%` };
+
+        // Tag filter: use PostTagMap lookup instead of JSON LIKE
+        if (tag) {
+            const tagRecord = await Tag.findOne({ where: { normalizedName: tag.toLowerCase() } });
+            if (tagRecord) {
+                const tagPostIds = await PostTagMap.findAll({
+                    where: { tagId: tagRecord.id },
+                    attributes: ['postId']
+                });
+                where.id = { ...(where.id || {}), [Op.in]: tagPostIds.map(t => t.postId) };
+            } else {
+                return res.json({ posts: [], pagination: { total: 0, page: parseInt(page), limit: parseInt(limit), totalPages: 0 } });
+            }
+        }
+
         if (search) {
             where[Op.or] = [
                 { title: { [Op.like]: `%${search}%` } },
@@ -69,7 +115,9 @@ exports.getPosts = async (req, res) => {
                     as: 'journal',
                     attributes: ['journalId', 'name'],
                     required: false
-                }
+                },
+                tagInclude,
+                postCategoryInclude
             ],
             order,
             limit: parseInt(limit),
@@ -78,7 +126,7 @@ exports.getPosts = async (req, res) => {
         });
 
         // 如果用户已登录，附加用户互动状态
-        let postsWithUserStatus = posts;
+        let postsWithUserStatus;
         if (req.user) {
             const postIds = posts.map(p => p.id);
             const [likes, favorites, follows] = await Promise.all([
@@ -91,12 +139,20 @@ exports.getPosts = async (req, res) => {
             const favoritedIds = new Set(favorites.map(f => f.postId));
             const followedIds = new Set(follows.map(f => f.postId));
 
-            postsWithUserStatus = posts.map(post => ({
-                ...post.toJSON(),
-                userLiked: likedIds.has(post.id),
-                userFavorited: favoritedIds.has(post.id),
-                userFollowed: followedIds.has(post.id)
-            }));
+            postsWithUserStatus = posts.map(post => {
+                const postJson = {
+                    ...post.toJSON(),
+                    userLiked: likedIds.has(post.id),
+                    userFavorited: favoritedIds.has(post.id),
+                    userFollowed: followedIds.has(post.id)
+                };
+                return filterPendingTags(postJson, req.user.id);
+            });
+        } else {
+            postsWithUserStatus = posts.map(post => {
+                const postJson = post.toJSON();
+                return filterPendingTags(postJson, null);
+            });
         }
 
         res.json({
@@ -131,7 +187,9 @@ exports.getPostById = async (req, res) => {
                     as: 'journal',
                     attributes: ['journalId', 'name', 'issn'],
                     required: false
-                }
+                },
+                tagInclude,
+                postCategoryInclude
             ]
         });
 
@@ -155,6 +213,9 @@ exports.getPostById = async (req, res) => {
             postData.userLiked = !!like;
             postData.userFavorited = !!favorite;
             postData.userFollowed = !!follow;
+            filterPendingTags(postData, req.user.id);
+        } else {
+            filterPendingTags(postData, null);
         }
 
         res.json(postData);
@@ -167,11 +228,61 @@ exports.getPostById = async (req, res) => {
 // 创建帖子
 exports.createPost = async (req, res) => {
     try {
-        const { title, content, category, tags, journalId } = req.body;
+        const { title, content, categoryId, tagIds, newTags, journalId, status } = req.body;
 
         // 验证必填字段
-        if (!title || !content || !category) {
-            return res.status(400).json({ error: '标题、内容和分类为必填项' });
+        if (!title || !content) {
+            return res.status(400).json({ error: '标题和内容为必填项' });
+        }
+
+        // Validate categoryId
+        if (categoryId) {
+            const cat = await PostCategory.findByPk(categoryId);
+            if (!cat) {
+                return res.status(400).json({ error: '分类不存在' });
+            }
+            if (!cat.isActive) {
+                return res.status(400).json({ error: '该分类已停用' });
+            }
+        }
+
+        // Process newTags: normalize, findOrCreate
+        const createdNewTagIds = [];
+        if (newTags && Array.isArray(newTags) && newTags.length > 0) {
+            for (const tagName of newTags) {
+                const trimmed = tagName.trim();
+                if (!trimmed) continue;
+                const normalizedName = trimmed.toLowerCase();
+                const [tagRecord] = await Tag.findOrCreate({
+                    where: { normalizedName },
+                    defaults: {
+                        name: trimmed,
+                        normalizedName,
+                        status: 'pending',
+                        isOfficial: false,
+                        createdBy: req.user.id
+                    }
+                });
+                createdNewTagIds.push(tagRecord.id);
+            }
+        }
+
+        // Merge tagIds + new tag ids, deduplicate
+        const existingTagIds = Array.isArray(tagIds) ? tagIds.map(id => parseInt(id)).filter(id => !isNaN(id)) : [];
+        const allTagIds = [...new Set([...existingTagIds, ...createdNewTagIds])];
+
+        // Check total tags <= maxTagsPerPost
+        const maxTagsPerPost = parseInt(await SystemConfig.getValue('maxTagsPerPost', '5'));
+        if (allTagIds.length > maxTagsPerPost) {
+            return res.status(400).json({ error: `每篇帖子最多 ${maxTagsPerPost} 个标签` });
+        }
+
+        // Validate that all existing tagIds actually exist
+        if (existingTagIds.length > 0) {
+            const validTags = await Tag.findAll({ where: { id: existingTagIds } });
+            if (validTags.length !== existingTagIds.length) {
+                return res.status(400).json({ error: '部分标签不存在' });
+            }
         }
 
         // 获取用户信息
@@ -181,10 +292,27 @@ exports.createPost = async (req, res) => {
             userId: req.user.id,
             title,
             content,
-            category,
-            tags: tags || [],
-            journalId: journalId || null
+            category: null,
+            categoryId: categoryId || null,
+            tags: [],
+            journalId: journalId || null,
+            status: status || 'published'
         });
+
+        // BulkCreate PostTagMap entries
+        if (allTagIds.length > 0) {
+            await PostTagMap.bulkCreate(
+                allTagIds.map(tagId => ({ postId: post.id, tagId }))
+            );
+
+            // Increment Tag.postCount for all associated tags
+            await Tag.increment('postCount', { where: { id: allTagIds } });
+        }
+
+        // Increment PostCategory.postCount if published and has category
+        if (categoryId && (status || 'published') === 'published') {
+            await PostCategory.increment('postCount', { where: { id: categoryId } });
+        }
 
         // 返回完整帖子信息
         const fullPost = await Post.findByPk(post.id, {
@@ -199,7 +327,9 @@ exports.createPost = async (req, res) => {
                     as: 'journal',
                     attributes: ['journalId', 'name'],
                     required: false
-                }
+                },
+                tagInclude,
+                postCategoryInclude
             ]
         });
 
@@ -240,9 +370,11 @@ exports.createPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, content, category, tags, journalId } = req.body;
+        const { title, content, categoryId, tagIds, newTags, journalId } = req.body;
 
-        const post = await Post.findByPk(id);
+        const post = await Post.findByPk(id, {
+            include: [tagInclude]
+        });
 
         if (!post) {
             return res.status(404).json({ error: '帖子不存在' });
@@ -253,18 +385,95 @@ exports.updatePost = async (req, res) => {
             return res.status(403).json({ error: '无权编辑此帖子' });
         }
 
+        // Handle categoryId change
+        if (categoryId !== undefined && categoryId !== post.categoryId) {
+            if (categoryId) {
+                const cat = await PostCategory.findByPk(categoryId);
+                if (!cat) {
+                    return res.status(400).json({ error: '分类不存在' });
+                }
+                if (!cat.isActive) {
+                    return res.status(400).json({ error: '该分类已停用' });
+                }
+            }
+            // Decrement old category postCount
+            if (post.categoryId && post.status === 'published') {
+                await PostCategory.decrement('postCount', { where: { id: post.categoryId } });
+            }
+            // Increment new category postCount
+            if (categoryId && post.status === 'published') {
+                await PostCategory.increment('postCount', { where: { id: categoryId } });
+            }
+        }
+
+        // Handle tags change
+        if (tagIds !== undefined || newTags !== undefined) {
+            // Process newTags
+            const createdNewTagIds = [];
+            if (newTags && Array.isArray(newTags) && newTags.length > 0) {
+                for (const tagName of newTags) {
+                    const trimmed = tagName.trim();
+                    if (!trimmed) continue;
+                    const normalizedName = trimmed.toLowerCase();
+                    const [tagRecord] = await Tag.findOrCreate({
+                        where: { normalizedName },
+                        defaults: {
+                            name: trimmed,
+                            normalizedName,
+                            status: 'pending',
+                            isOfficial: false,
+                            createdBy: req.user.id
+                        }
+                    });
+                    createdNewTagIds.push(tagRecord.id);
+                }
+            }
+
+            const existingTagIds = Array.isArray(tagIds) ? tagIds.map(tid => parseInt(tid)).filter(tid => !isNaN(tid)) : [];
+            const newAllTagIds = [...new Set([...existingTagIds, ...createdNewTagIds])];
+
+            // Check total tags <= maxTagsPerPost
+            const maxTagsPerPost = parseInt(await SystemConfig.getValue('maxTagsPerPost', '5'));
+            if (newAllTagIds.length > maxTagsPerPost) {
+                return res.status(400).json({ error: `每篇帖子最多 ${maxTagsPerPost} 个标签` });
+            }
+
+            // Compute diff: old tag ids vs new tag ids
+            const oldTagIds = post.tags_assoc ? post.tags_assoc.map(t => t.id) : [];
+            const removedTagIds = oldTagIds.filter(tid => !newAllTagIds.includes(tid));
+            const addedTagIds = newAllTagIds.filter(tid => !oldTagIds.includes(tid));
+
+            // Decrement removed tags postCount
+            if (removedTagIds.length > 0) {
+                await Tag.decrement('postCount', { where: { id: removedTagIds } });
+            }
+            // Increment added tags postCount
+            if (addedTagIds.length > 0) {
+                await Tag.increment('postCount', { where: { id: addedTagIds } });
+            }
+
+            // Clear old PostTagMap, insert new
+            await PostTagMap.destroy({ where: { postId: post.id } });
+            if (newAllTagIds.length > 0) {
+                await PostTagMap.bulkCreate(
+                    newAllTagIds.map(tagId => ({ postId: post.id, tagId }))
+                );
+            }
+        }
+
         await post.update({
             title: title || post.title,
             content: content || post.content,
-            category: category || post.category,
-            tags: tags !== undefined ? tags : post.tags,
+            categoryId: categoryId !== undefined ? (categoryId || null) : post.categoryId,
             journalId: journalId !== undefined ? journalId : post.journalId
         });
 
         const updatedPost = await Post.findByPk(id, {
             include: [
                 { model: User, as: 'author', attributes: ['id', 'name', 'avatar'] },
-                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
+                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false },
+                tagInclude,
+                postCategoryInclude
             ]
         });
 
@@ -292,6 +501,18 @@ exports.deletePost = async (req, res) => {
         }
 
         await post.update({ isDeleted: true });
+
+        // Decrement PostCategory.postCount
+        if (post.categoryId && post.status === 'published') {
+            await PostCategory.decrement('postCount', { where: { id: post.categoryId } });
+        }
+
+        // Decrement Tag.postCount for all associated tags
+        const tagMaps = await PostTagMap.findAll({ where: { postId: post.id }, attributes: ['tagId'] });
+        const tagIds = tagMaps.map(t => t.tagId);
+        if (tagIds.length > 0) {
+            await Tag.decrement('postCount', { where: { id: tagIds } });
+        }
 
         res.json({ message: '帖子已删除' });
     } catch (error) {
@@ -475,7 +696,9 @@ exports.getMyPosts = async (req, res) => {
         const { count, rows: posts } = await Post.findAndCountAll({
             where: { userId: req.user.id, isDeleted: false },
             include: [
-                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false }
+                { model: Journal, as: 'journal', attributes: ['journalId', 'name'], required: false },
+                tagInclude,
+                postCategoryInclude
             ],
             order: [['createdAt', 'DESC']],
             limit: parseInt(limit),

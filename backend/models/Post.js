@@ -29,13 +29,12 @@ const Post = sequelize.define('Post', {
   },
   category: {
     type: DataTypes.STRING(50),
-    allowNull: false,
-    validate: {
-      isIn: {
-        args: [['experience', 'discussion', 'question', 'news', 'review', 'other']],
-        msg: '分类必须是预定义的值之一'
-      }
-    }
+    allowNull: true
+  },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'category_id'
   },
   tags: {
     type: DataTypes.JSON,
@@ -124,6 +123,9 @@ const Post = sequelize.define('Post', {
     },
     {
       fields: ['created_at']
+    },
+    {
+      fields: ['category_id']
     }
   ]
 });
