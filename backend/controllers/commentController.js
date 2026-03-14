@@ -1,6 +1,7 @@
 const { Comment, CommentLike, Journal, JournalRatingCache, User, Badge, UserBadge } = require('../models');
 const { sequelize } = require('../config/database');
 const badgeService = require('../services/badgeService');
+const notificationService = require('../services/notificationService');
 
 // 多维评分维度定义
 const DIMENSION_KEYS = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
@@ -285,6 +286,56 @@ const createComment = async (req, res) => {
             await updateJournalRatingCache(journalId);
         }
 
+        // Notify: comment_reply
+        if (parentId) {
+            try {
+                const parentComment = await Comment.findByPk(resolvedParentId);
+                if (parentComment) {
+                    await notificationService.create({
+                        recipientId: parentComment.userId,
+                        senderId: req.user.id,
+                        type: 'comment_reply',
+                        entityType: 'comment',
+                        entityId: newComment.id,
+                        content: {
+                            title: `${req.user.name} 回复了你的评论`,
+                            body: content.substring(0, 100),
+                            commentContent: content.substring(0, 200),
+                            journalTitle: journal ? journal.title : ''
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Notification (comment_reply) failed:', err.message);
+            }
+        }
+
+        // Notify: journal_new_comment (to users who favorited this journal)
+        try {
+            const { Favorite } = require('../models');
+            const favorites = await Favorite.findAll({
+                where: { journalId },
+                attributes: ['userId']
+            });
+            const recipientIds = favorites.map(f => f.userId);
+            if (recipientIds.length > 0) {
+                await notificationService.createBulk(recipientIds, {
+                    senderId: req.user.id,
+                    type: 'journal_new_comment',
+                    entityType: 'journal',
+                    entityId: journalId,
+                    content: {
+                        title: `你收藏的期刊「${journal ? journal.title : ''}」有新评论`,
+                        body: content.substring(0, 100),
+                        commentContent: content.substring(0, 200),
+                        journalTitle: journal ? journal.title : ''
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Notification (journal_new_comment) failed:', err.message);
+        }
+
         // 检查评论徽章
         let newBadges = [];
         try {
@@ -361,6 +412,28 @@ const deleteComment = async (req, res) => {
             isDeleted: true,
             content: '[该评论已被删除]'
         });
+
+        // Notify: comment_deleted (admin deleted user's comment)
+        if (req.user.role === 'admin' || req.user.role === 'superadmin') {
+            try {
+                const journalObj = await Journal.findByPk(comment.journalId);
+                await notificationService.create({
+                    recipientId: comment.userId,
+                    senderId: req.user.id,
+                    type: 'comment_deleted',
+                    entityType: 'comment',
+                    entityId: comment.id,
+                    content: {
+                        title: '你的评论已被管理员删除',
+                        body: comment.content ? comment.content.substring(0, 100) : '',
+                        reason: req.body.reason || '',
+                        journalTitle: journalObj ? journalObj.title : ''
+                    }
+                });
+            } catch (err) {
+                console.error('Notification (comment_deleted) failed:', err.message);
+            }
+        }
 
         // 如果是顶级评论，重新计算期刊评分缓存
         if (!comment.parentId) {
