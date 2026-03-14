@@ -1,7 +1,8 @@
-const { Comment, CommentLike, Journal, JournalRatingCache, User, Badge, UserBadge } = require('../models');
+const { Comment, CommentLike, Journal, JournalRatingCache, User, Badge, UserBadge, Favorite } = require('../models');
 const { sequelize } = require('../config/database');
 const badgeService = require('../services/badgeService');
 const notificationService = require('../services/notificationService');
+const { calculateJournalHotScore, calculateJournalAllTimeScore } = require('../utils/hotScore');
 
 // 多维评分维度定义
 const DIMENSION_KEYS = ['reviewSpeed', 'editorAttitude', 'acceptDifficulty', 'reviewQuality', 'overallExperience'];
@@ -82,6 +83,37 @@ const updateJournalRatingCache = async (journalId) => {
         reviewQuality: averages.reviewQuality,
         overallExperience: averages.overallExperience
     });
+
+    // Update hot ranking scores
+    const { Op } = require('sequelize');
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
+
+    // Count recent comments (7 days)
+    const recentCommentCount = await Comment.count({
+      where: { journalId, parentId: null, isDeleted: false, createdAt: { [Op.gte]: sevenDaysAgo } }
+    });
+
+    // Count recent favorites (7 days)
+    const recentFavoriteCount = await Favorite.count({
+      where: { journalId, createdAt: { [Op.gte]: sevenDaysAgo } }
+    });
+
+    // Count total favorites
+    const totalFavoriteCount = await Favorite.count({ where: { journalId } });
+
+    // Get impactFactor from Journal table
+    const journal = await Journal.findByPk(journalId, { attributes: ['impactFactor'] });
+    const impactFactor = journal ? journal.impactFactor : null;
+
+    const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, rating);
+    const allTimeScore = calculateJournalAllTimeScore(
+      topLevelComments.length, totalFavoriteCount, rating, impactFactor
+    );
+
+    await JournalRatingCache.update(
+      { hotScore, allTimeScore, favoriteCount: totalFavoriteCount },
+      { where: { journalId } }
+    );
 
     return {
         rating,

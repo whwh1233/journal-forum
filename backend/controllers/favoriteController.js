@@ -1,5 +1,7 @@
-const { Favorite, Journal, JournalLevel, JournalRatingCache } = require('../models');
+const { Favorite, Journal, JournalLevel, JournalRatingCache, Comment } = require('../models');
 const badgeService = require('../services/badgeService');
+const { calculateJournalHotScore, calculateJournalAllTimeScore } = require('../utils/hotScore');
+const { Op } = require('sequelize');
 
 // 添加收藏
 const addFavorite = async (req, res) => {
@@ -23,6 +25,9 @@ const addFavorite = async (req, res) => {
             userId: req.user.id,
             journalId: journalId
         });
+
+        // Update journal hot ranking scores
+        await updateJournalScoresOnFavorite(journalId);
 
         // 检查收藏徽章
         let newBadges = [];
@@ -56,6 +61,10 @@ const removeFavorite = async (req, res) => {
         }
 
         await favorite.destroy();
+
+        // Update journal hot ranking scores
+        await updateJournalScoresOnFavorite(journalId);
+
         res.json({ message: '取消收藏成功' });
     } catch (error) {
         console.error('Error removing favorite:', error);
@@ -76,6 +85,31 @@ const checkFavorite = async (req, res) => {
     } catch (error) {
         console.error('Error checking favorite:', error);
         res.status(500).json({ message: '检查收藏状态失败' });
+    }
+};
+
+// 批量检查收藏状态
+const batchCheckFavorites = async (req, res) => {
+    try {
+        const { journalIds } = req.body;
+
+        if (!Array.isArray(journalIds) || journalIds.length === 0) {
+            return res.json({ favorites: {} });
+        }
+
+        const favorites = await Favorite.findAll({
+            where: { userId: req.user.id, journalId: journalIds },
+            attributes: ['journalId']
+        });
+
+        const favoriteSet = new Set(favorites.map(f => f.journalId));
+        const result = {};
+        journalIds.forEach(id => { result[id] = favoriteSet.has(id); });
+
+        res.json({ favorites: result });
+    } catch (error) {
+        console.error('Error batch checking favorites:', error);
+        res.status(500).json({ message: '批量检查收藏状态失败' });
     }
 };
 
@@ -128,9 +162,37 @@ const getUserFavorites = async (req, res) => {
     }
 };
 
+// Helper: recalculate journal scores after favorite change
+async function updateJournalScoresOnFavorite(journalId) {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
+
+  const [recentCommentCount, recentFavoriteCount, totalFavoriteCount, cache, journal] = await Promise.all([
+    Comment.count({ where: { journalId, parentId: null, isDeleted: false, createdAt: { [Op.gte]: sevenDaysAgo } } }),
+    Favorite.count({ where: { journalId, createdAt: { [Op.gte]: sevenDaysAgo } } }),
+    Favorite.count({ where: { journalId } }),
+    JournalRatingCache.findByPk(journalId),
+    Journal.findByPk(journalId, { attributes: ['impactFactor'] })
+  ]);
+
+  const rating = cache ? cache.rating : 0;
+  const ratingCount = cache ? cache.ratingCount : 0;
+  const impactFactor = journal ? journal.impactFactor : null;
+
+  const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, rating);
+  const allTimeScore = calculateJournalAllTimeScore(ratingCount, totalFavoriteCount, rating, impactFactor);
+
+  await JournalRatingCache.upsert({
+    journalId,
+    hotScore,
+    allTimeScore,
+    favoriteCount: totalFavoriteCount
+  });
+}
+
 module.exports = {
     addFavorite,
     removeFavorite,
     checkFavorite,
+    batchCheckFavorites,
     getUserFavorites
 };
