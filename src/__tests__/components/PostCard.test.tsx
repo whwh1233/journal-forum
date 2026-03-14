@@ -267,4 +267,26 @@ describe('PostCard', () => {
     expect(screen.getByText('99999')).toBeInTheDocument();
     expect(screen.getByText('9999')).toBeInTheDocument();
   });
+
+  it('strips markdown syntax from content preview', () => {
+    const postWithMarkdown: Post = {
+      ...mockPost,
+      // Supply fields that mockPost omits (required by Post interface):
+      userName: 'Test User',
+      isPinned: false,
+      isDeleted: false,
+      status: 'published' as const,
+      content: '## 标题\n\n这是**粗体**和*斜体*内容，还有`代码`和> 引用\n\n- 列表项\n\n[链接](https://example.com)',
+    };
+    render(
+      <BrowserRouter>
+        <PostCard post={postWithMarkdown} />
+      </BrowserRouter>
+    );
+    // Clean text should appear (markdown stripped)
+    expect(screen.getByText(/标题/)).toBeInTheDocument();
+    // Raw markdown symbols must not appear in preview
+    expect(screen.queryByText(/\*\*/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/##/)).not.toBeInTheDocument();
+  });
 });

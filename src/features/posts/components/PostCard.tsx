@@ -9,6 +9,21 @@ interface PostCardProps {
   compact?: boolean;
 }
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s+/g, '')             // headings
+    .replace(/\*\*(.+?)\*\*/gs, '$1')      // bold
+    .replace(/\*(.+?)\*/gs, '$1')          // italic
+    .replace(/`{1,3}[\s\S]*?`{1,3}/g, '') // inline/block code
+    .replace(/^>\s+/gm, '')                // blockquote
+    .replace(/^[-*+]\s+/gm, '')            // unordered list
+    .replace(/^\d+\.\s+/gm, '')            // ordered list
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')    // links (keep text)
+    .replace(/!\[.*?\]\(.+?\)/g, '')        // images (remove)
+    .replace(/\n+/g, ' ')                  // newlines → space
+    .trim();
+}
+
 const PostCard: React.FC<PostCardProps> = ({ post, onClick, compact = false }) => {
   const handleClick = () => {
     if (onClick) {
@@ -96,7 +111,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onClick, compact = false }) =
       {/* Content Summary (not in compact mode) */}
       {!compact && (
         <p className="post-card-content">
-          {truncateContent(post.content, 150)}
+          {truncateContent(stripMarkdown(post.content), 150)}
         </p>
       )}
 
