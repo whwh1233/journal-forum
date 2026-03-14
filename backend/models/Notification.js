@@ -58,10 +58,10 @@ const Notification = sequelize.define('Notification', {
   timestamps: true,
   indexes: [
     {
-      fields: ['recipientId', 'isRead', 'createdAt']
+      fields: ['recipient_id', 'is_read', 'created_at']
     },
     {
-      fields: ['recipientId', 'isRead']
+      fields: ['recipient_id', 'is_read']
     }
   ]
 });
