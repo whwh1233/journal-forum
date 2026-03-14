@@ -23,7 +23,8 @@ const Manuscript = require('./Manuscript');
 const Submission = require('./Submission');
 const SubmissionStatusHistory = require('./SubmissionStatusHistory');
 const Announcement = require('./Announcement');
-const UserAnnouncementRead = require('./UserAnnouncementRead');// ==================== 关联定义 ====================
+const UserAnnouncementRead = require('./UserAnnouncementRead');
+const Notification = require('./Notification');// ==================== 关联定义 ====================
 
 // ==================== 关联定义 ====================
 
@@ -169,6 +170,12 @@ Submission.belongsTo(Journal, { foreignKey: 'journalId', as: 'journal' });
 Submission.hasMany(SubmissionStatusHistory, { foreignKey: 'submissionId', as: 'statusHistory', onDelete: 'CASCADE' });
 SubmissionStatusHistory.belongsTo(Submission, { foreignKey: 'submissionId', as: 'submission' });
 
+// Notification 关联
+User.hasMany(Notification, { foreignKey: 'recipientId', as: 'receivedNotifications' });
+User.hasMany(Notification, { foreignKey: 'senderId', as: 'sentNotifications' });
+Notification.belongsTo(User, { foreignKey: 'recipientId', as: 'recipient' });
+Notification.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
+
 // ==================== 同步函数 ====================
 
 /**
@@ -214,5 +221,6 @@ module.exports = {
     SubmissionStatusHistory,
     Announcement,
     UserAnnouncementRead,
+    Notification,
     syncDatabase
 };
