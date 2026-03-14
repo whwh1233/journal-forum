@@ -57,6 +57,7 @@ export interface CreatePostData {
   category: PostCategory;
   tags: string[];
   journalId?: number;
+  status?: PostStatus;
 }
 
 export interface UpdatePostData {
