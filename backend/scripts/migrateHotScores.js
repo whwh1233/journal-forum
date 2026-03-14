@@ -16,9 +16,40 @@ const {
 
 async function migrate() {
   await connectDB();
-  await syncDatabase({ alter: true });
 
-  console.log('=== Hot Score Migration ===\n');
+  // Add new columns if they don't exist (avoid syncDatabase alter which can fail on FK constraints)
+  const { sequelize } = require('../config/database');
+  const addColumnIfNotExists = async (table, column, type) => {
+    try {
+      await sequelize.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${type}`);
+      console.log(`Added column ${table}.${column}`);
+    } catch (e) {
+      if (e.original && e.original.code === 'ER_DUP_FIELDNAME') {
+        console.log(`Column ${table}.${column} already exists`);
+      } else {
+        throw e;
+      }
+    }
+  };
+
+  await addColumnIfNotExists('online_posts', 'all_time_score', 'DECIMAL(10,2) DEFAULT 0');
+  await addColumnIfNotExists('journal_rating_cache', 'hot_score', 'DECIMAL(10,2) DEFAULT 0');
+  await addColumnIfNotExists('journal_rating_cache', 'all_time_score', 'DECIMAL(10,2) DEFAULT 0');
+  await addColumnIfNotExists('journal_rating_cache', 'favorite_count', 'INT DEFAULT 0');
+
+  // Add index if not exists
+  try {
+    await sequelize.query('CREATE INDEX `online_posts_all_time_score` ON `online_posts` (`all_time_score`)');
+    console.log('Added index on online_posts.all_time_score');
+  } catch (e) {
+    if (e.original && e.original.code === 'ER_DUP_KEYNAME') {
+      console.log('Index online_posts_all_time_score already exists');
+    } else {
+      throw e;
+    }
+  }
+
+  console.log('\n=== Hot Score Migration ===\n');
 
   // 1. Update all posts
   const posts = await Post.findAll({ where: { isDeleted: false, status: 'published' } });
