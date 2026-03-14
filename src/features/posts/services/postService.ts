@@ -26,6 +26,27 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
+// 归一化 tags：数据库 JSON 列可能返回数组或字符串，统一为 string[]
+const normalizeTags = (tags: unknown): string[] => {
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === 'string' && tags.length > 0) return [tags];
+  return [];
+};
+
+const normalizePost = (post: Post): Post => {
+  const normalized = { ...post };
+
+  // If tags_assoc exists (new relational format), derive tags from it for backward compat
+  if (normalized.tags_assoc && Array.isArray(normalized.tags_assoc)) {
+    normalized.tags = normalized.tags_assoc.map(t => t.name);
+  } else {
+    // Fall back to old JSON-column tags normalization
+    normalized.tags = normalizeTags(post.tags);
+  }
+
+  return normalized;
+};
+
 export const postService = {
   // 获取帖子列表
   getPosts: async (filters?: PostFilters): Promise<{ posts: Post[]; pagination: PostPagination }> => {
@@ -41,7 +62,9 @@ export const postService = {
     const response = await fetch(`${API_URL}/api/posts?${params}`, {
       headers: getAuthHeader()
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    data.posts = data.posts.map(normalizePost);
+    return data;
   },
 
   // 获取帖子详情
@@ -49,7 +72,8 @@ export const postService = {
     const response = await fetch(`${API_URL}/api/posts/${id}`, {
       headers: getAuthHeader()
     });
-    return handleResponse(response);
+    const post = await handleResponse(response);
+    return normalizePost(post);
   },
 
   // 创建帖子
@@ -62,7 +86,8 @@ export const postService = {
       },
       body: JSON.stringify(data)
     });
-    return handleResponse(response);
+    const post = await handleResponse(response);
+    return normalizePost(post);
   },
 
   // 更新帖子
@@ -75,7 +100,8 @@ export const postService = {
       },
       body: JSON.stringify(data)
     });
-    return handleResponse(response);
+    const post = await handleResponse(response);
+    return normalizePost(post);
   },
 
   // 删除帖子
@@ -178,7 +204,9 @@ export const postService = {
     const response = await fetch(`${API_URL}/api/posts/my/posts?page=${page}&limit=${limit}`, {
       headers: getAuthHeader()
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    data.posts = data.posts.map(normalizePost);
+    return data;
   },
 
   // 获取我收藏的帖子
@@ -186,7 +214,9 @@ export const postService = {
     const response = await fetch(`${API_URL}/api/posts/my/favorites?page=${page}&limit=${limit}`, {
       headers: getAuthHeader()
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    data.posts = data.posts.map(normalizePost);
+    return data;
   },
 
   // 获取我关注的帖子
@@ -194,6 +224,8 @@ export const postService = {
     const response = await fetch(`${API_URL}/api/posts/my/follows?page=${page}&limit=${limit}`, {
       headers: getAuthHeader()
     });
-    return handleResponse(response);
+    const data = await handleResponse(response);
+    data.posts = data.posts.map(normalizePost);
+    return data;
   }
 };
