@@ -220,6 +220,13 @@
   border-color: var(--color-accent);
 }
 
+.post-card-tag--pending {
+  border: 1px dashed var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
 .post-card-tag--more {
   background: rgba(59, 130, 246, 0.1);
   color: var(--color-accent);

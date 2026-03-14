@@ -15,7 +15,7 @@ import {
   ExternalLink,
   AlertCircle
 } from 'lucide-react';
-import { Post, CATEGORY_LABELS } from '../types/post';
+import { Post, CATEGORY_LABELS, TagInfo } from '../types/post';
 import { postService } from '../services/postService';
 import './PostDetail.css';
 import 'highlight.js/styles/github-dark.css'; // Code syntax highlighting theme
@@ -185,22 +185,44 @@ const PostDetail: React.FC<PostDetailProps> = ({
           </div>
 
           <div className="post-detail-meta-right">
-            <span className={`post-detail-category ${getCategoryColor(post.category)}`}>
-              {CATEGORY_LABELS[post.category]}
+            <span className={`post-detail-category ${getCategoryColor(post.postCategory?.slug || post.category)}`}>
+              {post.postCategory?.name || CATEGORY_LABELS[post.category]}
             </span>
           </div>
         </div>
 
         {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="post-detail-tags">
-            {post.tags.map((tag, index) => (
-              <span key={index} className="post-detail-tag">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
+        {(() => {
+          const tagsAssoc = post.tags_assoc;
+          if (tagsAssoc && tagsAssoc.length > 0) {
+            return (
+              <div className="post-detail-tags">
+                {tagsAssoc.map((tag: TagInfo) => (
+                  <span
+                    key={tag.id}
+                    className={`post-detail-tag ${tag.status === 'pending' ? 'post-detail-tag--pending' : ''}`}
+                    title={tag.status === 'pending' ? '审核中' : undefined}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            );
+          }
+          // Fallback to old string tags
+          if (post.tags && post.tags.length > 0) {
+            return (
+              <div className="post-detail-tags">
+                {post.tags.map((tag, index) => (
+                  <span key={index} className="post-detail-tag">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* Stats */}
         <div className="post-detail-stats">

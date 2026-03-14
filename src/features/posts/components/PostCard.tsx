@@ -1,6 +1,6 @@
 import React from 'react';
 import { Eye, Heart, MessageCircle, Calendar, User } from 'lucide-react';
-import { Post, CATEGORY_LABELS } from '../types/post';
+import { Post, CATEGORY_LABELS, TagInfo } from '../types/post';
 import './PostCard.css';
 
 interface PostCardProps {
@@ -98,8 +98,8 @@ const PostCard: React.FC<PostCardProps> = ({ post, onClick, compact = false }) =
           )}
           <span className="post-author-name">{post.userName}</span>
         </div>
-        <span className={`post-category-badge ${getCategoryColor(post.category)}`}>
-          {CATEGORY_LABELS[post.category]}
+        <span className={`post-category-badge ${getCategoryColor(post.postCategory?.slug || post.category)}`}>
+          {post.postCategory?.name || CATEGORY_LABELS[post.category]}
         </span>
       </div>
 
@@ -116,20 +116,49 @@ const PostCard: React.FC<PostCardProps> = ({ post, onClick, compact = false }) =
       )}
 
       {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
-        <div className="post-card-tags">
-          {post.tags.slice(0, compact ? 2 : 4).map((tag, index) => (
-            <span key={index} className="post-card-tag">
-              {tag}
-            </span>
-          ))}
-          {post.tags.length > (compact ? 2 : 4) && (
-            <span className="post-card-tag post-card-tag--more">
-              +{post.tags.length - (compact ? 2 : 4)}
-            </span>
-          )}
-        </div>
-      )}
+      {(() => {
+        const tagsAssoc = post.tags_assoc;
+        if (tagsAssoc && tagsAssoc.length > 0) {
+          const maxShow = compact ? 2 : 4;
+          return (
+            <div className="post-card-tags">
+              {tagsAssoc.slice(0, maxShow).map((tag: TagInfo) => (
+                <span
+                  key={tag.id}
+                  className={`post-card-tag ${tag.status === 'pending' ? 'post-card-tag--pending' : ''}`}
+                  title={tag.status === 'pending' ? '审核中' : undefined}
+                >
+                  {tag.name}
+                </span>
+              ))}
+              {tagsAssoc.length > maxShow && (
+                <span className="post-card-tag post-card-tag--more">
+                  +{tagsAssoc.length - maxShow}
+                </span>
+              )}
+            </div>
+          );
+        }
+        // Fallback to old string tags
+        if (post.tags && post.tags.length > 0) {
+          const maxShow = compact ? 2 : 4;
+          return (
+            <div className="post-card-tags">
+              {post.tags.slice(0, maxShow).map((tag, index) => (
+                <span key={index} className="post-card-tag">
+                  {tag}
+                </span>
+              ))}
+              {post.tags.length > maxShow && (
+                <span className="post-card-tag post-card-tag--more">
+                  +{post.tags.length - maxShow}
+                </span>
+              )}
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       {/* Footer: Stats + Time */}
       <div className="post-card-footer">
