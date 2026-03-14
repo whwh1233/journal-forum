@@ -1,5 +1,6 @@
 const { Follow, User } = require('../models');
 const badgeService = require('../services/badgeService');
+const notificationService = require('../services/notificationService');
 
 // 关注用户
 const followUser = async (req, res) => {
@@ -27,6 +28,23 @@ const followUser = async (req, res) => {
             followerId: req.user.id,
             followingId
         });
+
+        // Notify: new_follower
+        try {
+            await notificationService.create({
+                recipientId: followingId,
+                senderId: req.user.id,
+                type: 'new_follower',
+                entityType: null,
+                entityId: null,
+                content: {
+                    title: `${req.user.name} 关注了你`,
+                    body: ''
+                }
+            });
+        } catch (err) {
+            console.error('Notification (new_follower) failed:', err.message);
+        }
 
         // 检查被关注者的粉丝徽章
         let targetUserNewBadges = [];
