@@ -17,6 +17,7 @@ const databaseRoutes = require('./routes/databaseRoutes');
 const postRoutes = require('./routes/postRoutes');
 const submissionRoutes = require('./routes/submissionRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 const deployRoutes = require('./routes/deployRoutes');
 
 // 导入中间件
@@ -126,6 +127,7 @@ app.use('/api/database', databaseRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/deploy', deployRoutes);
 
 // 404处理
