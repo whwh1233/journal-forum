@@ -7,6 +7,7 @@ import FollowButton from '../../follow/components/FollowButton';
 import { BadgeList } from '../../badges';
 import { postService } from '../services/postService';
 import type { PostComment } from '../types/post';
+import { MarkdownContent } from '../../../components/MarkdownEditor';
 import './PostComment.css';
 
 interface PostCommentItemProps {
@@ -107,9 +108,11 @@ const PostCommentItem: React.FC<PostCommentItemProps> = ({
       </div>
 
       <div className="post-comment-content">
-        <p className={comment.isDeleted ? 'post-comment-deleted' : ''}>
-          {comment.content}
-        </p>
+        {comment.isDeleted ? (
+          <p className="post-comment-deleted">{comment.content}</p>
+        ) : (
+          <MarkdownContent content={comment.content} />
+        )}
       </div>
 
       {!comment.isDeleted && (
