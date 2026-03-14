@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Filter, X, TrendingUp, Users, Tag } from 'lucide-react';
+import { PlusCircle, Filter, X, TrendingUp, Users, Tag, Search } from 'lucide-react';
 import PostList from '../components/PostList';
 import { postService } from '../services/postService';
 import { Post, PostFilters, PostPagination, PostCategory, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
@@ -136,6 +136,35 @@ const CommunityPage: React.FC = () => {
           </div>
 
           <div className="community-topbar-right">
+            {/* Search — moved from sidebar */}
+            <div className="community-search-bar">
+              <Search size={16} className="community-search-icon" />
+              <input
+                type="text"
+                className="community-search-input"
+                placeholder="搜索帖子..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+            </div>
+
+            {/* Active tag badge — only shown when a tag filter is active */}
+            {filters.tag && (
+              <div className="community-active-tag">
+                <Tag size={16} />
+                {/* size=16: --text-xs (12px) × 1.25 = 15 → round up to even = 16, per design system */}
+                <span>{filters.tag}</span>
+                <button
+                  className="community-active-tag__clear"
+                  onClick={() => handleFilterChange('tag', undefined)}
+                  aria-label="清除标签筛选"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            {/* Sort select — position unchanged, already in topbar */}
             <select
               className="community-sort-select"
               value={filters.sortBy}
@@ -148,8 +177,10 @@ const CommunityPage: React.FC = () => {
               ))}
             </select>
 
+            {/* Filter toggle — mobile only (kept for mobile sidebar) */}
             <button className="community-filter-toggle" onClick={() => setShowFilterDrawer(!showFilterDrawer)}>
-              <Filter size={20} />
+              <Filter size={18} />
+              {/* size=18: --text-sm (14px) × 1.25 = 17.5, rounded up to even = 18, per design system */}
               <span>筛选</span>
             </button>
 
@@ -193,16 +224,6 @@ const CommunityPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="community-filter-section">
-              <h4 className="community-filter-title">搜索</h4>
-              <input
-                type="text"
-                className="community-search-input"
-                placeholder="搜索帖子标题或内容..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </div>
           </aside>
 
           {/* Main Content */}
