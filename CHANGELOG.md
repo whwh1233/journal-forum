@@ -2,6 +2,96 @@
 
 投哪儿 (pubWhere) 版本更新日志
 
+### [0.1.3](https://github.com/whwh1233/journal-forum/compare/v0.1.2...v0.1.3) (2026-03-14)
+
+
+### 文档
+
+* add hot ranking implementation plan ([eaec611](https://github.com/whwh1233/journal-forum/commit/eaec611dbe8499023b800de0a475bb978d485c9e))
+* add hot ranking system design spec ([3ae50a1](https://github.com/whwh1233/journal-forum/commit/3ae50a19b3c36c5e2bfe23334de27e627277830d))
+* add image upload feature design spec ([d432436](https://github.com/whwh1233/journal-forum/commit/d432436f748dc02c67772d6a4eb1c99b6436a287))
+* add image upload implementation plan ([d4967be](https://github.com/whwh1233/journal-forum/commit/d4967bedf3cd621497d64c8d54e423e3ed57c13d))
+* add notification system design spec ([a9190d1](https://github.com/whwh1233/journal-forum/commit/a9190d1054bcf79a661b07e5b32b6cb6b169e51e))
+* add notification system implementation plan ([b82099c](https://github.com/whwh1233/journal-forum/commit/b82099c2efe9727a54d64c0c4989d71445cbb2be))
+* add post tag and category system design spec ([4ac0da8](https://github.com/whwh1233/journal-forum/commit/4ac0da801724d15399d9efb3f4ba16489cddb6df))
+* add post tag and category system implementation plan ([043f035](https://github.com/whwh1233/journal-forum/commit/043f035ee9fd2b1a128c8939702c6e8fbc5b6c20))
+* add seed data generation design spec ([600c75b](https://github.com/whwh1233/journal-forum/commit/600c75beeaacc0363e702ec866959e93b38cb74a))
+* add seed data implementation plan ([cf87210](https://github.com/whwh1233/journal-forum/commit/cf87210481b2be457d5630cfb8195b10a2ba4276))
+* address spec review feedback for hot ranking design ([c239246](https://github.com/whwh1233/journal-forum/commit/c239246f93325a6f5148658bf9dc6aa11d3e1673))
+* fix spec review issues in post tag/category design ([937bbed](https://github.com/whwh1233/journal-forum/commit/937bbedfbfd048df85cd7f287624c223f223293c))
+* update image upload spec with review feedback ([dfae039](https://github.com/whwh1233/journal-forum/commit/dfae039edda680ac1c61666bad8d56b3db43d8f0))
+
+
+### 重构
+
+* **posts:** replace PostForm editor with shared MarkdownEditor ([f9fd81e](https://github.com/whwh1233/journal-forum/commit/f9fd81e6fa0022a868b9551f8606f18f1426dc3b))
+
+
+### 测试
+
+* update SearchAndFilter mock with hotSortMode fields ([b40638b](https://github.com/whwh1233/journal-forum/commit/b40638bbd38448333745ddb5dc0ffc4afaf2678d))
+
+
+### 新功能
+
+* **admin:** add tag and post-category management panels ([674ff74](https://github.com/whwh1233/journal-forum/commit/674ff74b5d2fdd9f03c4b32b0b24945772565c85))
+* **api:** add tag and post-category public/admin endpoints ([15e395c](https://github.com/whwh1233/journal-forum/commit/15e395cb71895bfb679f99e9219a8d1666cd6f08))
+* **comments:** render comment content as Markdown ([00c5db0](https://github.com/whwh1233/journal-forum/commit/00c5db0849243e83537b620a52e8caa1d4334458))
+* **comments:** upgrade CommentForm with MarkdownEditor ([ab47547](https://github.com/whwh1233/journal-forum/commit/ab47547f33b2e8b4435f1bcd89709685cd250428))
+* **context:** adapt PostContext and postService to new tag/category types ([eeb4f87](https://github.com/whwh1233/journal-forum/commit/eeb4f87287ce63f535042742e15883ea75cff9cd))
+* **editor:** add MarkdownContent component with lightbox ([a535e20](https://github.com/whwh1233/journal-forum/commit/a535e2056680e3690af8fca1e2ac0cd919835f8b))
+* **editor:** add shared MarkdownEditor component with image upload ([cae6800](https://github.com/whwh1233/journal-forum/commit/cae68001bbcee05412a2736e2f8c22da411d8a08))
+* **frontend:** add tag/category types and service clients ([7fba134](https://github.com/whwh1233/journal-forum/commit/7fba13481b049ef6abefe980da50cc40c45b189b))
+* **hot-ranking:** add allTime sort and isPinned ordering to posts API ([381a807](https://github.com/whwh1233/journal-forum/commit/381a807b3c9d05e6bc0b8dad2b4a988000473d66))
+* **hot-ranking:** add allTime sort option to post types ([120acf7](https://github.com/whwh1233/journal-forum/commit/120acf7cd5d7fdcda622ceee7f50d14d821f6f1a))
+* **hot-ranking:** add allTimeScore field to Post model ([2825dbb](https://github.com/whwh1233/journal-forum/commit/2825dbbb2016818c819219b3edcdd52ab6a5c506))
+* **hot-ranking:** add hot score utility functions with tests ([246ba99](https://github.com/whwh1233/journal-forum/commit/246ba99369b7eb2b564584e24483db315ec48aed))
+* **hot-ranking:** add hot/allTime sort buttons to journal search UI ([3287911](https://github.com/whwh1233/journal-forum/commit/3287911d998f2709d14745494c5e1f759bab394d))
+* **hot-ranking:** add hot/allTime sort to journals API ([b230495](https://github.com/whwh1233/journal-forum/commit/b230495a2695396c366332138b34daec0cb4c7f3))
+* **hot-ranking:** add hotScore, allTimeScore, favoriteCount to JournalRatingCache ([f361992](https://github.com/whwh1233/journal-forum/commit/f3619921eb232c5ea10e7735d18ea1634b4f0896))
+* **hot-ranking:** add hourly cron for post decay and journal score updates ([62f4645](https://github.com/whwh1233/journal-forum/commit/62f4645bcad4dcbf7f14533464004aef9e73efa1))
+* **hot-ranking:** add idempotent data migration script ([dcf694b](https://github.com/whwh1233/journal-forum/commit/dcf694b0077d956714e10c7703649a5206dfd29d))
+* **hot-ranking:** integrate score updates into journal engagement controllers ([1139e16](https://github.com/whwh1233/journal-forum/commit/1139e165499a5a0cf52d8620a9f9616149054cee))
+* **hot-ranking:** integrate score updates into post engagement controllers ([abd8670](https://github.com/whwh1233/journal-forum/commit/abd86709b283567122a9d3fa2fa374b4a69760d7))
+* **models:** add PostCategory, Tag, PostTagMap, SystemConfig models ([4c5b397](https://github.com/whwh1233/journal-forum/commit/4c5b3978e8008bb14c68b0e873a35ba9097a8e87))
+* **notification:** add badge_earned trigger ([646243a](https://github.com/whwh1233/journal-forum/commit/646243a5ac51466c09a0022009e26e4b36b60452))
+* **notification:** add comment_reply, journal_new_comment, comment_deleted triggers ([7fd211c](https://github.com/whwh1233/journal-forum/commit/7fd211cc9cba6497961202a64d8febad1f0e3e43))
+* **notification:** add frontend notification API service ([90aac11](https://github.com/whwh1233/journal-forum/commit/90aac110f72b0d37a0f3770c4f6d6518d1a3e731))
+* **notification:** add frontend TypeScript types ([5a8778f](https://github.com/whwh1233/journal-forum/commit/5a8778f5d808f9441a3f287867ceabdeac38f3ab))
+* **notification:** add like and follow_new_content triggers ([fb71f3d](https://github.com/whwh1233/journal-forum/commit/fb71f3dea1bd5e967f92629945b0f4b9011377b1))
+* **notification:** add new_follower trigger ([c7570dd](https://github.com/whwh1233/journal-forum/commit/c7570dd4237281200770524ac328e79e78f66255))
+* **notification:** add Notification model with associations ([dd6cef4](https://github.com/whwh1233/journal-forum/commit/dd6cef496ee5ab92cbb92cbaaf18c4b23f36c31b))
+* **notification:** add notification routes and mount in server ([307b98d](https://github.com/whwh1233/journal-forum/commit/307b98deeda049aa1c18e5392ac417e3e399fa3d))
+* **notification:** add NotificationContext with 60s polling ([b598eac](https://github.com/whwh1233/journal-forum/commit/b598eacd70d6d2fc23e0762688b6c7265eeec151))
+* **notification:** add notificationController with 5 endpoints ([b42fa99](https://github.com/whwh1233/journal-forum/commit/b42fa99a98081ee6156dc11a7a1390cc0c4dfbfa))
+* **notification:** add NotificationItem component ([1d127bc](https://github.com/whwh1233/journal-forum/commit/1d127bc1de9c41779917afd2b85411f39e549f66))
+* **notification:** add NotificationModal component with detail view and entity link ([8fabde1](https://github.com/whwh1233/journal-forum/commit/8fabde1794f916486b36521a0cc53ddfdbdb98ee))
+* **notification:** add notificationService with create and createBulk ([36e3277](https://github.com/whwh1233/journal-forum/commit/36e3277284167f1ae628dacd27b30e3e21feb411))
+* **notification:** add post_comment and post_comment_reply triggers ([635646f](https://github.com/whwh1233/journal-forum/commit/635646fdc341663e74954f7e634068f19fe98ff7))
+* **notification:** add submission_status trigger ([3d2bb11](https://github.com/whwh1233/journal-forum/commit/3d2bb118f341225f483b333c6c0369de454684d7))
+* **notification:** refactor AnnouncementBell to tabbed NotificationBell ([33af8b6](https://github.com/whwh1233/journal-forum/commit/33af8b601b586506b6f8b41ce49233c22b96968d))
+* **posts:** adapt postController to categoryId and Tag associations ([b625ff5](https://github.com/whwh1233/journal-forum/commit/b625ff53aa224608e8dfd222c1cc2446474454eb))
+* **posts:** render post comment content as Markdown ([d7a50f3](https://github.com/whwh1233/journal-forum/commit/d7a50f3bb77c60eeb265e0aadd7911452ef113c4))
+* **posts:** upgrade PostCommentForm with MarkdownEditor ([29257eb](https://github.com/whwh1233/journal-forum/commit/29257ebc41bb353d13aa264f742c81d64eb29051))
+* **seed:** add seed data generation system for dev environment ([dbf0ed3](https://github.com/whwh1233/journal-forum/commit/dbf0ed32ae4d4f612d6030f0e682f0efd86ca4b2))
+* **ui:** adapt CommunityPage to dynamic categories and hot tags API ([02a59fe](https://github.com/whwh1233/journal-forum/commit/02a59fe226dc1efdadec353c7e5320b4c9068e5e))
+* **ui:** adapt PostCard/PostDetail to Tag objects ([7f537da](https://github.com/whwh1233/journal-forum/commit/7f537daf926565e4431fcd75ebff7300361e9c30))
+* **ui:** adapt PostForm to dynamic categories and TagInput ([cf874ec](https://github.com/whwh1233/journal-forum/commit/cf874ec06c88b964f6e19131f1bc1504d9729dd9))
+* **ui:** add TagInput component with autocomplete and pending state ([e3636f0](https://github.com/whwh1233/journal-forum/commit/e3636f0af7c921855d0c48ff4cf34a5aa88aa304))
+* **upload:** add image upload API with rate limiting ([0b5c692](https://github.com/whwh1233/journal-forum/commit/0b5c692c113153dd9a5e1ff9c5227b73cda968ec))
+* **upload:** add storage service abstraction layer ([9762ff3](https://github.com/whwh1233/journal-forum/commit/9762ff3ba704706cdaf215e1b027819bc8958958))
+* **upload:** install rehype-sanitize and add frontend upload service ([a7f71e2](https://github.com/whwh1233/journal-forum/commit/a7f71e28664ef1f0ce35e5322583acd6245de901))
+
+
+### 修复
+
+* **hot-ranking:** address code review issues ([12e9f09](https://github.com/whwh1233/journal-forum/commit/12e9f0947ee759ab7d15441a00793455705d4fd4))
+* **hot-ranking:** migration covers favorited journals and filters invalid journal_ids ([8c7b825](https://github.com/whwh1233/journal-forum/commit/8c7b825ec525828e8f23817f743a8b49acfe0862))
+* **hot-ranking:** use manual ALTER TABLE in migration to avoid FK constraint issues ([677fb32](https://github.com/whwh1233/journal-forum/commit/677fb3210a7c540fa71eaf736909fb1555404abe))
+* **migration:** sync only new tables to avoid pre-existing FK constraint issues ([a35e1aa](https://github.com/whwh1233/journal-forum/commit/a35e1aab8582c0ec853b73cbd61108630d2b57e4))
+* unify dev/test database and rewrite integration tests ([0e2cc02](https://github.com/whwh1233/journal-forum/commit/0e2cc02b45473df8d2947b17b90f3ecada387028))
+* **upload:** bypass Vite proxy for image uploads ([50823db](https://github.com/whwh1233/journal-forum/commit/50823dbff1343090b0e56cae6318f5c710b46cb4))
+
 ### [0.1.2](https://github.com/whwh1233/journal-forum/compare/v0.1.1...v0.1.2) (2026-03-14)
 
 ### 0.1.1 (2026-03-14)
