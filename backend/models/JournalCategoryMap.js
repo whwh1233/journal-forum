@@ -2,19 +2,16 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const JournalCategoryMap = sequelize.define('JournalCategoryMap', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
   journalId: {
     type: DataTypes.STRING(50),
     field: 'journal_id',
+    primaryKey: true,
     allowNull: false
   },
   categoryId: {
     type: DataTypes.INTEGER,
     field: 'category_id',
+    primaryKey: true,
     allowNull: false
   }
 }, {

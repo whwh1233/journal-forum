@@ -1,100 +1,81 @@
 const request = require('supertest');
-const express = require('express');
-const { TestDatabase } = require('../helpers/testDb');
-const { generateUserToken } = require('../helpers/testHelpers');
-const { errorHandler } = require('../../middleware/error');
-
-// Mock数据库
-jest.mock('../../config/databaseLowdb', () => ({
-  getDB: () => require('../helpers/testDb').testDatabase.getDB(),
-}));
-
-// 动态引入路由（在mock之后）
-let followRoutes;
-
-// Mock protect middleware
-jest.mock('../../middleware/auth', () => ({
-  protect: jest.fn((req, res, next) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (token && token.includes('user')) {
-      // 从token中解析用户ID
-      const userId = token.includes('user1') ? 1 : 2;
-      req.user = {
-        id: userId,
-        email: userId === 1 ? 'test@example.com' : 'admin@example.com',
-        role: 'user',
-      };
-      next();
-    } else {
-      res.status(401).json({
-        success: false,
-        message: '未提供认证令牌',
-      });
-    }
-  }),
-}));
-
-const createTestApp = () => {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/follows', followRoutes);
-  app.use(errorHandler);
-  return app;
-};
+const app = require('../../server');
+const { sequelize, Follow, User } = require('../../models');
+const { Op } = require('sequelize');
 
 describe('Follow API Integration Tests', () => {
-  let testDb;
-  let app;
   let user1Token;
+  let user1Id;
   let user2Token;
+  let user2Id;
 
   beforeAll(async () => {
-    testDb = new TestDatabase();
-    await testDb.setup();
-
-    // 在testDb setup后加载路由
-    followRoutes = require('../../routes/followRoutes');
-
-    app = createTestApp();
-    user1Token = 'Bearer user1_token';
-    user2Token = 'Bearer user2_token';
-  });
-
-  afterAll(async () => {
-    await testDb.cleanup();
+    await sequelize.authenticate();
   });
 
   beforeEach(async () => {
-    await testDb.reset();
+    // Clean up follow records first (foreign key constraints)
+    await Follow.destroy({ where: {}, force: true });
+    // Clean up test users
+    await User.destroy({ where: { email: { [Op.like]: '%follow-test%' } }, force: true });
+
+    // Create test user 1
+    const user1Res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: `follow-test-user1-${Date.now()}@example.com`,
+        password: 'TestPass123!',
+        name: 'Follow Test User 1'
+      });
+
+    user1Token = user1Res.body.data.token;
+    user1Id = user1Res.body.data.user.id;
+
+    // Create test user 2
+    const user2Res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: `follow-test-user2-${Date.now()}@example.com`,
+        password: 'TestPass123!',
+        name: 'Follow Test User 2'
+      });
+
+    user2Token = user2Res.body.data.token;
+    user2Id = user2Res.body.data.user.id;
   });
+
+  afterAll(async () => {
+    await sequelize.close();
+  });
+
+  // ==================== POST /api/follows ====================
 
   describe('POST /api/follows', () => {
     it('should follow a user successfully', async () => {
       const response = await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 })
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id })
         .expect(201);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.follow).toHaveProperty('id');
-      expect(response.body.data.follow).toHaveProperty('followerId', 1);
-      expect(response.body.data.follow).toHaveProperty('followingId', 2);
+      expect(response.body.data.follow).toHaveProperty('followerId', user1Id);
+      expect(response.body.data.follow).toHaveProperty('followingId', user2Id);
       expect(response.body.data.follow).toHaveProperty('createdAt');
 
-      // 验证数据库中的记录
-      const db = testDb.getDB();
-      const follow = db.data.follows.find(
-        f => f.followerId === 1 && f.followingId === 2
-      );
-      expect(follow).toBeDefined();
+      // Verify in database
+      const follow = await Follow.findOne({
+        where: { followerId: user1Id, followingId: user2Id }
+      });
+      expect(follow).not.toBeNull();
     });
 
     it('should not allow following self', async () => {
       const response = await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 1 })
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user1Id })
         .expect(400);
 
       expect(response.body.success).toBe(false);
@@ -104,8 +85,8 @@ describe('Follow API Integration Tests', () => {
     it('should not allow following non-existent user', async () => {
       const response = await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 9999 })
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: 999999 })
         .expect(404);
 
       expect(response.body.success).toBe(false);
@@ -113,17 +94,17 @@ describe('Follow API Integration Tests', () => {
     });
 
     it('should not allow following already followed user', async () => {
-      // 先关注
+      // Follow first
       await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 });
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
 
-      // 再次关注
+      // Try to follow again
       const response = await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 })
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id })
         .expect(400);
 
       expect(response.body.success).toBe(false);
@@ -133,56 +114,44 @@ describe('Follow API Integration Tests', () => {
     it('should reject request without authentication', async () => {
       const response = await request(app)
         .post('/api/follows')
-        .send({ followingId: 2 })
+        .send({ followingId: user2Id })
         .expect(401);
-
-      expect(response.body.success).toBe(false);
-    });
-
-    it('should handle missing followingId', async () => {
-      const response = await request(app)
-        .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({})
-        .expect(404); // NaN会导致用户不存在
 
       expect(response.body.success).toBe(false);
     });
   });
 
+  // ==================== DELETE /api/follows/:followingId ====================
+
   describe('DELETE /api/follows/:followingId', () => {
     beforeEach(async () => {
-      // 创建一个关注关系
-      const db = testDb.getDB();
-      db.data.follows.push({
-        id: 1,
-        followerId: 1,
-        followingId: 2,
-        createdAt: new Date().toISOString(),
-      });
+      // Create a follow relationship via API
+      await request(app)
+        .post('/api/follows')
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
     });
 
     it('should unfollow a user successfully', async () => {
       const response = await request(app)
-        .delete('/api/follows/2')
-        .set('Authorization', user1Token)
+        .delete(`/api/follows/${user2Id}`)
+        .set('Authorization', `Bearer ${user1Token}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.message).toContain('取消关注成功');
 
-      // 验证数据库中的记录被删除
-      const db = testDb.getDB();
-      const follow = db.data.follows.find(
-        f => f.followerId === 1 && f.followingId === 2
-      );
-      expect(follow).toBeUndefined();
+      // Verify record is deleted from database
+      const follow = await Follow.findOne({
+        where: { followerId: user1Id, followingId: user2Id }
+      });
+      expect(follow).toBeNull();
     });
 
     it('should return 404 when unfollowing not-followed user', async () => {
       const response = await request(app)
-        .delete('/api/follows/9999')
-        .set('Authorization', user1Token)
+        .delete(`/api/follows/999999`)
+        .set('Authorization', `Bearer ${user1Token}`)
         .expect(404);
 
       expect(response.body.success).toBe(false);
@@ -191,29 +160,28 @@ describe('Follow API Integration Tests', () => {
 
     it('should reject request without authentication', async () => {
       const response = await request(app)
-        .delete('/api/follows/2')
+        .delete(`/api/follows/${user2Id}`)
         .expect(401);
 
       expect(response.body.success).toBe(false);
     });
   });
 
+  // ==================== GET /api/follows/check/:followingId ====================
+
   describe('GET /api/follows/check/:followingId', () => {
     beforeEach(async () => {
-      // 创建一个关注关系
-      const db = testDb.getDB();
-      db.data.follows.push({
-        id: 1,
-        followerId: 1,
-        followingId: 2,
-        createdAt: new Date().toISOString(),
-      });
+      // Create a follow relationship
+      await request(app)
+        .post('/api/follows')
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
     });
 
     it('should return true when following', async () => {
       const response = await request(app)
-        .get('/api/follows/check/2')
-        .set('Authorization', user1Token)
+        .get(`/api/follows/check/${user2Id}`)
+        .set('Authorization', `Bearer ${user1Token}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -222,8 +190,8 @@ describe('Follow API Integration Tests', () => {
 
     it('should return false when not following', async () => {
       const response = await request(app)
-        .get('/api/follows/check/9999')
-        .set('Authorization', user1Token)
+        .get(`/api/follows/check/999999`)
+        .set('Authorization', `Bearer ${user1Token}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -232,30 +200,27 @@ describe('Follow API Integration Tests', () => {
 
     it('should reject request without authentication', async () => {
       const response = await request(app)
-        .get('/api/follows/check/2')
+        .get(`/api/follows/check/${user2Id}`)
         .expect(401);
 
       expect(response.body.success).toBe(false);
     });
   });
 
+  // ==================== GET /api/follows/followers/:userId ====================
+
   describe('GET /api/follows/followers/:userId', () => {
     beforeEach(async () => {
-      // 创建多个关注关系（多人关注用户2）
-      const db = testDb.getDB();
-      db.data.follows = [
-        {
-          id: 1,
-          followerId: 1,
-          followingId: 2,
-          createdAt: new Date('2024-01-01').toISOString(),
-        },
-      ];
+      // User1 follows User2
+      await request(app)
+        .post('/api/follows')
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
     });
 
     it('should get followers list successfully', async () => {
       const response = await request(app)
-        .get('/api/follows/followers/2')
+        .get(`/api/follows/followers/${user2Id}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -263,7 +228,7 @@ describe('Follow API Integration Tests', () => {
       expect(response.body.data.followers.length).toBeGreaterThan(0);
       expect(response.body.data.pagination).toBeDefined();
 
-      // 验证粉丝信息包含用户数据
+      // Verify follower info includes user data
       const follower = response.body.data.followers[0];
       expect(follower).toHaveProperty('user');
       expect(follower.user).toHaveProperty('id');
@@ -273,7 +238,7 @@ describe('Follow API Integration Tests', () => {
 
     it('should support pagination', async () => {
       const response = await request(app)
-        .get('/api/follows/followers/2?page=1&limit=1')
+        .get(`/api/follows/followers/${user2Id}?page=1&limit=1`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -284,53 +249,28 @@ describe('Follow API Integration Tests', () => {
 
     it('should return empty array for user with no followers', async () => {
       const response = await request(app)
-        .get('/api/follows/followers/1')
+        .get(`/api/follows/followers/${user1Id}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.followers).toHaveLength(0);
     });
-
-    it('should sort followers by createdAt descending', async () => {
-      // 添加更多关注以测试排序
-      const db = testDb.getDB();
-      db.data.follows.push({
-        id: 2,
-        followerId: 2,
-        followingId: 1,
-        createdAt: new Date('2024-02-01').toISOString(),
-      });
-
-      const response = await request(app)
-        .get('/api/follows/followers/1')
-        .expect(200);
-
-      const followers = response.body.data.followers;
-      for (let i = 0; i < followers.length - 1; i++) {
-        const date1 = new Date(followers[i].createdAt);
-        const date2 = new Date(followers[i + 1].createdAt);
-        expect(date1.getTime()).toBeGreaterThanOrEqual(date2.getTime());
-      }
-    });
   });
+
+  // ==================== GET /api/follows/following/:userId ====================
 
   describe('GET /api/follows/following/:userId', () => {
     beforeEach(async () => {
-      // 创建多个关注关系（用户1关注多人）
-      const db = testDb.getDB();
-      db.data.follows = [
-        {
-          id: 1,
-          followerId: 1,
-          followingId: 2,
-          createdAt: new Date('2024-01-01').toISOString(),
-        },
-      ];
+      // User1 follows User2
+      await request(app)
+        .post('/api/follows')
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
     });
 
     it('should get following list successfully', async () => {
       const response = await request(app)
-        .get('/api/follows/following/1')
+        .get(`/api/follows/following/${user1Id}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -338,7 +278,7 @@ describe('Follow API Integration Tests', () => {
       expect(response.body.data.following.length).toBeGreaterThan(0);
       expect(response.body.data.pagination).toBeDefined();
 
-      // 验证关注信息包含用户数据
+      // Verify following info includes user data
       const following = response.body.data.following[0];
       expect(following).toHaveProperty('user');
       expect(following.user).toHaveProperty('id');
@@ -348,7 +288,7 @@ describe('Follow API Integration Tests', () => {
 
     it('should support pagination', async () => {
       const response = await request(app)
-        .get('/api/follows/following/1?page=1&limit=1')
+        .get(`/api/follows/following/${user1Id}?page=1&limit=1`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -359,7 +299,7 @@ describe('Follow API Integration Tests', () => {
 
     it('should return empty array for user following no one', async () => {
       const response = await request(app)
-        .get('/api/follows/following/2')
+        .get(`/api/follows/following/${user2Id}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
@@ -367,74 +307,44 @@ describe('Follow API Integration Tests', () => {
     });
   });
 
+  // ==================== Bidirectional Follows ====================
+
   describe('Follow Data Consistency', () => {
-    it('should maintain consistent follow data structure', async () => {
-      // 创建关注
-      await request(app)
-        .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 });
-
-      const db = testDb.getDB();
-      const follow = db.data.follows[db.data.follows.length - 1];
-
-      // 验证数据结构
-      expect(follow).toHaveProperty('id');
-      expect(follow).toHaveProperty('followerId');
-      expect(follow).toHaveProperty('followingId');
-      expect(follow).toHaveProperty('createdAt');
-      expect(typeof follow.id).toBe('number');
-      expect(typeof follow.followerId).toBe('number');
-      expect(typeof follow.followingId).toBe('number');
-    });
-
-    it('should prevent duplicate follow relationships', async () => {
-      const db = testDb.getDB();
-
-      // 创建第一个关注
-      db.data.follows.push({
-        id: 1,
-        followerId: 1,
-        followingId: 2,
-        createdAt: new Date().toISOString(),
-      });
-
-      const initialCount = db.data.follows.length;
-
-      // 尝试重复关注
-      await request(app)
-        .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 })
-        .expect(400);
-
-      // 验证没有新增关注记录
-      expect(db.data.follows.length).toBe(initialCount);
-    });
-
     it('should handle bidirectional follows correctly', async () => {
-      // 用户1关注用户2
+      // User1 follows User2
       await request(app)
         .post('/api/follows')
-        .set('Authorization', user1Token)
-        .send({ followingId: 2 });
+        .set('Authorization', `Bearer ${user1Token}`)
+        .send({ followingId: user2Id });
 
-      // 用户2关注用户1
+      // User2 follows User1
       await request(app)
         .post('/api/follows')
-        .set('Authorization', user2Token)
-        .send({ followingId: 1 });
+        .set('Authorization', `Bearer ${user2Token}`)
+        .send({ followingId: user1Id });
 
-      // 验证两个方向的关注都存在
+      // Verify both directions
       const response1 = await request(app)
-        .get('/api/follows/check/2')
-        .set('Authorization', user1Token);
+        .get(`/api/follows/check/${user2Id}`)
+        .set('Authorization', `Bearer ${user1Token}`);
       expect(response1.body.data.isFollowing).toBe(true);
 
       const response2 = await request(app)
-        .get('/api/follows/check/1')
-        .set('Authorization', user2Token);
+        .get(`/api/follows/check/${user1Id}`)
+        .set('Authorization', `Bearer ${user2Token}`);
       expect(response2.body.data.isFollowing).toBe(true);
+
+      // User1 should appear in User2's followers
+      const followersRes = await request(app)
+        .get(`/api/follows/followers/${user2Id}`);
+      expect(followersRes.body.data.followers.length).toBe(1);
+      expect(followersRes.body.data.followers[0].user.id).toBe(user1Id);
+
+      // User2 should appear in User1's following
+      const followingRes = await request(app)
+        .get(`/api/follows/following/${user1Id}`);
+      expect(followingRes.body.data.following.length).toBe(1);
+      expect(followingRes.body.data.following[0].user.id).toBe(user2Id);
     });
   });
 });

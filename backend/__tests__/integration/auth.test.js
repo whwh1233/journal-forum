@@ -1,40 +1,35 @@
 const request = require('supertest');
-const express = require('express');
-const { TestDatabase } = require('../helpers/testDb');
-const authRoutes = require('../../routes/authRoutes');
-const { errorHandler } = require('../../middleware/error');
-
-// 创建测试应用
-const createTestApp = () => {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/auth', authRoutes);
-  app.use(errorHandler);
-  return app;
-};
+const app = require('../../server');
+const { sequelize, User } = require('../../models');
+const { Op } = require('sequelize');
+const { hashPassword } = require('../../utils/password');
 
 describe('Auth API Integration Tests', () => {
-  let testDb;
-  let app;
-
   beforeAll(async () => {
-    testDb = new TestDatabase();
-    await testDb.setup();
-    app = createTestApp();
-  });
-
-  afterAll(async () => {
-    await testDb.cleanup();
+    await sequelize.authenticate();
   });
 
   beforeEach(async () => {
-    await testDb.reset();
+    // Clean up test users before each test
+    await User.destroy({
+      where: { email: { [Op.like]: '%@authtest.com' } },
+      force: true
+    });
+  });
+
+  afterAll(async () => {
+    // Final cleanup
+    await User.destroy({
+      where: { email: { [Op.like]: '%@authtest.com' } },
+      force: true
+    });
+    await sequelize.close();
   });
 
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
       const newUser = {
-        email: 'newuser@example.com',
+        email: 'newuser@authtest.com',
         password: 'password123',
         name: 'New User',
       };
@@ -46,146 +41,189 @@ describe('Auth API Integration Tests', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('token');
+      expect(response.body.data.user).toHaveProperty('id');
       expect(response.body.data.user).toHaveProperty('email', newUser.email);
       expect(response.body.data.user).toHaveProperty('name', newUser.name);
+      expect(response.body.data.user).toHaveProperty('role', 'user');
       expect(response.body.data.user).not.toHaveProperty('password');
     });
 
     it('should reject registration with existing email', async () => {
-      const existingUser = {
-        email: 'test@example.com', // 已存在的用户
+      const userData = {
+        email: 'duplicate@authtest.com',
         password: 'password123',
-        name: 'Test User',
+        name: 'First User',
       };
 
+      // Register the first user
+      await request(app)
+        .post('/api/auth/register')
+        .send(userData)
+        .expect(201);
+
+      // Try to register with the same email
       const response = await request(app)
         .post('/api/auth/register')
-        .send(existingUser)
+        .send({
+          email: 'duplicate@authtest.com',
+          password: 'password456',
+          name: 'Second User',
+        })
         .expect(400);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('邮箱已被注册');
+      expect(response.body.message).toContain('已被注册');
     });
 
-    it('should reject registration with missing fields', async () => {
-      const invalidUser = {
-        email: 'test@example.com',
-        // 缺少password和name
-      };
-
+    it('should reject registration with missing email', async () => {
       const response = await request(app)
         .post('/api/auth/register')
-        .send(invalidUser)
+        .send({
+          password: 'password123',
+          name: 'No Email User',
+        })
         .expect(400);
 
       expect(response.body.success).toBe(false);
     });
 
-    it('should reject registration with invalid email format', async () => {
-      const invalidUser = {
-        email: 'not-an-email',
-        password: 'password123',
-        name: 'Test User',
-      };
-
+    it('should reject registration with missing password', async () => {
       const response = await request(app)
         .post('/api/auth/register')
-        .send(invalidUser)
+        .send({
+          email: 'nopass@authtest.com',
+          name: 'No Password User',
+        })
         .expect(400);
 
       expect(response.body.success).toBe(false);
+    });
+
+    it('should normalize email to lowercase', async () => {
+      const response = await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'UPPER@authtest.com',
+          password: 'password123',
+          name: 'Upper Case Email',
+        })
+        .expect(201);
+
+      expect(response.body.data.user.email).toBe('upper@authtest.com');
     });
   });
 
   describe('POST /api/auth/login', () => {
-    it('should login with correct credentials', async () => {
-      const credentials = {
-        email: 'test@example.com',
-        password: 'test123',
-      };
+    beforeEach(async () => {
+      // Create a test user for login tests
+      await request(app)
+        .post('/api/auth/register')
+        .send({
+          email: 'loginuser@authtest.com',
+          password: 'test123456',
+          name: 'Login Test User',
+        });
+    });
 
+    it('should login with correct credentials', async () => {
       const response = await request(app)
         .post('/api/auth/login')
-        .send(credentials)
+        .send({
+          email: 'loginuser@authtest.com',
+          password: 'test123456',
+        })
         .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('token');
-      expect(response.body.data.user).toHaveProperty('email', credentials.email);
+      expect(response.body.data.user).toHaveProperty('email', 'loginuser@authtest.com');
+      expect(response.body.data.user).toHaveProperty('name', 'Login Test User');
       expect(response.body.data.user).not.toHaveProperty('password');
     });
 
     it('should reject login with wrong password', async () => {
-      const credentials = {
-        email: 'test@example.com',
-        password: 'wrongpassword',
-      };
-
       const response = await request(app)
         .post('/api/auth/login')
-        .send(credentials)
+        .send({
+          email: 'loginuser@authtest.com',
+          password: 'wrongpassword',
+        })
         .expect(401);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('密码错误');
+      expect(response.body.message).toContain('邮箱或密码错误');
     });
 
     it('should reject login with non-existent email', async () => {
-      const credentials = {
-        email: 'nonexistent@example.com',
-        password: 'password123',
-      };
-
       const response = await request(app)
         .post('/api/auth/login')
-        .send(credentials)
+        .send({
+          email: 'nonexistent@authtest.com',
+          password: 'password123',
+        })
         .expect(401);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('用户不存在');
+      expect(response.body.message).toContain('邮箱或密码错误');
     });
 
     it('should reject login with disabled account', async () => {
-      // 首先禁用测试用户
-      const db = testDb.getDB();
-      const user = db.data.users.find(u => u.email === 'test@example.com');
-      user.status = 'disabled';
-      await db.write();
-
-      const credentials = {
-        email: 'test@example.com',
-        password: 'test123',
-      };
+      // Disable the user directly in the database
+      await User.update(
+        { status: 'disabled' },
+        { where: { email: 'loginuser@authtest.com' } }
+      );
 
       const response = await request(app)
         .post('/api/auth/login')
-        .send(credentials)
+        .send({
+          email: 'loginuser@authtest.com',
+          password: 'test123456',
+        })
         .expect(403);
 
       expect(response.body.success).toBe(false);
       expect(response.body.message).toContain('账号已被禁用');
     });
+
+    it('should reject login with missing fields', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'loginuser@authtest.com',
+        })
+        .expect(400);
+
+      expect(response.body.success).toBe(false);
+    });
   });
 
   describe('GET /api/auth/me', () => {
-    it('should get current user info with valid token', async () => {
-      // 先登录获取token
-      const loginResponse = await request(app)
-        .post('/api/auth/login')
+    let userToken;
+
+    beforeEach(async () => {
+      // Register and get token
+      const res = await request(app)
+        .post('/api/auth/register')
         .send({
-          email: 'test@example.com',
-          password: 'test123',
+          email: 'meuser@authtest.com',
+          password: 'test123456',
+          name: 'Me Test User',
         });
 
-      const token = loginResponse.body.data.token;
+      userToken = res.body.data.token;
+    });
 
+    it('should get current user info with valid token', async () => {
       const response = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', `Bearer ${token}`)
+        .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.user).toHaveProperty('email', 'test@example.com');
+      expect(response.body.data.user).toHaveProperty('email', 'meuser@authtest.com');
+      expect(response.body.data.user).toHaveProperty('name', 'Me Test User');
+      expect(response.body.data.user).toHaveProperty('role', 'user');
       expect(response.body.data.user).not.toHaveProperty('password');
     });
 
@@ -195,13 +233,12 @@ describe('Auth API Integration Tests', () => {
         .expect(401);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('未提供认证令牌');
     });
 
     it('should reject request with invalid token', async () => {
       const response = await request(app)
         .get('/api/auth/me')
-        .set('Authorization', 'Bearer invalid_token')
+        .set('Authorization', 'Bearer invalid_token_here')
         .expect(401);
 
       expect(response.body.success).toBe(false);

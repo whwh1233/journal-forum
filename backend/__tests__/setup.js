@@ -1,10 +1,8 @@
 // Jest全局设置文件
-require('dotenv').config({ path: '.env.test' });
+// env-setup.js (setupFiles) already loads .env and .env.test
 
-// 设置测试环境变量
-process.env.NODE_ENV = 'test';
-process.env.JWT_SECRET = 'test_jwt_secret_key';
-process.env.PORT = 3002; // 使用不同端口避免冲突
+// 使用不同端口避免冲突
+process.env.PORT = 3002;
 
 // 增加测试超时时间
 jest.setTimeout(10000);

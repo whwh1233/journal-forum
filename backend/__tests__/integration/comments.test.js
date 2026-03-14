@@ -1,273 +1,408 @@
 const request = require('supertest');
-const express = require('express');
-const { TestDatabase } = require('../helpers/testDb');
-const { generateUserToken, generateAdminToken } = require('../helpers/testHelpers');
-const commentRoutes = require('../../routes/commentRoutes');
-const { auth } = require('../../middleware/auth');
-const { errorHandler } = require('../../middleware/error');
-
-// Mock auth middleware for testing
-jest.mock('../../middleware/auth', () => ({
-  auth: jest.fn((req, res, next) => {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    if (token) {
-      // 简化的token验证
-      req.userId = 1;
-      req.userRole = 'user';
-    }
-    next();
-  }),
-}));
-
-const createTestApp = () => {
-  const app = express();
-  app.use(express.json());
-  app.use('/api/comments', commentRoutes);
-  app.use(errorHandler);
-  return app;
-};
+const app = require('../../server');
+const { sequelize, Comment, CommentLike, Journal, JournalRatingCache, User } = require('../../models');
+const { Op } = require('sequelize');
 
 describe('Comments API Integration Tests', () => {
-  let testDb;
-  let app;
   let userToken;
+  let userId;
+  let user2Token;
+  let user2Id;
+  let testJournal;
 
   beforeAll(async () => {
-    testDb = new TestDatabase();
-    await testDb.setup();
-    app = createTestApp();
-    userToken = generateUserToken(1);
-  });
-
-  afterAll(async () => {
-    await testDb.cleanup();
+    await sequelize.authenticate();
   });
 
   beforeEach(async () => {
-    await testDb.reset();
-  });
+    // Clean up in correct order (respect foreign key constraints)
+    await CommentLike.destroy({ where: {}, force: true });
+    await Comment.destroy({ where: {}, force: true });
+    await JournalRatingCache.destroy({ where: {}, force: true });
+    // Disable FK checks to clean journals safely
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    await Journal.destroy({ where: { journalId: { [Op.like]: 'test-comment-%' } }, force: true });
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    await User.destroy({ where: { email: { [Op.like]: '%@example.com' } }, force: true });
 
-  describe('POST /api/comments', () => {
-    it('should create a new comment successfully', async () => {
-      const newComment = {
-        journalId: 1,
-        content: 'This is a new test comment',
-        rating: 5,
-      };
-
-      const response = await request(app)
-        .post('/api/comments')
-        .set('Authorization', `Bearer ${userToken}`)
-        .send(newComment)
-        .expect(201);
-
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.comment).toHaveProperty('id');
-      expect(response.body.data.comment).toHaveProperty('content', newComment.content);
-      expect(response.body.data.comment).toHaveProperty('rating', newComment.rating);
-      expect(response.body.data.comment).toHaveProperty('userId', 1);
-      expect(response.body.data.comment).toHaveProperty('isDeleted', false);
+    // Create test journal (Journal uses journalId as string PK and name instead of title)
+    testJournal = await Journal.create({
+      journalId: `test-comment-${Date.now()}`,
+      name: 'Test Journal For Comments',
+      issn: '0000-0000'
     });
 
-    it('should create a reply comment successfully', async () => {
-      const replyComment = {
-        journalId: 1,
-        parentId: '1-1234567890-abc123',
-        content: 'This is a reply',
-      };
+    // Create test user 1
+    const user1Email = `comment-user1-${Date.now()}@example.com`;
+    const user1Res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: user1Email,
+        password: 'TestPass123!',
+        name: 'Comment User 1'
+      });
 
-      const response = await request(app)
+    userToken = user1Res.body.data.token;
+    userId = user1Res.body.data.user.id;
+
+    // Create test user 2
+    const user2Email = `comment-user2-${Date.now()}@example.com`;
+    const user2Res = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: user2Email,
+        password: 'TestPass123!',
+        name: 'Comment User 2'
+      });
+
+    user2Token = user2Res.body.data.token;
+    user2Id = user2Res.body.data.user.id;
+  });
+
+  afterAll(async () => {
+    await sequelize.close();
+  });
+
+  // ==================== Create Comment Tests ====================
+
+  describe('POST /api/comments', () => {
+    it('should create a top-level comment with rating successfully', async () => {
+      const res = await request(app)
         .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(replyComment)
-        .expect(201);
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Great journal with fast review process',
+          rating: 4
+        });
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.comment).toHaveProperty('parentId', replyComment.parentId);
-      expect(response.body.data.comment).not.toHaveProperty('rating'); // 回复没有评分
+      expect(res.status).toBe(201);
+      expect(res.body).toHaveProperty('id');
+      expect(res.body.content).toBe('Great journal with fast review process');
+      expect(res.body.rating).toBe(4);
+      expect(res.body.userId).toBe(userId);
+      expect(res.body.journalId).toBe(testJournal.journalId);
+      expect(res.body.isDeleted).toBe(false);
+    });
+
+    it('should create a reply comment without rating', async () => {
+      // First create a top-level comment to reply to
+      const parentRes = await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Parent comment',
+          rating: 3
+        });
+
+      const parentId = parentRes.body.id;
+
+      // Create reply
+      const res = await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${user2Token}`)
+        .send({
+          journalId: testJournal.journalId,
+          parentId,
+          content: 'I agree with your review'
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.parentId).toBe(parentId);
+      expect(res.body.content).toBe('I agree with your review');
+      expect(res.body.userId).toBe(user2Id);
     });
 
     it('should reject comment without authentication', async () => {
-      const newComment = {
-        journalId: 1,
-        content: 'This should fail',
-        rating: 5,
-      };
-
-      // 移除认证mock
-      auth.mockImplementationOnce((req, res, next) => {
-        return res.status(401).json({
-          success: false,
-          message: '未提供认证令牌',
+      const res = await request(app)
+        .post('/api/comments')
+        .send({
+          journalId: testJournal.journalId,
+          content: 'This should fail',
+          rating: 5
         });
-      });
 
-      const response = await request(app)
-        .post('/api/comments')
-        .send(newComment)
-        .expect(401);
-
-      expect(response.body.success).toBe(false);
+      expect(res.status).toBe(401);
     });
 
-    it('should reject comment with missing required fields', async () => {
-      const invalidComment = {
-        journalId: 1,
-        // 缺少content
-      };
-
-      const response = await request(app)
+    it('should reject top-level comment without rating', async () => {
+      const res = await request(app)
         .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(invalidComment)
-        .expect(400);
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Missing rating'
+        });
 
-      expect(response.body.success).toBe(false);
+      expect(res.status).toBe(400);
+      expect(res.body.message).toContain('顶级评论必须包含评分');
     });
 
-    it('should reject comment with invalid journalId', async () => {
-      const invalidComment = {
-        journalId: 9999, // 不存在的期刊
-        content: 'Test comment',
-        rating: 5,
-      };
-
-      const response = await request(app)
+    it('should reject comment for non-existent journal', async () => {
+      const res = await request(app)
         .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(invalidComment)
-        .expect(404);
+        .send({
+          journalId: 999999,
+          content: 'Journal does not exist',
+          rating: 5
+        });
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('期刊不存在');
+      expect(res.status).toBe(404);
+      expect(res.body.message).toContain('期刊不存在');
     });
 
     it('should reject rating out of range', async () => {
-      const invalidComment = {
-        journalId: 1,
-        content: 'Test comment',
-        rating: 6, // 超出1-5范围
-      };
-
-      const response = await request(app)
+      const res = await request(app)
         .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .send(invalidComment)
-        .expect(400);
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Invalid rating',
+          rating: 6
+        });
 
-      expect(response.body.success).toBe(false);
+      expect(res.status).toBe(400);
+      expect(res.body.message).toContain('评分必须在1-5之间');
+    });
+
+    it('should create comment with dimension ratings', async () => {
+      const res = await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Detailed review with dimensions',
+          dimensionRatings: {
+            reviewSpeed: 4,
+            editorAttitude: 5,
+            acceptDifficulty: 3,
+            reviewQuality: 4,
+            overallExperience: 4
+          }
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.dimensionRatings).toBeDefined();
+      expect(res.body.dimensionRatings.overallExperience).toBe(4);
+      expect(res.body.rating).toBe(4);
     });
   });
 
-  describe('GET /api/comments/:journalId', () => {
-    it('should get all comments for a journal', async () => {
-      const response = await request(app)
-        .get('/api/comments/1')
-        .expect(200);
+  // ==================== Get Comments Tests ====================
 
-      expect(response.body.success).toBe(true);
-      expect(Array.isArray(response.body.data.comments)).toBe(true);
-      expect(response.body.data.comments.length).toBeGreaterThan(0);
+  describe('GET /api/comments/journal/:journalId', () => {
+    it('should get comments for a journal', async () => {
+      // Create a comment first
+      await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'A test comment',
+          rating: 4
+        });
+
+      const res = await request(app)
+        .get(`/api/comments/journal/${testJournal.journalId}`);
+
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body[0].content).toBe('A test comment');
+      expect(res.body[0].rating).toBe(4);
     });
 
     it('should return empty array for journal without comments', async () => {
-      const response = await request(app)
-        .get('/api/comments/2')
-        .expect(200);
+      const res = await request(app)
+        .get(`/api/comments/journal/${testJournal.journalId}`);
 
-      expect(response.body.success).toBe(true);
-      expect(Array.isArray(response.body.data.comments)).toBe(true);
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
     });
 
-    it('should return 404 for non-existent journal', async () => {
-      const response = await request(app)
-        .get('/api/comments/9999')
-        .expect(404);
+    it('should return comment tree with replies', async () => {
+      // Create parent comment
+      const parentRes = await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Parent comment',
+          rating: 5
+        });
 
-      expect(response.body.success).toBe(false);
-    });
+      const parentId = parentRes.body.id;
 
-    it('should not include deleted comments', async () => {
-      // 先标记一个评论为删除
-      const db = testDb.getDB();
-      db.data.comments[0].isDeleted = true;
-      await db.write();
+      // Create reply
+      await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${user2Token}`)
+        .send({
+          journalId: testJournal.journalId,
+          parentId,
+          content: 'Reply to parent'
+        });
 
-      const response = await request(app)
-        .get('/api/comments/1')
-        .expect(200);
+      const res = await request(app)
+        .get(`/api/comments/journal/${testJournal.journalId}`);
 
-      const deletedComment = response.body.data.comments.find(
-        c => c.id === db.data.comments[0].id
-      );
-      expect(deletedComment).toBeUndefined();
+      expect(res.status).toBe(200);
+      // Top-level comments should have replies nested
+      const parentComment = res.body.find(c => c.content === 'Parent comment');
+      expect(parentComment).toBeDefined();
+      expect(parentComment.replies).toBeDefined();
+      expect(parentComment.replies.length).toBe(1);
+      expect(parentComment.replies[0].content).toBe('Reply to parent');
     });
   });
 
-  describe('DELETE /api/comments/:id', () => {
-    it('should delete own comment successfully', async () => {
-      const response = await request(app)
-        .delete('/api/comments/1-1234567890-abc123')
+  // ==================== Delete Comment Tests ====================
+
+  describe('DELETE /api/comments/:commentId', () => {
+    it('should delete own comment', async () => {
+      // Create a comment
+      const createRes = await request(app)
+        .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Comment to delete',
+          rating: 3
+        });
 
-      expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('删除成功');
+      const commentId = createRes.body.id;
 
-      // 验证评论被标记为删除
-      const db = testDb.getDB();
-      const comment = db.data.comments.find(c => c.id === '1-1234567890-abc123');
-      expect(comment.isDeleted).toBe(true);
+      const res = await request(app)
+        .delete(`/api/comments/${commentId}`)
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('评论已删除');
+
+      // Verify it is soft-deleted in DB
+      const deleted = await Comment.findByPk(commentId);
+      expect(deleted.isDeleted).toBe(true);
+      expect(deleted.content).toBe('[该评论已被删除]');
     });
 
-    it('should not allow deleting other user\'s comment', async () => {
-      // Mock为另一个用户
-      auth.mockImplementationOnce((req, res, next) => {
-        req.userId = 999; // 不同的用户ID
-        req.userRole = 'user';
-        next();
-      });
-
-      const response = await request(app)
-        .delete('/api/comments/1-1234567890-abc123')
+    it('should reject deleting other user\'s comment', async () => {
+      // User 1 creates a comment
+      const createRes = await request(app)
+        .post('/api/comments')
         .set('Authorization', `Bearer ${userToken}`)
-        .expect(403);
+        .send({
+          journalId: testJournal.journalId,
+          content: 'User 1 comment',
+          rating: 4
+        });
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('无权删除');
+      const commentId = createRes.body.id;
+
+      // User 2 tries to delete it
+      const res = await request(app)
+        .delete(`/api/comments/${commentId}`)
+        .set('Authorization', `Bearer ${user2Token}`);
+
+      expect(res.status).toBe(403);
+      expect(res.body.message).toContain('没有删除权限');
     });
 
     it('should return 404 for non-existent comment', async () => {
-      const response = await request(app)
-        .delete('/api/comments/nonexistent-id')
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(404);
+      const res = await request(app)
+        .delete('/api/comments/999999')
+        .set('Authorization', `Bearer ${userToken}`);
 
-      expect(response.body.success).toBe(false);
+      expect(res.status).toBe(404);
+      expect(res.body.message).toContain('评论不存在');
     });
   });
 
-  describe('Comment Data Structure Consistency', () => {
-    it('should maintain consistent data structure across old and new comments', async () => {
-      const db = testDb.getDB();
+  // ==================== Rating Summary Tests ====================
 
-      // 检查旧评论系统的数据结构
-      const oldComment = db.data.journals[0].reviews[0];
-      expect(oldComment).toHaveProperty('author');
-      expect(oldComment).toHaveProperty('rating');
-      expect(oldComment).toHaveProperty('content');
-      expect(oldComment).toHaveProperty('createdAt');
+  describe('GET /api/comments/journal/:journalId/ratings', () => {
+    it('should return rating summary for a journal', async () => {
+      // Create comments with ratings
+      await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Review 1',
+          dimensionRatings: {
+            reviewSpeed: 4,
+            editorAttitude: 5,
+            overallExperience: 4
+          }
+        });
 
-      // 检查新评论系统的数据结构
-      const newComment = db.data.comments[0];
-      expect(newComment).toHaveProperty('userId');
-      expect(newComment).toHaveProperty('userName');
-      expect(newComment).toHaveProperty('journalId');
-      expect(newComment).toHaveProperty('content');
-      expect(newComment).toHaveProperty('createdAt');
-      expect(newComment).toHaveProperty('isDeleted');
+      await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${user2Token}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Review 2',
+          dimensionRatings: {
+            reviewSpeed: 2,
+            editorAttitude: 3,
+            overallExperience: 2
+          }
+        });
 
-      // 这个测试确保数据结构的一致性，防止像之前那样改了数据结构但忘记更新某些地方
+      const res = await request(app)
+        .get(`/api/comments/journal/${testJournal.journalId}/ratings`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.journalId).toBe(testJournal.journalId);
+      expect(res.body.ratingCount).toBe(2);
+      expect(res.body.dimensionAverages).toBeDefined();
+      expect(res.body.dimensionLabels).toBeDefined();
+    });
+
+    it('should return 404 for non-existent journal', async () => {
+      const res = await request(app)
+        .get('/api/comments/journal/999999/ratings');
+
+      expect(res.status).toBe(404);
+      expect(res.body.message).toContain('期刊不存在');
+    });
+  });
+
+  // ==================== Like Comment Tests ====================
+
+  describe('POST /api/comments/:commentId/like', () => {
+    it('should toggle like on a comment', async () => {
+      // Create a comment
+      const createRes = await request(app)
+        .post('/api/comments')
+        .set('Authorization', `Bearer ${userToken}`)
+        .send({
+          journalId: testJournal.journalId,
+          content: 'Likeable comment',
+          rating: 5
+        });
+
+      const commentId = createRes.body.id;
+
+      // Like it
+      let res = await request(app)
+        .post(`/api/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${user2Token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.liked).toBe(true);
+      expect(res.body.likeCount).toBe(1);
+
+      // Unlike it
+      res = await request(app)
+        .post(`/api/comments/${commentId}/like`)
+        .set('Authorization', `Bearer ${user2Token}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.liked).toBe(false);
+      expect(res.body.likeCount).toBe(0);
     });
   });
 });

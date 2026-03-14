@@ -1,5 +1,7 @@
 module.exports = {
   testEnvironment: 'node',
+  // Run tests serially — all suites share one MySQL database
+  maxWorkers: 1,
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'controllers/**/*.js',
