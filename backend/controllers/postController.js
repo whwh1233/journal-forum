@@ -124,7 +124,7 @@ exports.getPostById = async (req, res) => {
                 {
                     model: Journal,
                     as: 'journal',
-                    attributes: ['id', 'title', 'issn'],
+                    attributes: ['journalId', 'name', 'issn'],
                     required: false
                 }
             ]
