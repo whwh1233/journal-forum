@@ -18,7 +18,8 @@ type AuthAction =
   | { type: 'LOGIN_FAILURE'; payload: string }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
-  | { type: 'CHECK_AUTH_STATUS'; payload: { isAuthenticated: boolean; email?: string; role?: string; id?: string | number } };
+  | { type: 'UPDATE_USER'; payload: Partial<User> }
+  | { type: 'CHECK_AUTH_STATUS'; payload: { isAuthenticated: boolean; email?: string; role?: string; id?: string | number; name?: string; avatar?: string | null; bio?: string | null } };
 
 // 初始状态
 const initialState: AuthState = {
@@ -47,6 +48,11 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       return { ...state, error: null };
     case 'LOGOUT':
       return { ...initialState, isAuthenticated: false };
+    case 'UPDATE_USER':
+      return {
+        ...state,
+        user: state.user ? { ...state.user, ...action.payload } : state.user
+      };
     case 'CHECK_AUTH_STATUS':
       if (action.payload.isAuthenticated && action.payload.email) {
         return {
@@ -54,7 +60,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
           user: {
             id: action.payload.id ? String(action.payload.id) : action.payload.email,
             email: action.payload.email,
-            role: action.payload.role as 'user' | 'admin' || 'user'
+            name: action.payload.name,
+            avatar: action.payload.avatar ?? undefined,
+            bio: action.payload.bio ?? undefined,
+            role: action.payload.role as 'user' | 'admin' | 'superadmin' || 'user'
           },
           isAuthenticated: true,
           loading: false
@@ -74,13 +83,15 @@ const AuthContext = createContext<{
   logout: () => void;
   clearError: () => void;
   checkAuthStatus: () => Promise<void>;
+  updateUser: (partial: Partial<User>) => void;
 }>({
   state: initialState,
   login: async () => { },
   register: async () => { },
   logout: () => { },
   clearError: () => { },
-  checkAuthStatus: async () => { }
+  checkAuthStatus: async () => { },
+  updateUser: () => { }
 });
 
 // Provider组件
@@ -91,8 +102,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'LOGIN_START' });
-      const { token, role, id } = await authService.login(credentials.email, credentials.password);
-      const user: User = { id: id ? String(id) : credentials.email, email: credentials.email, role: role as 'user' | 'admin' };
+      const { token, role, id, name, avatar, bio } = await authService.login(credentials.email, credentials.password);
+      const user: User = {
+        id: id ? String(id) : credentials.email,
+        email: credentials.email,
+        name: name,
+        avatar: avatar ?? undefined,
+        bio: bio ?? undefined,
+        role: role as 'user' | 'admin' | 'superadmin'
+      };
       localStorageUtils.saveUser(credentials.email, token);
       localStorage.setItem('userRole', role);
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
@@ -116,8 +134,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'LOGIN_START' });
       await authService.register(data.email, data.password);
       // 注册成功后自动登录
-      const { token, role, id } = await authService.login(data.email, data.password);
-      const user: User = { id: id ? String(id) : data.email, email: data.email, role: role as 'user' | 'admin' };
+      const { token, role, id, name, avatar, bio } = await authService.login(data.email, data.password);
+      const user: User = {
+        id: id ? String(id) : data.email,
+        email: data.email,
+        name: name,
+        avatar: avatar ?? undefined,
+        bio: bio ?? undefined,
+        role: role as 'user' | 'admin' | 'superadmin'
+      };
       localStorageUtils.saveUser(data.email, token);
       localStorage.setItem('userRole', role);
       dispatch({ type: 'LOGIN_SUCCESS', payload: { user, token } });
@@ -140,6 +165,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // 清除错误
   const clearError = () => {
     dispatch({ type: 'CLEAR_ERROR' });
+  };
+
+  // 更新当前用户信息（保存资料后同步 context）
+  const updateUser = (partial: Partial<User>) => {
+    dispatch({ type: 'UPDATE_USER', payload: partial });
   };
 
   // 检查认证状态
@@ -165,7 +195,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         register,
         logout,
         clearError,
-        checkAuthStatus
+        checkAuthStatus,
+        updateUser
       }}
     >
       {children}

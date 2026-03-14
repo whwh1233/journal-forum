@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useAuthContext } from '@/contexts/AuthContext';
 
 export function useAuth() {
-  const { state, login, register, logout, clearError, checkAuthStatus } = useAuthContext();
+  const { state, login, register, logout, clearError, checkAuthStatus, updateUser } = useAuthContext();
 
   const handleLogin = useCallback(async (email: string, password: string) => {
     await login({ email, password });
@@ -21,6 +21,7 @@ export function useAuth() {
     register: handleRegister,
     logout,
     clearError,
-    checkAuthStatus
+    checkAuthStatus,
+    updateUser
   };
 }

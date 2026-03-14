@@ -30,7 +30,7 @@ export const authService = {
   },
 
   // 用户登录
-  login: async (email: string, password: string): Promise<{ token: string; role: string; id: number | string }> => {
+  login: async (email: string, password: string): Promise<{ token: string; role: string; id: number | string; name?: string; avatar?: string | null; bio?: string | null }> => {
     // 前端哈希密码，防止明文传输
     const hashedPassword = await hashPassword(password, email);
 
@@ -49,11 +49,18 @@ export const authService = {
 
     const data = await response.json();
     localStorage.setItem('userId', data.data.user.id.toString());
-    return { token: data.data.token, role: data.data.user.role || 'user', id: data.data.user.id };
+    return {
+      token: data.data.token,
+      role: data.data.user.role || 'user',
+      id: data.data.user.id,
+      name: data.data.user.name,
+      avatar: data.data.user.avatar,
+      bio: data.data.user.bio
+    };
   },
 
   // 检查认证状态
-  checkAuthStatus: async (): Promise<{ isAuthenticated: boolean; email?: string; role?: string; id?: string | number }> => {
+  checkAuthStatus: async (): Promise<{ isAuthenticated: boolean; email?: string; role?: string; id?: string | number; name?: string; avatar?: string | null; bio?: string | null }> => {
     const token = localStorage.getItem('authToken');
     const userEmail = localStorage.getItem('userEmail');
     const userRole = localStorage.getItem('userRole');
@@ -73,7 +80,15 @@ export const authService = {
           const id = data.data.user.id || userId;
           localStorage.setItem('userRole', role);
           if (id) localStorage.setItem('userId', id.toString());
-          return { isAuthenticated: true, email: userEmail, role, id };
+          return {
+            isAuthenticated: true,
+            email: userEmail,
+            role,
+            id,
+            name: data.data.user.name,
+            avatar: data.data.user.avatar,
+            bio: data.data.user.bio
+          };
         }
       } catch (error) {
         console.error('Auth status check failed:', error);

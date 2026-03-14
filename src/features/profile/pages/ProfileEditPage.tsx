@@ -10,7 +10,7 @@ import './ProfileEditPage.css';
 const ProfileEditPage: React.FC = () => {
   usePageTitle('账号设置');
 
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -40,11 +40,9 @@ const ProfileEditPage: React.FC = () => {
     setError(null);
     setSuccess(null);
     try {
-      await uploadAvatar(file);
+      const avatarUrl = await uploadAvatar(file);
+      updateUser({ avatar: avatarUrl });
       setSuccess('头像上传成功');
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
     } catch (error: any) {
       setError(error.response?.data?.message || '上传失败');
     } finally {
@@ -59,6 +57,7 @@ const ProfileEditPage: React.FC = () => {
     setSuccess(null);
     try {
       await updateUserProfile(formData);
+      updateUser({ name: formData.name, bio: formData.bio });
       setSuccess('资料更新成功');
       setTimeout(() => {
         setSuccess(null);

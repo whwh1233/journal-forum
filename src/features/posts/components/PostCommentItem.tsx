@@ -27,7 +27,7 @@ const PostCommentItem: React.FC<PostCommentItemProps> = ({
   const [localLiked, setLocalLiked] = useState(comment.userLiked || false);
   const [localLikeCount, setLocalLikeCount] = useState(comment.likeCount || 0);
 
-  const isAuthor = user && comment.userId === user.id;
+  const isAuthor = user && String(comment.userId) === String(user.id);
   const isAdmin = user?.role === 'admin';
   const canDelete = (isAuthor || isAdmin) && !comment.isDeleted;
   const canReply = level < 2 && !comment.isDeleted;
@@ -92,7 +92,7 @@ const PostCommentItem: React.FC<PostCommentItemProps> = ({
           <Link to={`/profile/${comment.userId}`} className="post-comment-author-name">
             {comment.userName}
           </Link>
-          {user && comment.userId !== user.id && (
+          {user && String(comment.userId) !== String(user.id) && (
             <div className="post-comment-follow-btn-wrapper">
               <FollowButton userId={comment.userId} />
             </div>
