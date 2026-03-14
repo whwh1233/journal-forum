@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// 文件上传直连后端，绕过 Vite 代理，避免系统代理干扰 multipart 请求
+const UPLOAD_BASE = import.meta.env.DEV ? 'http://127.0.0.1:3001' : '';
+
 export interface UploadResult {
   url: string;
   filename: string;
@@ -14,10 +17,9 @@ export const uploadImage = async (file: File): Promise<UploadResult> => {
   const formData = new FormData();
   formData.append('image', file);
 
-  const response = await axios.post('/api/uploads/image', formData, {
+  const response = await axios.post(`${UPLOAD_BASE}/api/uploads/image`, formData, {
     headers: {
       Authorization: `Bearer ${token}`
-      // 不设置 Content-Type，让 axios 自动设置 multipart boundary
     }
   });
 
