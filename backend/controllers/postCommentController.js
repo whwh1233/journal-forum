@@ -1,4 +1,5 @@
 const { PostComment, Post, User, PostCommentLike } = require('../models');
+const notificationService = require('../services/notificationService');
 
 // 获取帖子的所有评论
 exports.getComments = async (req, res) => {
@@ -128,6 +129,49 @@ exports.createComment = async (req, res) => {
 
         // 增加帖子评论计数
         await post.increment('commentCount');
+
+        // Notify: post_comment (to post author)
+        try {
+            await notificationService.create({
+                recipientId: post.userId,
+                senderId: req.user.id,
+                type: 'post_comment',
+                entityType: 'post',
+                entityId: postId,
+                content: {
+                    title: `${user.name} 评论了你的帖子`,
+                    body: content.substring(0, 100),
+                    commentContent: content.substring(0, 200),
+                    postTitle: post.title || ''
+                }
+            });
+        } catch (err) {
+            console.error('Notification (post_comment) failed:', err.message);
+        }
+
+        // Notify: post_comment_reply (to parent comment author)
+        if (parentId) {
+            try {
+                const parentComment = await PostComment.findByPk(parentId);
+                if (parentComment) {
+                    await notificationService.create({
+                        recipientId: parentComment.userId,
+                        senderId: req.user.id,
+                        type: 'post_comment_reply',
+                        entityType: 'post_comment',
+                        entityId: comment.id,
+                        content: {
+                            title: `${user.name} 回复了你的评论`,
+                            body: content.substring(0, 100),
+                            commentContent: content.substring(0, 200),
+                            postTitle: post.title || ''
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Notification (post_comment_reply) failed:', err.message);
+            }
+        }
 
         // 返回完整评论信息
         const fullComment = await PostComment.findByPk(comment.id, {
