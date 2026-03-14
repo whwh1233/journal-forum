@@ -112,7 +112,7 @@ export const selectors = {
     popoverTrigger: '.filter-trigger',
     popoverMenu: '.popover-menu',
     menuItem: '.menu-item',
-    sortTrigger: '.filter-trigger',
+    sortTrigger: '.filter-trigger:has-text("排序")',
     sortPanel: '.sort-panel-container',
     sortItemCard: '.sort-item-card',
     clearFiltersBtn: '.clear-filters-btn',

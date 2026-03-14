@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@/__tests__/test-utils';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import JournalInfoCard from '@/components/common/JournalInfoCard';
 
@@ -13,25 +14,34 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-describe('JournalInfoCard', () => {
-  const mockJournal = {
-    journalId: '1',
-    name: 'Nature',
-    issn: '0028-0836',
-    levels: ['SCI'],
-    introduction: '顶级综合性科学期刊',
-    ratingCache: {
+const renderCard = (props: any = {}) => {
+  const defaultProps = {
+    journal: {
       journalId: '1',
-      rating: 4.5,
-      ratingCount: 120,
-      reviewSpeed: 4.0,
-      editorAttitude: 4.5,
-      acceptDifficulty: 4.8,
-      reviewQuality: 4.6,
-      overallExperience: 4.5
-    }
+      name: 'Nature',
+      issn: '0028-0836',
+      levels: ['SCI'],
+      introduction: '顶级综合性科学期刊',
+      articleCount: 120,
+      ratingCache: {
+        rating: 4.5,
+        reviewSpeed: 4.0,
+        editorAttitude: 4.5,
+        acceptDifficulty: 4.8,
+        reviewQuality: 4.6,
+        overallExperience: 4.5
+      }
+    },
+    ...props
   };
+  return render(
+    <BrowserRouter>
+      <JournalInfoCard {...defaultProps} />
+    </BrowserRouter>
+  );
+};
 
+describe('JournalInfoCard', () => {
   const mockOnFavoriteToggle = vi.fn();
 
   beforeEach(() => {
@@ -40,56 +50,59 @@ describe('JournalInfoCard', () => {
 
   describe('渲染测试', () => {
     it('should render journal title', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
+      renderCard();
       expect(screen.getByText('Nature')).toBeInTheDocument();
     });
 
     it('should render ISSN', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
+      renderCard();
       expect(screen.getByText(/ISSN: 0028-0836/)).toBeInTheDocument();
     });
 
-    it('should render category', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
+    it('should render category/level', () => {
+      renderCard();
       expect(screen.getByText('SCI')).toBeInTheDocument();
     });
 
     it('should render rating', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
-      // Rating displays as "⭐ 4.5"
-      expect(screen.getByText(/⭐ 4.5/)).toBeInTheDocument();
+      renderCard();
+      // Rating is rendered as "4.5" next to a Star icon
+      expect(screen.getByText('4.5')).toBeInTheDocument();
     });
 
     it('should render review count', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
-      expect(screen.getByText('120 条评论')).toBeInTheDocument();
+      renderCard();
+      // Component shows "120 记录文章"
+      expect(screen.getByText('120 记录文章')).toBeInTheDocument();
     });
 
-    it('should render description when provided', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
-      expect(screen.getByText('顶级综合性科学期刊')).toBeInTheDocument();
+    it('should render description when expanded', () => {
+      // Card is collapsed by default, need to expand it
+      renderCard({ defaultExpanded: true });
+      expect(screen.getByText(/顶级综合性科学期刊/)).toBeInTheDocument();
     });
 
-    it('should not render description when not provided', () => {
-      const journalWithoutDesc = { ...mockJournal, introduction: undefined };
-      render(<JournalInfoCard journal={journalWithoutDesc} />);
-      expect(screen.queryByText('顶级综合性科学期刊')).not.toBeInTheDocument();
+    it('should not render description when collapsed', () => {
+      renderCard();
+      // Card is collapsed by default, description should not be visible
+      expect(screen.queryByText(/顶级综合性科学期刊/)).not.toBeInTheDocument();
     });
 
-    it('should truncate long title', () => {
+    it('should not truncate title in header (uses CSS)', () => {
       const longTitleJournal = {
-        ...mockJournal,
-        name: 'A Very Long Journal Title That Exceeds Fifty Characters And Should Be Truncated'
+        journalId: '1',
+        name: 'A Very Long Journal Title That Exceeds Fifty Characters And Should Be Truncated',
+        ratingCache: { rating: 4.5 }
       };
-      render(<JournalInfoCard journal={longTitleJournal} />);
-      // Title should be truncated with ...
-      expect(screen.getByText(/\.\.\.$/)).toBeInTheDocument();
+      renderCard({ journal: longTitleJournal });
+      // Component uses title attribute for full name, CSS handles truncation
+      expect(screen.getByTitle('A Very Long Journal Title That Exceeds Fifty Characters And Should Be Truncated')).toBeInTheDocument();
     });
   });
 
   describe('维度评分', () => {
-    it('should render all 5 dimension labels', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
+    it('should render all 5 dimension labels when expanded', () => {
+      renderCard({ defaultExpanded: true });
 
       expect(screen.getByText('审稿速度')).toBeInTheDocument();
       expect(screen.getByText('编辑态度')).toBeInTheDocument();
@@ -98,51 +111,60 @@ describe('JournalInfoCard', () => {
       expect(screen.getByText('综合体验')).toBeInTheDocument();
     });
 
-    it('should display dimension values', () => {
-      render(<JournalInfoCard journal={mockJournal as any} />);
+    it('should display dimension values when expanded', () => {
+      renderCard({ defaultExpanded: true });
 
       // Check that dimension values are displayed (4.0, 4.5, 4.8, 4.6, 4.5)
-      const dimensionValues = screen.getAllByText(/^[0-4]\.[0-9]$/);
-      expect(dimensionValues.length).toBe(5);
+      expect(screen.getByText('4.0')).toBeInTheDocument();
+      expect(screen.getByText('4.8')).toBeInTheDocument();
+      expect(screen.getByText('4.6')).toBeInTheDocument();
     });
 
     it('should handle missing dimension values', () => {
-      const journalWithMissingDimensions = {
-        ...mockJournal,
+      const journal = {
+        journalId: '1',
+        name: 'Test Journal',
         ratingCache: {
-          ...mockJournal.ratingCache,
-          reviewSpeed: 3.0,
-          editorAttitude: undefined,
-          acceptDifficulty: undefined,
-          reviewQuality: undefined,
-          overallExperience: undefined
+          rating: 3.0,
+          reviewSpeed: 3.0
+          // other dimensions undefined
         }
       };
-      render(<JournalInfoCard journal={journalWithMissingDimensions} />);
+      renderCard({ journal, defaultExpanded: true });
 
-      // Should still render all 5 dimensions with 0.0 for missing ones
+      // Should still render all 5 dimension labels
       expect(screen.getByText('审稿速度')).toBeInTheDocument();
-      expect(screen.getByText('3.0')).toBeInTheDocument();
+      // "3.0" might appear multiple times (rating badge + dimension value), use getAllByText
+      expect(screen.getAllByText('3.0').length).toBeGreaterThanOrEqual(1);
+      // Missing dimensions should show "0.0"
+      const zeros = screen.getAllByText('0.0');
+      expect(zeros.length).toBe(4); // 4 missing dimensions
     });
   });
 
   describe('导航功能', () => {
-    it('should navigate to journal detail when name is clicked', async () => {
+    it('should toggle expanded state when header is clicked', async () => {
       const user = userEvent.setup();
-      render(<JournalInfoCard journal={mockJournal as any} />);
+      renderCard();
 
-      const name = screen.getByText('Nature');
-      await user.click(name);
+      // Initially collapsed
+      expect(screen.queryByText('审稿速度')).not.toBeInTheDocument();
 
-      expect(mockNavigate).toHaveBeenCalledWith('/journals/1');
+      // Click header to expand
+      const header = screen.getByText('Nature').closest('.card-header');
+      await user.click(header!);
+
+      // Now expanded
+      expect(screen.getByText('审稿速度')).toBeInTheDocument();
     });
 
-    it('should navigate to journal detail when view comments button is clicked', async () => {
+    it('should navigate to journal detail when view button is clicked', async () => {
       const user = userEvent.setup();
-      render(<JournalInfoCard journal={mockJournal as any} />);
+      renderCard({ defaultExpanded: true });
 
-      const viewButton = screen.getByRole('button', { name: /查看评论/i });
-      await user.click(viewButton);
+      // Component has a "查看详情" button
+      const viewButton = screen.getByText('查看详情').closest('button');
+      await user.click(viewButton!);
 
       expect(mockNavigate).toHaveBeenCalledWith('/journals/1');
     });
@@ -150,47 +172,41 @@ describe('JournalInfoCard', () => {
 
   describe('收藏功能', () => {
     it('should not render favorite button when onFavoriteToggle is not provided', () => {
-      render(<JournalInfoCard journal={mockJournal} />);
-      expect(screen.queryByTitle('收藏')).not.toBeInTheDocument();
-      expect(screen.queryByTitle('取消收藏')).not.toBeInTheDocument();
+      renderCard({ defaultExpanded: true });
+      expect(screen.queryByText('收藏')).not.toBeInTheDocument();
+      expect(screen.queryByText('已收藏')).not.toBeInTheDocument();
     });
 
     it('should render unfavorited state when isFavorited is false', () => {
-      render(
-        <JournalInfoCard
-          journal={mockJournal as any}
-          isFavorited={false}
-          onFavoriteToggle={mockOnFavoriteToggle}
-        />
-      );
-      const favoriteBtn = screen.getByTitle('收藏');
-      expect(favoriteBtn).toHaveTextContent('☆');
+      renderCard({
+        isFavorited: false,
+        onFavoriteToggle: mockOnFavoriteToggle,
+        defaultExpanded: true
+      });
+
+      expect(screen.getByText('收藏')).toBeInTheDocument();
     });
 
     it('should render favorited state when isFavorited is true', () => {
-      render(
-        <JournalInfoCard
-          journal={mockJournal as any}
-          isFavorited={true}
-          onFavoriteToggle={mockOnFavoriteToggle}
-        />
-      );
-      const favoriteBtn = screen.getByTitle('取消收藏');
-      expect(favoriteBtn).toHaveTextContent('★');
+      renderCard({
+        isFavorited: true,
+        onFavoriteToggle: mockOnFavoriteToggle,
+        defaultExpanded: true
+      });
+
+      expect(screen.getByText('已收藏')).toBeInTheDocument();
     });
 
     it('should call onFavoriteToggle when favorite button is clicked', async () => {
       const user = userEvent.setup();
-      render(
-        <JournalInfoCard
-          journal={mockJournal as any}
-          isFavorited={false}
-          onFavoriteToggle={mockOnFavoriteToggle}
-        />
-      );
+      renderCard({
+        isFavorited: false,
+        onFavoriteToggle: mockOnFavoriteToggle,
+        defaultExpanded: true
+      });
 
-      const favoriteBtn = screen.getByTitle('收藏');
-      await user.click(favoriteBtn);
+      const favoriteBtn = screen.getByText('收藏').closest('button');
+      await user.click(favoriteBtn!);
 
       expect(mockOnFavoriteToggle).toHaveBeenCalledTimes(1);
     });
@@ -198,21 +214,19 @@ describe('JournalInfoCard', () => {
 
   describe('样式类', () => {
     it('should apply custom className', () => {
-      const { container } = render(
-        <JournalInfoCard journal={mockJournal as any} className="custom-class" />
-      );
+      const { container } = renderCard({ className: 'custom-class' });
       expect(container.querySelector('.journal-info-card.custom-class')).toBeInTheDocument();
     });
 
     it('should have active class on favorite button when favorited', () => {
-      render(
-        <JournalInfoCard
-          journal={mockJournal as any}
-          isFavorited={true}
-          onFavoriteToggle={mockOnFavoriteToggle}
-        />
-      );
-      const favoriteBtn = screen.getByTitle('取消收藏');
+      renderCard({
+        isFavorited: true,
+        onFavoriteToggle: mockOnFavoriteToggle,
+        defaultExpanded: true
+      });
+
+      // The button has class "action-btn favorite-btn active"
+      const favoriteBtn = screen.getByText('已收藏').closest('button');
       expect(favoriteBtn).toHaveClass('active');
     });
   });

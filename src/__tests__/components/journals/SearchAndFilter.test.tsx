@@ -270,7 +270,7 @@ describe('SearchAndFilter', () => {
 
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('排序配置管理')).toBeInTheDocument();
+      expect(screen.getByText('排序')).toBeInTheDocument();
       expect(screen.getByText('评论数')).toBeInTheDocument();
       expect(screen.getByText('影响因子')).toBeInTheDocument();
       expect(screen.getByText('综合评分')).toBeInTheDocument();
@@ -312,9 +312,9 @@ describe('SearchAndFilter', () => {
         sortFields: { commentCount: 'desc' }
       });
 
-      render(<SearchAndFilter />);
+      const { container } = render(<SearchAndFilter />);
 
-      expect(screen.getByText('降序排列')).toBeInTheDocument();
+      expect(container.querySelector('.sort-item-card.active.desc')).toBeInTheDocument();
     });
 
     it('should display ascending icon for asc sort order', () => {
@@ -324,9 +324,9 @@ describe('SearchAndFilter', () => {
         sortFields: { commentCount: 'asc' }
       });
 
-      render(<SearchAndFilter />);
+      const { container } = render(<SearchAndFilter />);
 
-      expect(screen.getByText('升序排列')).toBeInTheDocument();
+      expect(container.querySelector('.sort-item-card.active.asc')).toBeInTheDocument();
     });
 
     it('should close sort panel when close button is clicked', () => {

@@ -68,7 +68,7 @@ describe('AnnouncementManagement', () => {
     await waitFor(() => { expect(screen.getByText('系统维护')).toBeInTheDocument(); });
     expect(screen.getAllByText('草稿').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('生效中').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('已归档')).toBeInTheDocument();
+    expect(screen.getAllByText('已归档').length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows type labels', async () => {

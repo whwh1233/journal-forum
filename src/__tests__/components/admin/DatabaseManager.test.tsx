@@ -417,17 +417,24 @@ describe('DatabaseManager', () => {
       expect(screen.getByText('user1@test.com')).toBeInTheDocument();
     });
 
-    // Click on column header to sort
-    (databaseService.getTableData as Mock).mockClear();
+    // Click on column header to sort — re-mock so it still returns data after clearing call history
+    (databaseService.getTableData as Mock).mockResolvedValue(mockTableData);
+    const callCountBefore = (databaseService.getTableData as Mock).mock.calls.length;
 
-    const emailHeader = screen.getAllByText('email')[0].closest('th') || screen.getAllByText('email')[0];
-    await user.click(emailHeader);
+    // Find the <th> for the 'email' column and click it
+    const emailSpans = screen.getAllByText('email');
+    const emailTh = emailSpans.find(el => el.closest('th'))?.closest('th');
+    expect(emailTh).toBeTruthy();
+    await user.click(emailTh!);
 
+    // handleSort sets sortField, which recreates fetchTableData callback,
+    // which triggers the useEffect to call fetchTableData(selectedTable)
     await waitFor(() => {
-      expect(databaseService.getTableData).toHaveBeenCalledWith('users', expect.objectContaining({
-        sortField: 'email',
-        sortOrder: 'ASC',
-      }));
+      const newCalls = (databaseService.getTableData as Mock).mock.calls.slice(callCountBefore);
+      const sortCall = newCalls.find((call: any[]) =>
+        call[0] === 'users' && call[1]?.sortField === 'email' && call[1]?.sortOrder === 'ASC'
+      );
+      expect(sortCall).toBeTruthy();
     });
   });
 

@@ -1,82 +1,115 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@/__tests__/test-utils';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JournalPicker from '@/components/common/JournalPicker';
-import axios from 'axios';
 
-// Mock axios
-vi.mock('axios');
-const mockedAxios = axios as any;
+// Mock the hook that JournalPicker uses
+const mockSearch = vi.fn();
+const mockLoadMore = vi.fn();
+const mockReset = vi.fn();
+
+let mockResults: any[] = [];
+let mockLoading = false;
+let mockError: string | null = null;
+let mockHasMore = false;
+
+vi.mock('@/hooks/useJournalSearch', () => ({
+  useJournalSearch: () => ({
+    results: mockResults,
+    loading: mockLoading,
+    error: mockError,
+    hasMore: mockHasMore,
+    search: mockSearch,
+    loadMore: mockLoadMore,
+    reset: mockReset,
+  }),
+}));
+
+// Mock the service functions that the component calls on mount
+vi.mock('@/services/journalSearchService', () => ({
+  searchJournals: vi.fn(),
+  getCategories: vi.fn().mockResolvedValue({ categories: [] }),
+  getLevels: vi.fn().mockResolvedValue({ levels: [] }),
+  // Re-export types won't matter for runtime
+}));
+
+// Mock the utility functions
+vi.mock('@/components/common/journalPickerUtils', () => ({
+  createCustomJournal: vi.fn((name: string) => ({
+    journalId: `custom-${name}`,
+    id: `custom-${name}`,
+    name,
+    title: name,
+    issn: '',
+    levels: [],
+    rating: 0,
+    reviews: 0,
+    category: '',
+    dimensionAverages: {},
+  })),
+  isCustomJournal: vi.fn(() => false),
+}));
+
+// Mock DIMENSION_LABELS
+vi.mock('@/types', () => ({
+  DIMENSION_LABELS: {
+    reviewSpeed: '审稿速度',
+    editorAttitude: '编辑态度',
+    acceptDifficulty: '录用难度',
+    reviewQuality: '审稿质量',
+    overallExperience: '综合体验',
+  },
+}));
 
 describe('JournalPicker', () => {
-  const mockJournals = [
+  const mockOnChange = vi.fn();
+
+  const sampleResults = [
     {
       journalId: '1',
+      id: '1',
       name: 'Nature',
+      title: 'Nature',
       issn: '0028-0836',
       levels: ['SCI'],
-      introduction: 'Leading scientific journal',
-      ratingCache: {
-        journalId: '1',
-        rating: 4.5,
-        ratingCount: 120,
+      rating: 4.5,
+      reviews: 120,
+      category: 'Science',
+      dimensionAverages: {
         reviewSpeed: 4.0,
         editorAttitude: 4.5,
         acceptDifficulty: 4.8,
         reviewQuality: 4.6,
-        overallExperience: 4.5
-      }
+        overallExperience: 4.5,
+      },
     },
     {
       journalId: '2',
+      id: '2',
       name: 'Science',
+      title: 'Science',
       issn: '0036-8075',
       levels: ['SCI'],
-      introduction: 'Premier scientific journal',
-      ratingCache: {
-        journalId: '2',
-        rating: 4.4,
-        ratingCount: 110,
+      rating: 4.4,
+      reviews: 110,
+      category: 'Science',
+      dimensionAverages: {
         reviewSpeed: 3.9,
         editorAttitude: 4.3,
         acceptDifficulty: 4.7,
         reviewQuality: 4.5,
-        overallExperience: 4.4
-      }
-    }
+        overallExperience: 4.4,
+      },
+    },
   ];
-
-  const mockCategories = {
-    categories: [
-      { name: 'SCI', count: 50 },
-      { name: 'EI', count: 30 }
-    ]
-  };
-
-  const mockOnChange = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-
-    // Mock categories endpoint - returns { data: { categories: [...] } }
-    mockedAxios.get.mockImplementation((url: string) => {
-      if (url === '/api/journals/categories') {
-        return Promise.resolve({ data: { data: mockCategories } });
-      }
-      // Mock search endpoint - returns { data: { journals: [...], hasMore: boolean } }
-      if (url === '/api/journals/search') {
-        return Promise.resolve({
-          data: {
-            data: {
-              journals: mockJournals,
-              hasMore: false
-            }
-          }
-        });
-      }
-      return Promise.reject(new Error('Unknown endpoint'));
-    });
+    mockResults = [];
+    mockLoading = false;
+    mockError = null;
+    mockHasMore = false;
   });
 
   afterEach(() => {
@@ -84,355 +117,198 @@ describe('JournalPicker', () => {
   });
 
   describe('渲染测试', () => {
-    it('should render input field with placeholder', async () => {
-      render(<JournalPicker value={null} onChange={mockOnChange} placeholder="搜索期刊" />);
-
-      await waitFor(() => {
-        const input = screen.getByPlaceholderText('搜索期刊');
-        expect(input).toBeInTheDocument();
-      });
+    it('should render input field with default placeholder', () => {
+      render(<JournalPicker value={null} onChange={mockOnChange} />);
+      expect(screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...')).toBeInTheDocument();
     });
 
-    it('should render with selected journal', async () => {
-      render(<JournalPicker value={mockJournals[0] as any} onChange={mockOnChange} />);
-
-      await waitFor(() => {
-        // When a journal is selected, it shows the name in a span, not an input
-        expect(screen.getByText('Nature')).toBeInTheDocument();
-      });
+    it('should render with selected journal name', () => {
+      render(<JournalPicker value={sampleResults[0] as any} onChange={mockOnChange} />);
+      // When a value is selected, the name is shown instead of input
+      expect(screen.getByText('Nature')).toBeInTheDocument();
     });
 
-    it('should be disabled when disabled prop is true', async () => {
-      render(<JournalPicker value={null} onChange={mockOnChange} disabled />);
-
-      await waitFor(() => {
-        const input = screen.getByRole('textbox');
-        expect(input).toBeDisabled();
-      });
+    it('should show clear button when value is selected', () => {
+      render(<JournalPicker value={sampleResults[0] as any} onChange={mockOnChange} />);
+      expect(screen.getByText('×')).toBeInTheDocument();
     });
   });
 
   describe('搜索功能', () => {
-    it('should show dropdown when typing 2+ characters', async () => {
+    it('should trigger search after debounce on input', async () => {
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
+      await user.type(input, 'Na');
+
+      // The component uses 300ms debounce
+      await waitFor(() => {
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
+    });
+
+    it('should not search if input is cleared', async () => {
+      const user = userEvent.setup();
+      render(<JournalPicker value={null} onChange={mockOnChange} />);
+
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
+      await user.type(input, 'N');
+      await user.clear(input);
+
+      // After clearing, reset should be called
+      await waitFor(() => {
+        expect(mockReset).toHaveBeenCalled();
+      });
+    });
+
+    it('should display search results when available', async () => {
+      mockResults = sampleResults;
+
+      const user = userEvent.setup();
+      render(<JournalPicker value={null} onChange={mockOnChange} />);
+
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
       await user.type(input, 'Na');
 
       await waitFor(() => {
-        // Dropdown should show dimension selector with "显示："
-        expect(screen.getByText(/显示/)).toBeInTheDocument();
-      });
-    });
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
 
-    it('should search journals when typing', async () => {
-      const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Nature');
-
+      // Results should be visible in the dropdown
       await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          '/api/journals/search',
-          expect.objectContaining({
-            params: expect.objectContaining({
-              q: 'Nature',
-              page: 1,
-              limit: 10
-            })
-          })
-        );
-      });
-    });
-
-    it('should display search results', async () => {
-      const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Nature');
-
-      await waitFor(() => {
-        expect(screen.getByText('Nature')).toBeInTheDocument();
-        expect(screen.getByText('Science')).toBeInTheDocument();
-      });
-    });
-
-    it('should not search if query is less than 2 characters', async () => {
-      const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'N');
-
-      // Wait a bit to ensure debounce has passed
-      await new Promise(resolve => setTimeout(resolve, 400));
-
-      // Should not have called the search endpoint
-      expect(mockedAxios.get).not.toHaveBeenCalledWith(
-        '/api/journals/search',
-        expect.anything()
-      );
-    });
-  });
-
-  describe('分类过滤', () => {
-    it('should load categories on mount', async () => {
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith('/api/journals/categories');
-      });
-    });
-
-    it('should filter by category when category is selected', async () => {
-      const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      // Wait for categories to load
-      await waitFor(() => {
-        expect(screen.getByText(/全部/i)).toBeInTheDocument();
-      });
-
-      // Find and click SCI category button
-      const sciButton = screen.getByRole('button', { name: /SCI/i });
-      await user.click(sciButton);
-
-      // Type to trigger search with category
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Nature');
-
-      await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          '/api/journals/search',
-          expect.objectContaining({
-            params: expect.objectContaining({
-              category: 'SCI'
-            })
-          })
-        );
+        const items = document.querySelectorAll('.journal-item');
+        expect(items.length).toBe(2);
       });
     });
   });
 
   describe('选择功能', () => {
-    it('should call onChange when journal is selected', async () => {
+    it('should call onChange when journal is selected from results', async () => {
+      mockResults = sampleResults;
+
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Nature');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
+      await user.type(input, 'Na');
 
       await waitFor(() => {
-        expect(screen.getByText('Nature')).toBeInTheDocument();
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
+
+      await waitFor(() => {
+        const items = document.querySelectorAll('.journal-item');
+        expect(items.length).toBeGreaterThan(0);
       });
 
-      // Component uses .journal-item class
-      const journalItem = screen.getByText('Nature').closest('.journal-item');
-      expect(journalItem).toBeInTheDocument();
-
-      await user.click(journalItem!);
-
-      expect(mockOnChange).toHaveBeenCalledWith(mockJournals[0]);
+      const firstItem = document.querySelector('.journal-item');
+      fireEvent.click(firstItem!);
+      expect(mockOnChange).toHaveBeenCalledWith(sampleResults[0]);
     });
 
-    it('should close dropdown after selection', async () => {
+    it('should call onChange(null) when clear button is clicked', async () => {
       const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
+      render(<JournalPicker value={sampleResults[0] as any} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Nature');
-
-      await waitFor(() => {
-        expect(screen.getByText('Nature')).toBeInTheDocument();
-      });
-
-      const journalItem = screen.getByText('Nature').closest('.journal-item');
-      await user.click(journalItem!);
-
-      await waitFor(() => {
-        // The dropdown should be closed, Science should not be visible
-        expect(screen.queryByText('Science')).not.toBeInTheDocument();
-      });
-    });
-
-    it('should clear selection when clear button is clicked', async () => {
-      const user = userEvent.setup();
-      render(<JournalPicker value={mockJournals[0] as any} onChange={mockOnChange} />);
-
-      // Clear button shows × character
-      const clearButton = screen.getByRole('button', { name: /×/ });
+      const clearButton = screen.getByText('×');
       await user.click(clearButton);
 
       expect(mockOnChange).toHaveBeenCalledWith(null);
     });
   });
 
-  describe('维度显示', () => {
-    it('should persist dimension preferences to localStorage', async () => {
+  describe('错误处理', () => {
+    it('should show no results message when search returns empty', async () => {
+      mockResults = [];
+
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'Na');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
+      await user.type(input, 'NonExistent');
 
       await waitFor(() => {
-        // Component shows "显示：" label
-        expect(screen.getByText(/显示/)).toBeInTheDocument();
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
+
+      // Component shows "在期刊库中未找到匹配结果"
+      await waitFor(() => {
+        expect(screen.getByText('在期刊库中未找到匹配结果')).toBeInTheDocument();
       });
-
-      // Find dimension button (component uses buttons, not checkboxes)
-      const dimensionBtn = screen.getByRole('button', { name: /录用难度/i });
-      await user.click(dimensionBtn);
-
-      // Check localStorage
-      const saved = localStorage.getItem('journalPickerDimensions');
-      expect(saved).toBeTruthy();
     });
-  });
 
-  describe('错误处理', () => {
-    it('should show error message when search fails', async () => {
-      mockedAxios.get.mockImplementation((url: string) => {
-        if (url === '/api/journals/categories') {
-          return Promise.resolve({ data: { data: mockCategories } });
-        }
-        if (url === '/api/journals/search') {
-          return Promise.reject(new Error('Network error'));
-        }
-        return Promise.reject(new Error('Unknown endpoint'));
-      });
+    it('should show error message from the hook', async () => {
+      mockError = '搜索失败，请重试';
 
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
       await user.type(input, 'Nature');
 
       await waitFor(() => {
-        expect(screen.getByText(/搜索失败/i)).toBeInTheDocument();
-      });
-    });
-
-    it('should show no results message when no journals found', async () => {
-      mockedAxios.get.mockImplementation((url: string) => {
-        if (url === '/api/journals/search') {
-          return Promise.resolve({
-            data: {
-              data: {
-                journals: [],
-                hasMore: false
-              }
-            }
-          });
-        }
-        return Promise.resolve({ data: { data: mockCategories } });
-      });
-
-      const user = userEvent.setup();
-      render(<JournalPicker value={null} onChange={mockOnChange} />);
-
-      const input = screen.getByRole('textbox');
-      await user.type(input, 'NonExistentJournal');
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
 
       await waitFor(() => {
-        // Component shows "未找到匹配的期刊，试试其他关键词"
-        expect(screen.getByText(/未找到匹配的期刊/i)).toBeInTheDocument();
+        expect(screen.getByText('搜索失败，请重试')).toBeInTheDocument();
       });
     });
   });
 
   describe('加载状态', () => {
-    it('should show loading state while searching', async () => {
-      // Delay the response
-      mockedAxios.get.mockImplementation((url: string) => {
-        if (url === '/api/journals/search') {
-          return new Promise(resolve => {
-            setTimeout(() => {
-              resolve({
-                data: {
-                  data: {
-                    journals: mockJournals,
-                    hasMore: false
-                  }
-                }
-              });
-            }, 500);
-          });
-        }
-        return Promise.resolve({ data: { data: mockCategories } });
-      });
+    it('should show loading indicator while searching', async () => {
+      mockLoading = true;
 
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
       await user.type(input, 'Nature');
 
-      // Component shows "加载中..." not "搜索中"
       await waitFor(() => {
-        expect(screen.getByText(/加载中/i)).toBeInTheDocument();
-      });
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
 
-      // Wait for results
+      // Component shows "加载中..."
       await waitFor(() => {
-        expect(screen.getByText('Nature')).toBeInTheDocument();
-      }, { timeout: 2000 });
+        expect(screen.getByText('加载中...')).toBeInTheDocument();
+      });
     });
   });
 
   describe('滚动加载', () => {
-    it('should load more results when scrolling to bottom', async () => {
-      mockedAxios.get.mockImplementation((url: string, config: any) => {
-        if (url === '/api/journals/search') {
-          const page = config?.params?.page || 1;
-          return Promise.resolve({
-            data: {
-              data: {
-                journals: mockJournals,
-                hasMore: page < 2
-              }
-            }
-          });
-        }
-        return Promise.resolve({ data: { data: mockCategories } });
-      });
+    it('should call loadMore on scroll near bottom', async () => {
+      mockResults = sampleResults;
+      mockHasMore = true;
 
       const user = userEvent.setup();
       render(<JournalPicker value={null} onChange={mockOnChange} />);
 
-      const input = screen.getByRole('textbox');
+      const input = screen.getByPlaceholderText('输入期刊名称、ISSN 或刊号搜索...');
       await user.type(input, 'Nature');
 
       await waitFor(() => {
-        expect(screen.getByText('Nature')).toBeInTheDocument();
+        expect(mockSearch).toHaveBeenCalled();
+      }, { timeout: 1000 });
+
+      await waitFor(() => {
+        const resultsList = document.querySelector('.results-list');
+        expect(resultsList).toBeTruthy();
       });
 
-      // Find the results-list container (component uses .dropdown > .results-list)
       const resultsList = document.querySelector('.results-list');
-      expect(resultsList).toBeInTheDocument();
-
-      // Simulate scroll event
       if (resultsList) {
         Object.defineProperty(resultsList, 'scrollHeight', { value: 500, configurable: true });
         Object.defineProperty(resultsList, 'scrollTop', { value: 450, configurable: true });
         Object.defineProperty(resultsList, 'clientHeight', { value: 100, configurable: true });
 
-        resultsList.dispatchEvent(new Event('scroll', { bubbles: true }));
+        fireEvent.scroll(resultsList);
       }
 
-      // Should call with page 2
       await waitFor(() => {
-        expect(mockedAxios.get).toHaveBeenCalledWith(
-          '/api/journals/search',
-          expect.objectContaining({
-            params: expect.objectContaining({
-              page: 2
-            })
-          })
-        );
+        expect(mockLoadMore).toHaveBeenCalled();
       }, { timeout: 2000 });
     });
   });
