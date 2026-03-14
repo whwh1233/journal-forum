@@ -81,6 +81,15 @@ const Post = sequelize.define('Post', {
       return val === null ? 0 : parseFloat(val);
     }
   },
+  allTimeScore: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+    field: 'all_time_score',
+    get() {
+      const val = this.getDataValue('allTimeScore');
+      return val === null ? 0 : parseFloat(val);
+    }
+  },
   isPinned: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -109,6 +118,9 @@ const Post = sequelize.define('Post', {
     },
     {
       fields: ['hot_score']
+    },
+    {
+      fields: ['all_time_score']
     },
     {
       fields: ['created_at']
