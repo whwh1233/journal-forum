@@ -1,4 +1,4 @@
-const { Journal, JournalLevel, JournalRatingCache, Category, JournalCategoryMap, sequelize } = require('../models');
+const { Journal, JournalLevel, JournalRatingCache, Category, JournalCategoryMap, Favorite, sequelize } = require('../models');
 const { Op } = require('sequelize');
 
 // 排序字段优先级顺序（固定）
@@ -136,6 +136,62 @@ const getJournals = async (req, res, next) => {
 
         const offset = (page - 1) * limit;
 
+        // Hot ranking sorts (bypass multi-field sort logic)
+        if (sortBy === 'hot' || sortBy === 'allTime') {
+          const scoreField = sortBy === 'hot' ? 'hot_score' : 'all_time_score';
+
+          const queryOpts = {
+            where,
+            include: [
+              { model: JournalLevel, as: 'levels', attributes: ['levelName'] },
+              { model: JournalRatingCache, as: 'ratingCache' },
+              { model: Category, as: 'categories', attributes: ['name'], through: { attributes: [] } }
+            ],
+            order: [[
+              { model: JournalRatingCache, as: 'ratingCache' },
+              scoreField,
+              'DESC'
+            ]],
+            offset: Number(offset),
+            limit: Number(limit),
+            distinct: true,
+            subQuery: false
+          };
+
+          const { count, rows } = await Journal.findAndCountAll(queryOpts);
+
+          let journals = rows.map(j => {
+            const data = j.toJSON();
+            data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
+            data.category = data.categories ? data.categories.map(c => c.name).join(' / ') : '';
+            return data;
+          });
+
+          // 登录用户：批量查收藏状态
+          if (req.user) {
+            const journalIds = journals.map(j => j.journalId);
+            const favorites = await Favorite.findAll({
+              where: { userId: req.user.id, journalId: journalIds },
+              attributes: ['journalId']
+            });
+            const favSet = new Set(favorites.map(f => f.journalId));
+            journals.forEach(j => { j.isFavorited = favSet.has(j.journalId); });
+          }
+
+          return res.status(200).json({
+            success: true,
+            data: {
+              journals,
+              pagination: {
+                currentPage: Number(page),
+                totalPages: Math.ceil(count / limit),
+                totalItems: count,
+                itemsPerPage: Number(limit)
+              }
+            }
+          });
+        }
+
         // 基础查询，include 关联
         const queryOptions = {
             where,
@@ -188,6 +244,17 @@ const getJournals = async (req, res, next) => {
             journals = journals.filter(j =>
                 j.ratingCache && j.ratingCache.rating >= Number(minRating)
             );
+        }
+
+        // 登录用户：批量查收藏状态
+        if (req.user) {
+            const journalIds = journals.map(j => j.journalId);
+            const favorites = await Favorite.findAll({
+                where: { userId: req.user.id, journalId: journalIds },
+                attributes: ['journalId']
+            });
+            const favSet = new Set(favorites.map(f => f.journalId));
+            journals.forEach(j => { j.isFavorited = favSet.has(j.journalId); });
         }
 
         res.status(200).json({
@@ -402,6 +469,14 @@ const getJournalById = async (req, res, next) => {
         const data = journal.toJSON();
         data.levels = data.levels ? data.levels.map(l => l.levelName) : [];
         data.category = data.categories ? data.categories.map(c => c.name).join(' / ') : '';
+
+        // 登录用户：查收藏状态
+        if (req.user) {
+            const fav = await Favorite.findOne({
+                where: { userId: req.user.id, journalId: id }
+            });
+            data.isFavorited = !!fav;
+        }
 
         res.status(200).json({
             success: true,
