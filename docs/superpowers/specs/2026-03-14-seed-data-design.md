@@ -9,6 +9,12 @@
 - **期刊数据不造假** — 使用数据库中已有的真实期刊
 - **数据可清理** — seed 用户邮箱统一用 `seed-xxx@test.com`，支持按标记精准清除
 - **中文仿真** — 使用 `@faker-js/faker` 中文 locale 生成多样化内容
+- **数据格式必须与正常操作一致** — seed 数据必须严格符合数据库 schema 和业务规则，等同于用户通过 API 正常操作产生的数据：
+  - 字段类型严格匹配（如 User.id 是 UUID char(36)、Journal.journalId 是 string PK）
+  - 遵守业务规则（顶级评论必须带 dimensionRatings、帖子评论最多 3 层、投稿状态链合理）
+  - 计数字段同步（帖子的 likeCount/commentCount/favoriteCount 必须等于实际关联记录数）
+  - 评论创建后更新 JournalRatingCache，与 commentController 逻辑一致
+  - 所有外键、唯一约束、非空约束正确满足
 
 ## 数据规模（小规模）
 
