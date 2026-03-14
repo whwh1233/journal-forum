@@ -41,6 +41,7 @@ export interface Post {
   favoriteCount: number;
   followCount: number;
   hotScore: number;
+  allTimeScore: number;
 
   isPinned: boolean;
   isDeleted: boolean;
@@ -103,7 +104,7 @@ export interface PostFilters {
   tag?: string;
   journalId?: number;
   userId?: string;
-  sortBy?: 'hot' | 'latest' | 'likes' | 'comments' | 'views';
+  sortBy?: 'hot' | 'latest' | 'likes' | 'comments' | 'views' | 'allTime';
   page?: number;
   limit?: number;
   search?: string;
@@ -128,6 +129,7 @@ export const CATEGORY_LABELS: Record<PostCategory, string> = {
 
 export const SORT_OPTIONS = [
   { value: 'hot', label: '综合热度' },
+  { value: 'allTime', label: '历史最热' },
   { value: 'latest', label: '最新发布' },
   { value: 'likes', label: '最多点赞' },
   { value: 'comments', label: '最多回复' },
