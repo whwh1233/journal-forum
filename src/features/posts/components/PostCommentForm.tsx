@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import { MarkdownEditor } from '../../../components/MarkdownEditor';
 import './PostCommentForm.css';
 
 interface PostCommentFormProps {
@@ -68,12 +69,12 @@ const PostCommentForm: React.FC<PostCommentFormProps> = ({
 
   return (
     <form className="post-comment-form" onSubmit={handleSubmit}>
-      <textarea
-        className="post-comment-form-textarea"
+      <MarkdownEditor
         value={content}
-        onChange={e => setContent(e.target.value)}
+        onChange={setContent}
         placeholder={isReply ? '写下你的回复...' : '写下你的评论...'}
-        rows={isReply ? 3 : 4}
+        mode="compact"
+        minRows={isReply ? 3 : 4}
         disabled={isSubmitting}
       />
 
