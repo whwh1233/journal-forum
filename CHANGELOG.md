@@ -2,6 +2,20 @@
 
 投哪儿 (pubWhere) 版本更新日志
 
+### [0.1.4](https://github.com/whwh1233/journal-forum/compare/v0.1.3...v0.1.4) (2026-03-14)
+
+
+### 新功能
+
+* optimize favorite system with batch check and optional auth ([16f92f6](https://github.com/whwh1233/journal-forum/commit/16f92f6e186356a44ae958ca052c78ec21bba71b))
+* **ui:** add skeleton loading shimmer for journal card covers ([1aeb4ad](https://github.com/whwh1233/journal-forum/commit/1aeb4adc545816159ca2b9fbfcd3a848208a9eae))
+
+
+### 修复
+
+* use 127.0.0.1 instead of localhost in Vite proxy config ([cac50d3](https://github.com/whwh1233/journal-forum/commit/cac50d3c39f1296a9b9b5d5d4cbdbb72947c9c8b))
+* use snake_case column names in Notification model indexes ([8318b42](https://github.com/whwh1233/journal-forum/commit/8318b42afc3947f6dcf910a1c1eb26d6c6851307))
+
 ### [0.1.3](https://github.com/whwh1233/journal-forum/compare/v0.1.2...v0.1.3) (2026-03-14)
 
 
