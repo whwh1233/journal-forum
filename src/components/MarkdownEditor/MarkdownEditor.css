@@ -165,3 +165,80 @@
 .markdown-editor--compact .markdown-editor__textarea {
   padding: 8px 12px;
 }
+
+/* Lightbox */
+.markdown-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  animation: md-lightbox-in 0.2s ease;
+}
+
+.markdown-lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+@keyframes md-lightbox-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Markdown content in comments */
+.markdown-content {
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.markdown-content p {
+  margin: 0 0 0.5em;
+}
+
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: var(--radius-sm, 4px);
+  margin: 4px 0;
+  cursor: pointer;
+}
+
+.markdown-img-error {
+  display: inline-block;
+  padding: 8px 12px;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs, 12px);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm, 4px);
+}
+
+.markdown-content code {
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: var(--bg-tertiary, var(--bg-secondary));
+  font-size: 0.9em;
+}
+
+.markdown-content pre code {
+  display: block;
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.markdown-content blockquote {
+  margin: 0.5em 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--border-primary);
+  color: var(--text-secondary);
+}
