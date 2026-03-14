@@ -6,8 +6,10 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { Post, CreatePostData, PostCategory, CATEGORY_LABELS } from '../types/post';
+import { Post, CreatePostData, PostCategoryInfo, TagInfo, CATEGORY_LABELS } from '../types/post';
+import { postCategoryService } from '../../../services/postCategoryService';
 import { MarkdownEditor } from '../../../components/MarkdownEditor';
+import TagInput from './TagInput';
 import './PostForm.css';
 
 interface PostFormProps {
@@ -28,23 +30,53 @@ const PostForm: React.FC<PostFormProps> = ({
 }) => {
   const [title, setTitle] = useState(initialData?.title || '');
   const [content, setContent] = useState(initialData?.content || '');
-  const [category, setCategory] = useState<PostCategory>(initialData?.category || 'other');
-  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
-  const [tagInput, setTagInput] = useState('');
+  const [categoryId, setCategoryId] = useState<number | undefined>(
+    initialData?.categoryId || undefined
+  );
+  const [selectedTags, setSelectedTags] = useState<TagInfo[]>(initialData?.tags_assoc || []);
+  const [newTagNames, setNewTagNames] = useState<string[]>([]);
   const [journalId, setJournalId] = useState<number | undefined>(initialData?.journalId);
   const [journalTitle, setJournalTitle] = useState(initialData?.journalTitle || '');
+
+  const [categories, setCategories] = useState<PostCategoryInfo[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showDraftRestore, setShowDraftRestore] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   const autoSaveTimerRef = useRef<NodeJS.Timeout>();
-  const draftStateRef = useRef({ title, content, category, tags, journalId });
+  const draftStateRef = useRef({ title, content, categoryId, selectedTags, newTagNames, journalId });
+
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const { categories: cats } = await postCategoryService.getCategories();
+        setCategories(cats);
+        // If editing and we have a category slug but no categoryId, try to map it
+        if (initialData?.category && !initialData?.categoryId && cats.length > 0) {
+          const match = cats.find(c => c.slug === initialData.category);
+          if (match) setCategoryId(match.id);
+        }
+        // Default to first category if none selected
+        if (!categoryId && !initialData?.categoryId && cats.length > 0) {
+          setCategoryId(cats[0].id);
+        }
+      } catch {
+        // Fallback: categories will be empty, user sees empty select
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+    loadCategories();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep ref in sync with latest form state (no interval rebuilding)
   useEffect(() => {
-    draftStateRef.current = { title, content, category, tags, journalId };
-  }, [title, content, category, tags, journalId]);
+    draftStateRef.current = { title, content, categoryId, selectedTags, newTagNames, journalId };
+  }, [title, content, categoryId, selectedTags, newTagNames, journalId]);
 
   // Check for draft on mount
   useEffect(() => {
@@ -67,10 +99,11 @@ const PostForm: React.FC<PostFormProps> = ({
   useEffect(() => {
     if (mode !== 'create') return;
     autoSaveTimerRef.current = setInterval(() => {
-      const { title: t, content: c, category: cat, tags: tgs, journalId: jid } = draftStateRef.current;
+      const { title: t, content: c, categoryId: cid, selectedTags: stags, newTagNames: ntags, journalId: jid } = draftStateRef.current;
       if (t || c) {
         localStorage.setItem(DRAFT_KEY, JSON.stringify({
-          title: t, content: c, category: cat, tags: tgs, journalId: jid,
+          title: t, content: c, categoryId: cid,
+          selectedTags: stags, newTagNames: ntags, journalId: jid,
           savedAt: new Date().toISOString()
         }));
         setLastSaved(new Date());
@@ -88,8 +121,15 @@ const PostForm: React.FC<PostFormProps> = ({
         const parsedDraft = JSON.parse(draft);
         setTitle(parsedDraft.title || '');
         setContent(parsedDraft.content || '');
-        setCategory(parsedDraft.category || 'other');
-        setTags(parsedDraft.tags || []);
+        // Support both old (category slug) and new (categoryId) draft format
+        if (parsedDraft.categoryId) {
+          setCategoryId(parsedDraft.categoryId);
+        } else if (parsedDraft.category && categories.length > 0) {
+          const match = categories.find(c => c.slug === parsedDraft.category);
+          if (match) setCategoryId(match.id);
+        }
+        setSelectedTags(parsedDraft.selectedTags || []);
+        setNewTagNames(parsedDraft.newTagNames || []);
         setJournalId(parsedDraft.journalId);
       } catch (e) {
         // Invalid draft
@@ -103,20 +143,10 @@ const PostForm: React.FC<PostFormProps> = ({
     setShowDraftRestore(false);
   };
 
-  // Handle tag input
-  const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
-      e.preventDefault();
-      const newTag = tagInput.trim();
-      if (!tags.includes(newTag) && tags.length < 10) {
-        setTags([...tags, newTag]);
-        setTagInput('');
-      }
-    }
-  };
-
-  const removeTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index));
+  // Handle tag changes from TagInput
+  const handleTagsChange = (tags: TagInfo[], newNames: string[]) => {
+    setSelectedTags(tags);
+    setNewTagNames(newNames);
   };
 
   // Form validation
@@ -133,7 +163,7 @@ const PostForm: React.FC<PostFormProps> = ({
       newErrors.content = '内容不能为空';
     }
 
-    if (!category) {
+    if (!categoryId) {
       newErrors.category = '请选择分类';
     }
 
@@ -150,8 +180,9 @@ const PostForm: React.FC<PostFormProps> = ({
     const data: CreatePostData = {
       title: title.trim(),
       content: content.trim(),
-      category,
-      tags,
+      categoryId: categoryId || 0,
+      tagIds: selectedTags.filter(t => t.id).map(t => t.id),
+      newTags: newTagNames.length > 0 ? newTagNames : undefined,
       journalId,
       status: isDraft ? 'draft' : 'published',
     };
@@ -230,14 +261,22 @@ const PostForm: React.FC<PostFormProps> = ({
             <select
               id="category"
               className={`post-form-select ${errors.category ? 'post-form-select--error' : ''}`}
-              value={category}
-              onChange={(e) => setCategory(e.target.value as PostCategory)}
+              value={categoryId || ''}
+              onChange={(e) => setCategoryId(Number(e.target.value) || undefined)}
+              disabled={categoriesLoading}
             >
-              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
+              {categoriesLoading ? (
+                <option value="">加载中...</option>
+              ) : (
+                <>
+                  <option value="">请选择分类</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
             {errors.category && <span className="post-form-error">{errors.category}</span>}
           </div>
@@ -246,27 +285,11 @@ const PostForm: React.FC<PostFormProps> = ({
             <label htmlFor="tags" className="post-form-label">
               标签 <span className="post-form-optional">(可选)</span>
             </label>
-            <input
-              id="tags"
-              type="text"
-              className="post-form-input"
-              placeholder="输入标签，按回车或逗号添加..."
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagInput}
+            <TagInput
+              selectedTags={selectedTags}
+              onChange={handleTagsChange}
+              maxTags={10}
             />
-            {tags.length > 0 && (
-              <div className="post-form-tags">
-                {tags.map((tag, index) => (
-                  <span key={index} className="post-form-tag">
-                    {tag}
-                    <button onClick={() => removeTag(index)} className="post-form-tag-remove">
-                      <X size={14} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
