@@ -20,6 +20,8 @@ const announcementRoutes = require('./routes/announcementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const deployRoutes = require('./routes/deployRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const tagRoutes = require('./routes/tagRoutes');
+const postCategoryRoutes = require('./routes/postCategoryRoutes');
 const { startHotRankingCron } = require('./jobs/hotRankingCron');
 
 // 导入中间件
@@ -132,6 +134,8 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/deploy', deployRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/post-categories', postCategoryRoutes);
 
 // 404处理
 app.use(notFound);

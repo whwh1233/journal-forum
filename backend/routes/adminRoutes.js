@@ -26,6 +26,14 @@ const {
   adminArchiveAnnouncement,
   adminDeleteAnnouncement
 } = require('../controllers/announcementController');
+const {
+  adminGetCategories, adminCreateCategory, adminUpdateCategory,
+  adminToggleCategory, adminReorderCategories, adminMigrateCategory
+} = require('../controllers/postCategoryController');
+const {
+  adminGetTags, adminCreateTag, adminUpdateTag, adminDeleteTag,
+  adminApproveTag, adminRejectTag, adminBatchApprove, adminBatchReject, adminMergeTags
+} = require('../controllers/tagController');
 
 // 所有路由都需要管理员权限
 router.use(adminProtect);
@@ -60,5 +68,24 @@ router.put('/announcements/:id', adminUpdateAnnouncement);
 router.put('/announcements/:id/publish', adminPublishAnnouncement);
 router.put('/announcements/:id/archive', adminArchiveAnnouncement);
 router.delete('/announcements/:id', adminDeleteAnnouncement);
+
+// 标签管理
+router.get('/tags', adminGetTags);
+router.post('/tags', adminCreateTag);
+router.post('/tags/batch-approve', adminBatchApprove);
+router.post('/tags/batch-reject', adminBatchReject);
+router.post('/tags/merge', adminMergeTags);
+router.put('/tags/:id', adminUpdateTag);
+router.delete('/tags/:id', adminDeleteTag);
+router.put('/tags/:id/approve', adminApproveTag);
+router.put('/tags/:id/reject', adminRejectTag);
+
+// 帖子分类管理
+router.get('/post-categories', adminGetCategories);
+router.post('/post-categories', adminCreateCategory);
+router.put('/post-categories/reorder', adminReorderCategories);
+router.put('/post-categories/:id', adminUpdateCategory);
+router.put('/post-categories/:id/toggle', adminToggleCategory);
+router.post('/post-categories/:id/migrate', adminMigrateCategory);
 
 module.exports = router;
