@@ -1,0 +1,16 @@
+{
+  "bumpFiles": [
+    { "filename": "package.json", "type": "json" },
+    { "filename": "backend/package.json", "type": "json" }
+  ],
+  "header": "# Changelog\n\n投哪儿 (pubWhere) 版本更新日志\n",
+  "types": [
+    { "type": "feat", "section": "新功能" },
+    { "type": "fix", "section": "修复" },
+    { "type": "refactor", "section": "重构" },
+    { "type": "test", "section": "测试" },
+    { "type": "docs", "section": "文档" },
+    { "type": "chore", "hidden": true },
+    { "type": "style", "hidden": true }
+  ]
+}
