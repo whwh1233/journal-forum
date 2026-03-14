@@ -250,7 +250,7 @@ describe('SearchAndFilter', () => {
     it('should render sort button', () => {
       render(<SearchAndFilter />);
 
-      expect(screen.getByText('排序功能')).toBeInTheDocument();
+      expect(screen.getByText('排序')).toBeInTheDocument();
     });
 
     it('should toggle sort panel when sort button is clicked', () => {
@@ -427,7 +427,7 @@ describe('SearchAndFilter', () => {
       expect(screen.getByText('等级')).toBeInTheDocument();
       expect(screen.getByText('分类')).toBeInTheDocument();
       expect(screen.getByText('评分')).toBeInTheDocument();
-      expect(screen.getByText('排序功能')).toBeInTheDocument();
+      expect(screen.getByText('排序')).toBeInTheDocument();
     });
   });
 
