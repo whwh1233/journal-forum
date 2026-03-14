@@ -9,9 +9,12 @@
 ### 近期热门 (hot)
 
 ```
-newBoost = 发布 < 24h ? 20 × (1 - hours_since_creation / 24) : 0
-hotScore = (commentCount × 5 + likeCount × 3 + favoriteCount × 2 + viewCount × 0.1) × decay + newBoost
 decay = 0.5 ^ (hours_since_creation / 48)
+rawScore = commentCount × 5 + likeCount × 3 + favoriteCount × 2 + viewCount × 0.1
+newBoost = 发布 < 24h ? 20 × (1 - hours_since_creation / 24) : 0
+
+hotScore = (rawScore × decay) + newBoost
+         ↑ 互动分数乘以衰减      ↑ 新帖加成独立叠加，不参与衰减
 ```
 
 - 权重优先级：评论 > 点赞 > 收藏 > 浏览
@@ -30,7 +33,7 @@ allTimeScore = commentCount × 5 + likeCount × 3 + favoriteCount × 2 + viewCou
 
 ### 排序规则
 
-- 置顶帖 (`isPinned = true`) 强制排在最前面：`ORDER BY isPinned DESC, hotScore DESC`
+- 置顶帖 (`isPinned = true`) 在所有排序模式下强制排在最前面：`ORDER BY isPinned DESC, <sortField> DESC`（新增行为，当前代码未处理 isPinned 排序）
 - 排除 `isDeleted = true` 和 `status != 'published'` 的帖子
 
 ## 期刊 (Journal) 热度算法
@@ -51,6 +54,7 @@ allTimeScore = ratingCount × 5 + totalFavoriteCount × 3 + rating × 2 + impact
 ```
 
 - 综合用户参与度和学术指标
+- 注意：`impactFactor` 在 `online_journals` 表，`ratingCount`/`rating` 在 `journal_rating_caches` 表，计算时需 JOIN 两表
 
 ## 数据库变更
 
@@ -78,9 +82,11 @@ allTimeScore = ratingCount × 5 + totalFavoriteCount × 3 + rating × 2 + impact
 | 帖子被点赞/取消点赞 | 该帖子的 hotScore + allTimeScore |
 | 帖子被评论/删除评论 | 该帖子的 hotScore + allTimeScore |
 | 帖子被收藏/取消收藏 | 该帖子的 hotScore + allTimeScore |
-| 帖子被浏览 | 该帖子的 hotScore + allTimeScore |
-| 期刊被评论/评分 | 该期刊的 hotScore + allTimeScore |
-| 期刊被收藏/取消收藏 | 该期刊的 favoriteCount + hotScore + allTimeScore |
+| 帖子被浏览 | 该帖子的 allTimeScore（viewCount 权重仅 0.1，每次浏览不必更新 hotScore，由定时任务覆盖） |
+| 期刊被评论/评分（Comment 表） | 该期刊的 hotScore + allTimeScore |
+| 期刊被收藏/取消收藏（Favorite 表） | 该期刊的 favoriteCount + hotScore + allTimeScore |
+
+**注意**：帖子互动使用 `PostLike`/`PostComment`/`PostFavorite` 表，期刊互动使用 `Comment`/`Favorite` 表，不要混淆。
 
 ### 定时任务（每小时）
 
@@ -91,6 +97,8 @@ allTimeScore = ratingCount × 5 + totalFavoriteCount × 3 + rating × 2 + impact
 
 - 使用 `node-cron` 在后端进程内运行
 - 帖子批量更新只处理最近 7 天的数据，控制性能开销
+- 超过 7 天的帖子在定时任务中将 hotScore 置为 0（避免残留过高的陈旧分数）
+- 使用简单的执行锁（内存变量）防止定时任务重叠执行
 
 ## API 变更
 
@@ -137,6 +145,7 @@ SORT_OPTIONS = [
 1. 遍历所有帖子，根据当前 commentCount/likeCount/favoriteCount/viewCount 计算初始 hotScore 和 allTimeScore
 2. 遍历所有期刊，从 Comment/Favorite/JournalRatingCache 表聚合数据，计算初始 hotScore 和 allTimeScore
 3. 初始化 JournalRatingCache 的 favoriteCount 字段
+4. 迁移脚本应幂等（可安全重复执行）
 
 ## 热度计算工具函数
 
