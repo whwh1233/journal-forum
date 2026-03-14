@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Filter, X, TrendingUp, Users, Tag } from 'lucide-react';
 import PostList from '../components/PostList';
@@ -6,6 +6,8 @@ import { postService } from '../services/postService';
 import { Post, PostFilters, PostPagination, PostCategory, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePageTitle } from '@/contexts/PageContext';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { useToast } from '../../../hooks/useToast';
 import './CommunityPage.css';
 
 const CommunityPage: React.FC = () => {
@@ -34,6 +36,28 @@ const CommunityPage: React.FC = () => {
   // UI State
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
+  const toast = useToast();
+
+  // Handle filter change — must be defined before the debounce effect that depends on it
+  const handleFilterChange = useCallback((key: keyof PostFilters, value: any) => {
+    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+  }, []); // setFilters is stable, no deps needed
+
+  // Separate search input state for debouncing
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+  const debouncedSearch = useDebounce(searchInput, 300);
+  const isFirstRender = useRef(true);
+
+  // Sync debounced search value to filters — safe because handleFilterChange is stable (useCallback)
+  useEffect(() => {
+    // Skip on initial mount to avoid a redundant extra fetch
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    handleFilterChange('search', debouncedSearch || undefined);
+  }, [debouncedSearch, handleFilterChange]);
+
   // Fetch posts
   const fetchPosts = async (newFilters?: PostFilters) => {
     try {
@@ -56,29 +80,20 @@ const CommunityPage: React.FC = () => {
     }
   };
 
-  // Initial load
+  // Fetch when filters change
   useEffect(() => {
     fetchPosts();
-  }, []);
-
-  // Handle filter change
-  const handleFilterChange = (key: keyof PostFilters, value: any) => {
-    const newFilters = { ...filters, [key]: value, page: 1 };
-    setFilters(newFilters);
-    fetchPosts(newFilters);
-  };
+  }, [filters]);
 
   // Handle load more
   const handleLoadMore = () => {
-    const newFilters = { ...filters, page: (filters.page || 1) + 1 };
-    setFilters(newFilters);
-    fetchPosts(newFilters);
+    setFilters(prev => ({ ...prev, page: (prev.page || 1) + 1 }));
   };
 
   // Handle create post
   const handleCreatePost = () => {
     if (!user) {
-      alert('请先登录');
+      toast.warning('请先登录后再发布帖子');
       return;
     }
     navigate('/posts/new');
@@ -184,8 +199,8 @@ const CommunityPage: React.FC = () => {
                 type="text"
                 className="community-search-input"
                 placeholder="搜索帖子标题或内容..."
-                value={filters.search || ''}
-                onChange={(e) => handleFilterChange('search', e.target.value || undefined)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
               />
             </div>
           </aside>

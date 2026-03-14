@@ -9,6 +9,17 @@ vi.mock('@/features/posts/services/postService', () => ({
 }));
 vi.mock('@/hooks/useAuth');
 vi.mock('@/contexts/PageContext', () => ({ usePageTitle: vi.fn() }));
+vi.mock('@/hooks/useToast', () => ({
+  useToast: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    addToast: vi.fn(),
+    removeToast: vi.fn(),
+    notify: vi.fn(),
+  }),
+}));
 vi.mock('@/features/posts/components/PostList', () => ({
   default: ({ posts, loading, error, onCreatePost, onPostClick }: any) => (
     <div data-testid="post-list">
