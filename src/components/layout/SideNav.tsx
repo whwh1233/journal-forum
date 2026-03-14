@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuthModal } from '@/contexts/AuthModalContext';
-import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award, Database, MessagesSquare, FileText, Megaphone } from 'lucide-react';
+import { Home, User, Settings, Shield, LogOut, Lock, BarChart2, Users, BookOpen, MessageSquare, ChevronRight, Award, Database, MessagesSquare, FileText, Megaphone, Rocket } from 'lucide-react';
 import './SideNav.css';
 
 interface SideNavProps {
@@ -76,10 +76,16 @@ const SideNav: React.FC<SideNavProps> = ({ expanded, onToggle }) => {
               <span className="side-nav-label">公告管理</span>
             </NavLink>
             {user?.role === 'superadmin' && (
-              <NavLink to="/admin/database" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '数据库管理'}>
-                <Database className="side-nav-icon" size={20} />
-                <span className="side-nav-label">数据库管理</span>
-              </NavLink>
+              <>
+                <NavLink to="/admin/database" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '数据库管理'}>
+                  <Database className="side-nav-icon" size={20} />
+                  <span className="side-nav-label">数据库管理</span>
+                </NavLink>
+                <NavLink to="/admin/deploy" className={({ isActive }) => `side-nav-item${isActive ? ' active' : ''}`} title={expanded ? undefined : '部署监控'}>
+                  <Rocket className="side-nav-icon" size={20} />
+                  <span className="side-nav-label">部署监控</span>
+                </NavLink>
+              </>
             )}
             <div className="side-nav-divider" />
             <NavLink to="/" className="side-nav-item" title={expanded ? undefined : '返回首页'}>

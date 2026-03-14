@@ -21,7 +21,8 @@ import {
   CommentManagement,
   BadgeManagement,
   DatabaseManager,
-  AnnouncementManagement
+  AnnouncementManagement,
+  DeployMonitor
 } from '@/features/admin';
 import ProfilePage from '@/features/profile/pages/ProfilePage';
 import ProfileEditPage from '@/features/profile/pages/ProfileEditPage';
@@ -213,6 +214,14 @@ const AppContent: React.FC = () => {
             element={
               <SuperAdminRoute>
                 <DatabaseManager />
+              </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/deploy"
+            element={
+              <SuperAdminRoute>
+                <DeployMonitor />
               </SuperAdminRoute>
             }
           />
