@@ -2,6 +2,8 @@
 
 投哪儿 (pubWhere) 版本更新日志
 
+### [0.1.2](https://github.com/whwh1233/journal-forum/compare/v0.1.1...v0.1.2) (2026-03-14)
+
 ### 0.1.1 (2026-03-14)
 
 
