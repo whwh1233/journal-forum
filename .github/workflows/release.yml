@@ -33,7 +33,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Run standard-version
-        run: npx standard-version
+        run: HUSKY=0 npx standard-version
 
       - name: Push changes and tags
         run: git push --follow-tags origin main
