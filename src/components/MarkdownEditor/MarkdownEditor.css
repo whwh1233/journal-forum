@@ -1,0 +1,167 @@
+.markdown-editor {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md, 8px);
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.markdown-editor__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.markdown-editor__toolbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.markdown-editor__toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-editor__toolbar-btn:hover {
+  background: var(--bg-tertiary, var(--bg-hover));
+  color: var(--text-primary);
+}
+
+.markdown-editor__toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.markdown-editor__toolbar-btn.uploading {
+  color: var(--color-primary);
+}
+
+.markdown-editor__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border-primary);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: md-editor-spin 0.6s linear infinite;
+}
+
+@keyframes md-editor-spin {
+  to { transform: rotate(360deg); }
+}
+
+.markdown-editor__view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.markdown-editor__view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm, 4px);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.markdown-editor__view-btn:hover {
+  color: var(--text-primary);
+}
+
+.markdown-editor__view-btn.active {
+  color: var(--color-primary);
+  background: var(--bg-tertiary, var(--bg-hover));
+}
+
+.markdown-editor__body {
+  display: flex;
+}
+
+.markdown-editor__body--edit .markdown-editor__textarea {
+  width: 100%;
+}
+
+.markdown-editor__body--split {
+  display: flex;
+}
+
+.markdown-editor__body--split .markdown-editor__textarea,
+.markdown-editor__body--split .markdown-editor__preview {
+  width: 50%;
+}
+
+.markdown-editor__body--split .markdown-editor__preview {
+  border-left: 1px solid var(--border-primary);
+}
+
+.markdown-editor__body--preview .markdown-editor__preview {
+  width: 100%;
+}
+
+.markdown-editor__textarea {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  font-size: var(--font-size-sm, 14px);
+  line-height: 1.6;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.markdown-editor__textarea::placeholder {
+  color: var(--text-tertiary);
+}
+
+.markdown-editor__preview {
+  padding: 12px;
+  overflow-y: auto;
+  font-size: var(--font-size-sm, 14px);
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.markdown-editor__preview img {
+  max-width: 100%;
+  border-radius: var(--radius-sm, 4px);
+  cursor: pointer;
+}
+
+.markdown-editor__preview-placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.markdown-editor--compact .markdown-editor__toolbar {
+  padding: 2px 6px;
+}
+
+.markdown-editor--compact .markdown-editor__toolbar-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.markdown-editor--compact .markdown-editor__textarea {
+  padding: 8px 12px;
+}
