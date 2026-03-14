@@ -20,6 +20,7 @@ const announcementRoutes = require('./routes/announcementRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const deployRoutes = require('./routes/deployRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const { startHotRankingCron } = require('./jobs/hotRankingCron');
 
 // 导入中间件
 const { errorHandler, notFound } = require('./middleware/error');
@@ -150,6 +151,7 @@ const startServer = async () => {
     // 3. 启动 HTTP 服务
     app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+      startHotRankingCron();
     });
   } catch (error) {
     console.error('Failed to start server:', error);
