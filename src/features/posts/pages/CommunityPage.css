@@ -556,6 +556,21 @@
   color: white;
 }
 
+.community-tag-cloud-count {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  background: var(--color-background);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.community-tag-cloud-item:hover .community-tag-cloud-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
 .community-info-text {
   font-size: var(--text-sm);
   line-height: 1.7;

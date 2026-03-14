@@ -1,57 +1,29 @@
 .star-rating {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--space-2);
 }
 
-.star-rating__star {
-  color: var(--color-accent);
-  font-weight: bold;
-  transition: transform var(--transition-fast);
-  display: inline-block;
+.star-rating__stars {
+  display: inline-flex;
+  gap: 3px;
 }
 
-.star-rating__star:hover {
-  transform: scale(1.2);
+.star-rating__svg {
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.06));
 }
 
-.star-rating__star--empty {
-  color: var(--color-border);
-  opacity: 0.5;
-}
+.star-rating--small .star-rating__stars { gap: 2px; }
+.star-rating--large .star-rating__stars { gap: 4px; }
 
 .star-rating__text {
-  margin-left: var(--spacing-sm);
-  font-size: 0.9em;
-  font-family: var(--font-body);
-  color: var(--color-text-secondary);
-  font-weight: 500;
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--color-text);
 }
 
-/* 尺寸变体 */
-.star-rating--small .star-rating__star {
-  font-size: 0.8em;
-}
-
-.star-rating--medium .star-rating__star {
-  font-size: 1em;
-}
-
-.star-rating--large .star-rating__star {
-  font-size: 1.3em;
-}
-
-/* 评分数值特殊颜色 */
-.star-rating__text--high {
-  color: var(--color-accent);
-  font-weight: 600;
-}
-
-.star-rating__text--medium {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.star-rating__text--low {
-  color: var(--color-text-secondary);
+.star-rating--small .star-rating__text {
+  font-size: var(--text-xs);
 }

@@ -119,6 +119,10 @@
   --avatar-lg: 48px;
   --avatar-xl: 64px;
 
+  /* Star Rating */
+  --star-fill: #fbbf24;
+  --star-empty: #e8e8e8;
+
   /* Shadows - Soft, Layered */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -271,6 +275,9 @@
   --gray-800: #e6edf3;
   --gray-900: #f0f6fc;
 
+  --star-fill: #e3b341;
+  --star-empty: #30363d;
+
   /* 焦点环 */
   --focus-ring: 0 0 0 3px rgba(88, 166, 255, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(248, 81, 73, 0.3);
@@ -420,6 +427,9 @@
   --shadow-xl: 0 20px 25px rgba(61, 51, 40, 0.15);
 
   /* 焦点环 */
+  --star-fill: #d9a961;
+  --star-empty: #ccd5ae;
+
   --focus-ring: 0 0 0 3px rgba(212, 163, 115, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(201, 112, 100, 0.3);
   --focus-ring-success: 0 0 0 3px rgba(123, 163, 90, 0.3);
@@ -537,6 +547,9 @@
   --shadow-xl: 0 20px 25px rgba(74, 40, 0, 0.15);
 
   /* 焦点环 */
+  --star-fill: #ffb700;
+  --star-empty: #ffe0b3;
+
   --focus-ring: 0 0 0 3px rgba(255, 162, 0, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(216, 67, 21, 0.3);
   --focus-ring-success: 0 0 0 3px rgba(124, 179, 66, 0.3);
@@ -649,6 +662,9 @@
   --shadow-xl: 0 20px 25px rgba(108, 88, 76, 0.15);
 
   /* 焦点环 */
+  --star-fill: #c9a060;
+  --star-empty: #c9d4a8;
+
   --focus-ring: 0 0 0 3px rgba(169, 132, 103, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(169, 86, 68, 0.3);
   --focus-ring-success: 0 0 0 3px rgba(125, 155, 90, 0.3);
@@ -763,6 +779,9 @@
   --shadow-xl: 0 20px 25px rgba(93, 78, 66, 0.15);
 
   /* 焦点环 */
+  --star-fill: #cb997e;
+  --star-empty: #ddbea9;
+
   --focus-ring: 0 0 0 3px rgba(203, 153, 126, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(181, 112, 95, 0.3);
   --focus-ring-success: 0 0 0 3px rgba(139, 165, 128, 0.3);
@@ -877,6 +896,9 @@
   --shadow-xl: 0 20px 25px rgba(77, 63, 51, 0.15);
 
   /* 焦点环 */
+  --star-fill: #d08c60;
+  --star-empty: #e5cdb0;
+
   --focus-ring: 0 0 0 3px rgba(208, 140, 96, 0.3);
   --focus-ring-error: 0 0 0 3px rgba(197, 106, 82, 0.3);
   --focus-ring-success: 0 0 0 3px rgba(136, 160, 96, 0.3);

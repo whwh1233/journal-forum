@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Journal, RatingSummary } from '@/types';
 import { getRatingSummary } from '@/services/commentService';
-import StarRating from '@/components/common/StarRating';
 import DimensionRatingDisplay from '@/features/comments/components/DimensionRatingDisplay';
 import CommentList from '@/features/comments/components/CommentList';
-import { X, FileEdit } from 'lucide-react';
+import { X, FileEdit, BookOpen } from 'lucide-react';
 import './JournalDetailPanel.css';
 
 interface JournalDetailPanelProps {
@@ -17,11 +16,12 @@ interface JournalDetailPanelProps {
 const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen, onClose }) => {
   const navigate = useNavigate();
   const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
+  const [coverError, setCoverError] = useState(false);
 
   const handleRecordSubmission = () => {
     if (journal) {
-      onClose(); // 关闭面板
-      navigate(`/submissions?journalId=${journal.journalId}`); // 跳转到投稿追踪页并传递期刊 ID
+      onClose();
+      navigate(`/submissions?journalId=${journal.journalId}`);
     }
   };
 
@@ -46,12 +46,12 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 获取多维评分汇总
   useEffect(() => {
     if (journal && isOpen) {
       getRatingSummary(journal.journalId)
         .then(setRatingSummary)
         .catch(() => setRatingSummary(null));
+      setCoverError(false);
     } else {
       setRatingSummary(null);
     }
@@ -59,8 +59,8 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
 
   if (!journal && !isOpen) return null;
 
-  // 获取评分 (处理可能是缓存的情况)
   const rating = journal?.ratingCache?.rating || 0;
+  const hasCover = journal?.coverImageUrl && !coverError;
 
   return (
     <>
@@ -84,7 +84,7 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
               aria-label="记录投稿"
               title="记录到投稿追踪"
             >
-              <FileEdit size={18} aria-hidden="true" />
+              <FileEdit size={16} aria-hidden="true" />
               <span>记录投稿</span>
             </button>
             <button
@@ -92,48 +92,95 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
               onClick={onClose}
               aria-label="关闭"
             >
-              <X size={24} aria-hidden="true" />
+              <X size={18} aria-hidden="true" />
             </button>
           </div>
         </div>
 
         {journal && (
           <div className="journal-panel-body">
-            <div className="journal-detail-header">
-              <div className="journal-detail-meta">
-                <div className="detail-item">
-                  <span className="detail-label">ISSN</span>
-                  <span className="detail-value">{journal.issn || '无'}</span>
-                </div>
-                {journal.cn && (
-                  <div className="detail-item">
-                    <span className="detail-label">CN</span>
-                    <span className="detail-value">{journal.cn}</span>
+            {/* Hero: Cover + Info */}
+            <div className="journal-panel-hero">
+              <div className="journal-panel-cover">
+                {hasCover ? (
+                  <img
+                    src={journal.coverImageUrl}
+                    alt={journal.name}
+                    onError={() => setCoverError(true)}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="journal-panel-cover-default">
+                    <BookOpen size={24} strokeWidth={1.5} aria-hidden="true" />
+                    <span className="journal-panel-cover-char">{journal.name.charAt(0)}</span>
                   </div>
                 )}
-                {journal.publicationCycle && (
-                  <div className="detail-item">
-                    <span className="detail-label">出版周期</span>
-                    <span className="detail-value">{journal.publicationCycle}</span>
+              </div>
+              <div className="journal-panel-hero-info">
+                <div className="journal-panel-meta">
+                  <span>{journal.issn ? `ISSN ${journal.issn}` : '无 ISSN'}</span>
+                  {journal.cn && <span>CN {journal.cn}</span>}
+                  {journal.publicationCycle && <span>{journal.publicationCycle}</span>}
+                </div>
+                <div className="journal-panel-tags">
+                  {journal.levels && journal.levels.length > 0 ? (
+                    journal.levels.map((lvl, idx) => (
+                      <span
+                        key={idx}
+                        className={`journal-panel-tag ${lvl.includes('1') || lvl.includes('TOP') || lvl.includes('A') ? 'primary' : 'muted'}`}
+                      >
+                        {lvl}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="journal-panel-tag muted">暂无分类</span>
+                  )}
+                </div>
+                {journal.introduction && (
+                  <div className="journal-panel-intro">
+                    {journal.introduction.length > 80
+                      ? journal.introduction.slice(0, 80) + '...'
+                      : journal.introduction}
                   </div>
                 )}
-                <div className="detail-item">
-                  <span className="detail-label">学科领域</span>
-                  <span className="detail-value">
-                    {journal.levels && journal.levels.length > 0
-                      ? journal.levels.join(', ')
-                      : '暂无'}
-                  </span>
+              </div>
+            </div>
+
+            {/* Metrics Bar */}
+            <div className="journal-panel-metrics">
+              <div className="journal-panel-metric">
+                <div className="journal-panel-metric-label">影响因子</div>
+                <div className="journal-panel-metric-value">
+                  {journal.impactFactor?.toFixed(2) || '—'}
                 </div>
-                <div className="detail-item">
-                  <span className="detail-label">评分</span>
-                  <span className="detail-value">
-                    <StarRating rating={ratingSummary?.rating ?? rating} showText={true} />
-                  </span>
+              </div>
+              <div className="journal-panel-metric">
+                <div className="journal-panel-metric-label">用户评分</div>
+                <div className="journal-panel-metric-value">
+                  {(ratingSummary?.rating ?? rating) > 0
+                    ? (ratingSummary?.rating ?? rating).toFixed(1)
+                    : '—'}
+                </div>
+              </div>
+              <div className="journal-panel-metric">
+                <div className="journal-panel-metric-label">文献量</div>
+                <div className="journal-panel-metric-value">
+                  {journal.articleCount
+                    ? journal.articleCount >= 1000
+                      ? (journal.articleCount / 1000).toFixed(1) + 'k'
+                      : journal.articleCount
+                    : '—'}
+                </div>
+              </div>
+              <div className="journal-panel-metric">
+                <div className="journal-panel-metric-label">被引频次</div>
+                <div className="journal-panel-metric-value">
+                  {journal.avgCitations?.toFixed(1) || '—'}
                 </div>
               </div>
             </div>
 
+            {/* Dimension Ratings */}
             {ratingSummary && Object.keys(ratingSummary.dimensionAverages).length > 0 && (
               <DimensionRatingDisplay
                 dimensionRatings={ratingSummary.dimensionAverages}
@@ -142,33 +189,15 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
               />
             )}
 
-            <div className="journal-detail-description">
-              <h3>期刊简介</h3>
-              <p>{journal.introduction || '暂无简介'}</p>
-            </div>
+            {/* Description */}
+            {journal.introduction && (
+              <div className="journal-panel-description">
+                <h3>期刊简介</h3>
+                <p>{journal.introduction}</p>
+              </div>
+            )}
 
-            {/* 额外的信息区域设计 */}
-            <div className="journal-detail-extra-info">
-              {journal.impactFactor && (
-                <div className="extra-stat">
-                  <span className="stat-label">影响因子</span>
-                  <span className="stat-value">{journal.impactFactor}</span>
-                </div>
-              )}
-              {journal.articleCount && (
-                <div className="extra-stat">
-                  <span className="stat-label">文献量</span>
-                  <span className="stat-value">{journal.articleCount}</span>
-                </div>
-              )}
-              {journal.avgCitations && (
-                <div className="extra-stat">
-                  <span className="stat-label">均被引频次</span>
-                  <span className="stat-value">{journal.avgCitations}</span>
-                </div>
-              )}
-            </div>
-
+            {/* Comments */}
             <CommentList journalId={journal.journalId} />
           </div>
         )}
@@ -178,4 +207,3 @@ const JournalDetailPanel: React.FC<JournalDetailPanelProps> = ({ journal, isOpen
 };
 
 export default JournalDetailPanel;
-

@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Filter, X, TrendingUp, Tag, Search } from 'lucide-react';
 import PostList from '../components/PostList';
 import { postService } from '../services/postService';
-import { Post, PostFilters, PostPagination, PostCategory, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
+import { Post, PostFilters, PostPagination, PostCategoryInfo, TagInfo, CATEGORY_LABELS, SORT_OPTIONS } from '../types/post';
+import { postCategoryService } from '../../../services/postCategoryService';
+import { tagService } from '../../../services/tagService';
 import { useAuth } from '../../../hooks/useAuth';
 import { usePageTitle } from '@/contexts/PageContext';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -26,6 +28,10 @@ const CommunityPage: React.FC = () => {
     totalPages: 0
   });
 
+  // Dynamic categories and hot tags
+  const [categories, setCategories] = useState<PostCategoryInfo[]>([]);
+  const [hotTags, setHotTags] = useState<TagInfo[]>([]);
+
   // Filters
   const [filters, setFilters] = useState<PostFilters>({
     sortBy: 'hot',
@@ -37,6 +43,28 @@ const CommunityPage: React.FC = () => {
   const [showFilterDrawer, setShowFilterDrawer] = useState(false);
 
   const toast = useToast();
+
+  // Load categories and hot tags on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { categories: cats } = await postCategoryService.getCategories();
+        setCategories(cats);
+      } catch {
+        // Fallback: categories stays empty, tabs won't render
+      }
+    };
+    const loadHotTags = async () => {
+      try {
+        const { tags } = await tagService.getHotTags();
+        setHotTags(tags);
+      } catch {
+        // Fallback: hotTags stays empty
+      }
+    };
+    loadCategories();
+    loadHotTags();
+  }, []);
 
   // Handle filter change — must be defined before the debounce effect that depends on it
   const handleFilterChange = useCallback((key: keyof PostFilters, value: any) => {
@@ -109,6 +137,13 @@ const CommunityPage: React.FC = () => {
     navigate(`/posts/${id}`);
   };
 
+  // Build category label lookup for sidebar (fallback-compatible)
+  const getCategoryLabel = (slug: string): string => {
+    const cat = categories.find(c => c.slug === slug);
+    if (cat) return cat.name;
+    return CATEGORY_LABELS[slug as keyof typeof CATEGORY_LABELS] || slug;
+  };
+
   return (
     <div className="community-page">
       <div className="community-container">
@@ -123,15 +158,27 @@ const CommunityPage: React.FC = () => {
               >
                 全部
               </button>
-              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                <button
-                  key={value}
-                  className={`community-category-tab ${filters.category === value ? 'community-category-tab--active' : ''}`}
-                  onClick={() => handleFilterChange('category', value)}
-                >
-                  {label}
-                </button>
-              ))}
+              {categories.length > 0
+                ? categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      className={`community-category-tab ${filters.category === cat.slug ? 'community-category-tab--active' : ''}`}
+                      onClick={() => handleFilterChange('category', cat.slug)}
+                    >
+                      {cat.name}
+                    </button>
+                  ))
+                : /* Fallback to hardcoded categories if API hasn't loaded */
+                  Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                    <button
+                      key={value}
+                      className={`community-category-tab ${filters.category === value ? 'community-category-tab--active' : ''}`}
+                      onClick={() => handleFilterChange('category', value)}
+                    >
+                      {label}
+                    </button>
+                  ))
+              }
             </div>
           </div>
 
@@ -152,7 +199,6 @@ const CommunityPage: React.FC = () => {
             {filters.tag && (
               <div className="community-active-tag">
                 <Tag size={16} />
-                {/* size=16: --text-xs (12px) × 1.25 = 15 → round up to even = 16, per design system */}
                 <span>{filters.tag}</span>
                 <button
                   className="community-active-tag__clear"
@@ -180,7 +226,6 @@ const CommunityPage: React.FC = () => {
             {/* Filter toggle — mobile only (kept for mobile sidebar) */}
             <button className="community-filter-toggle" onClick={() => setShowFilterDrawer(!showFilterDrawer)}>
               <Filter size={18} />
-              {/* size=18: --text-sm (14px) × 1.25 = 17.5, rounded up to even = 18, per design system */}
               <span>筛选</span>
             </button>
 
@@ -208,13 +253,20 @@ const CommunityPage: React.FC = () => {
                   <span className="community-stat-label">全部</span>
                   <span className="community-stat-badge">{pagination.total}</span>
                 </div>
-                {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                  <div key={value} className="community-stat-row">
-                    {/* key=value (PostCategory enum key) — labels may not be unique across locales */}
-                    <span className="community-stat-label">{label}</span>
-                    <span className="community-stat-badge">—</span>
-                  </div>
-                ))}
+                {categories.length > 0
+                  ? categories.map((cat) => (
+                      <div key={cat.id} className="community-stat-row">
+                        <span className="community-stat-label">{cat.name}</span>
+                        <span className="community-stat-badge">{cat.postCount ?? '—'}</span>
+                      </div>
+                    ))
+                  : Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                      <div key={value} className="community-stat-row">
+                        <span className="community-stat-label">{label}</span>
+                        <span className="community-stat-badge">—</span>
+                      </div>
+                    ))
+                }
               </div>
             </div>
           </aside>
@@ -255,22 +307,37 @@ const CommunityPage: React.FC = () => {
               </div>
               <div className="community-widget-content">
                 <div className="community-tag-cloud">
-                  {['期刊推荐', '投稿经验', 'SCI', 'EI', '审稿', '修改意见', '拒稿', '录用', 'OA期刊', '影响因子'].map((tag, index) => (
-                    <button
-                      key={index}
-                      className="community-tag-cloud-item"
-                      onClick={() => handleFilterChange('tag', tag)}
-                    >
-                      <Tag size={16} />
-                      {/* size=16: --text-xs (12px) × 1.25 = 15 → round up to even = 16, per design system */}
-                      <span>{tag}</span>
-                    </button>
-                  ))}
+                  {hotTags.length > 0
+                    ? hotTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          className="community-tag-cloud-item"
+                          onClick={() => handleFilterChange('tag', tag.name)}
+                        >
+                          <Tag size={16} />
+                          <span>{tag.name}</span>
+                          {tag.postCount !== undefined && tag.postCount > 0 && (
+                            <span className="community-tag-cloud-count">{tag.postCount}</span>
+                          )}
+                        </button>
+                      ))
+                    : /* Fallback to hardcoded tags if API hasn't loaded */
+                      ['期刊推荐', '投稿经验', 'SCI', 'EI', '审稿', '修改意见', '拒稿', '录用', 'OA期刊', '影响因子'].map((tag, index) => (
+                        <button
+                          key={index}
+                          className="community-tag-cloud-item"
+                          onClick={() => handleFilterChange('tag', tag)}
+                        >
+                          <Tag size={16} />
+                          <span>{tag}</span>
+                        </button>
+                      ))
+                  }
                 </div>
               </div>
             </div>
 
-            {/* 社区统计 — replaces 活跃用户 */}
+            {/* 社区统计 */}
             <div className="community-widget">
               <div className="community-widget-header">
                 <h3>社区统计</h3>
@@ -282,7 +349,7 @@ const CommunityPage: React.FC = () => {
                     <span className="community-stat-desc">总帖子</span>
                   </div>
                   <div className="community-stat-item">
-                    <span className="community-stat-number">6</span>
+                    <span className="community-stat-number">{categories.length || 6}</span>
                     <span className="community-stat-desc">讨论分类</span>
                   </div>
                 </div>
