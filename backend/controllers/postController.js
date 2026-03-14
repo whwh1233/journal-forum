@@ -1,6 +1,7 @@
 const { Post, User, Journal, PostLike, PostFavorite, PostFollow, PostReport } = require('../models');
 const { Op } = require('sequelize');
 const notificationService = require('../services/notificationService');
+const { updatePostScores, calculatePostAllTimeScore } = require('../utils/hotScore');
 
 // 获取帖子列表（带筛选、排序、分页）
 exports.getPosts = async (req, res) => {
@@ -308,8 +309,10 @@ exports.incrementViewCount = async (req, res) => {
         }
 
         await post.increment('viewCount');
+        await post.reload();
+        await post.update({ allTimeScore: calculatePostAllTimeScore(post) });
 
-        res.json({ viewCount: post.viewCount + 1 });
+        res.json({ viewCount: post.viewCount });
     } catch (error) {
         console.error('更新浏览计数失败:', error);
         res.status(500).json({ error: '更新浏览计数失败' });
@@ -334,11 +337,15 @@ exports.toggleLike = async (req, res) => {
             // 取消点赞
             await existingLike.destroy();
             await post.decrement('likeCount');
-            res.json({ liked: false, likeCount: post.likeCount - 1 });
+            await post.reload();
+            await updatePostScores(post);
+            res.json({ liked: false, likeCount: post.likeCount });
         } else {
             // 点赞
             await PostLike.create({ postId: id, userId: req.user.id });
             await post.increment('likeCount');
+            await post.reload();
+            await updatePostScores(post);
 
             // Notify: like (to post author)
             try {
@@ -358,7 +365,7 @@ exports.toggleLike = async (req, res) => {
                 console.error('Notification (like) failed:', err.message);
             }
 
-            res.json({ liked: true, likeCount: post.likeCount + 1 });
+            res.json({ liked: true, likeCount: post.likeCount });
         }
     } catch (error) {
         console.error('点赞操作失败:', error);
@@ -383,11 +390,15 @@ exports.toggleFavorite = async (req, res) => {
         if (existingFavorite) {
             await existingFavorite.destroy();
             await post.decrement('favoriteCount');
-            res.json({ favorited: false, favoriteCount: post.favoriteCount - 1 });
+            await post.reload();
+            await updatePostScores(post);
+            res.json({ favorited: false, favoriteCount: post.favoriteCount });
         } else {
             await PostFavorite.create({ postId: id, userId: req.user.id });
             await post.increment('favoriteCount');
-            res.json({ favorited: true, favoriteCount: post.favoriteCount + 1 });
+            await post.reload();
+            await updatePostScores(post);
+            res.json({ favorited: true, favoriteCount: post.favoriteCount });
         }
     } catch (error) {
         console.error('收藏操作失败:', error);

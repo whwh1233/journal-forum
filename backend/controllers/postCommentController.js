@@ -1,5 +1,6 @@
 const { PostComment, Post, User, PostCommentLike } = require('../models');
 const notificationService = require('../services/notificationService');
+const { updatePostScores } = require('../utils/hotScore');
 
 // 获取帖子的所有评论
 exports.getComments = async (req, res) => {
@@ -129,6 +130,8 @@ exports.createComment = async (req, res) => {
 
         // 增加帖子评论计数
         await post.increment('commentCount');
+        await post.reload();
+        await updatePostScores(post);
 
         // Notify: post_comment (to post author)
         try {
@@ -203,6 +206,14 @@ exports.deleteComment = async (req, res) => {
         }
 
         await comment.update({ isDeleted: true, content: '[该评论已被删除]' });
+
+        // Decrement post comment count and update scores
+        const postForScore = await Post.findByPk(comment.postId);
+        if (postForScore) {
+          await postForScore.decrement('commentCount');
+          await postForScore.reload();
+          await updatePostScores(postForScore);
+        }
 
         res.json({ message: '评论已删除' });
     } catch (error) {
