@@ -62,31 +62,48 @@ async function migrate() {
   }
   console.log(`Updated ${postCount} posts`);
 
-  // 2. Update all journals with rating cache
-  const caches = await JournalRatingCache.findAll();
+  // 2. Collect all journal IDs that have any user interaction (rating cache OR favorites)
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 3600000);
+
+  const caches = await JournalRatingCache.findAll();
+  const cachedIds = new Set(caches.map(c => c.journalId));
+
+  // Find journals with favorites that actually exist in online_journals
+  const [favoritedRows] = await sequelize.query(
+    `SELECT DISTINCT f.journal_id FROM online_favorites f
+     INNER JOIN online_journals j ON f.journal_id = j.journal_id`
+  );
+  const favoritedIds = favoritedRows.map(r => r.journal_id);
+
+  // Merge: all journals that have any interaction
+  const allJournalIds = new Set([...cachedIds, ...favoritedIds]);
   let journalCount = 0;
 
-  for (const cache of caches) {
-    const journalId = cache.journalId;
-
-    const [recentCommentCount, recentFavoriteCount, totalFavoriteCount, journal] = await Promise.all([
+  for (const journalId of allJournalIds) {
+    const [recentCommentCount, recentFavoriteCount, totalFavoriteCount, journal, cache] = await Promise.all([
       Comment.count({ where: { journalId, parentId: null, isDeleted: false, createdAt: { [Op.gte]: sevenDaysAgo } } }),
       Favorite.count({ where: { journalId, createdAt: { [Op.gte]: sevenDaysAgo } } }),
       Favorite.count({ where: { journalId } }),
-      Journal.findByPk(journalId, { attributes: ['impactFactor'] })
+      Journal.findByPk(journalId, { attributes: ['impactFactor'] }),
+      JournalRatingCache.findByPk(journalId)
     ]);
 
-    const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, cache.rating);
-    const allTimeScore = calculateJournalAllTimeScore(
-      cache.ratingCount, totalFavoriteCount, cache.rating,
-      journal ? journal.impactFactor : null
-    );
+    const rating = cache ? cache.rating : 0;
+    const ratingCount = cache ? cache.ratingCount : 0;
+    const impactFactor = journal ? journal.impactFactor : null;
 
-    await cache.update({ hotScore, allTimeScore, favoriteCount: totalFavoriteCount });
+    const hotScore = calculateJournalHotScore(recentCommentCount, recentFavoriteCount, rating);
+    const allTimeScore = calculateJournalAllTimeScore(ratingCount, totalFavoriteCount, rating, impactFactor);
+
+    await JournalRatingCache.upsert({
+      journalId,
+      hotScore,
+      allTimeScore,
+      favoriteCount: totalFavoriteCount
+    });
     journalCount++;
   }
-  console.log(`Updated ${journalCount} journal caches`);
+  console.log(`Updated ${journalCount} journal caches (from ${cachedIds.size} rated + ${favoritedIds.length} favorited)`);
 
   console.log('\n=== Migration Complete ===');
   process.exit(0);
