@@ -93,110 +93,126 @@
   color: var(--color-error);
 }
 
-/* --- Filter Bar Layout --- */
+/* --- Filter Bar Layout (核心修复) --- */
 .filter-bar {
   display: flex;
-  gap: var(--space-4);
+  align-items: center;
+  gap: var(--space-2);
   flex-wrap: wrap;
-  align-items: flex-end;
   margin-top: var(--space-2);
-  margin-bottom: 0;
-  padding-top: 0;
 }
 
-.filter-group {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.filter-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
+/* "筛选" 文字标签 */
+.filter-bar-label {
+  font-size: var(--text-xs);
   font-weight: 700;
-  color: var(--color-text);
-  padding-left: 2px;
-  line-height: 1 !important;
-  height: var(--text-md);
-}
-
-.filter-label svg {
-  display: block;
-  color: var(--color-accent);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
   flex-shrink: 0;
+  padding-right: var(--space-1);
 }
 
-.filter-label span {
-  display: block;
+/* 分隔线 */
+.filter-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  flex-shrink: 0;
+  margin: 0 var(--space-1);
 }
 
-/* --- Popover System --- */
-.popover-select-container {
-  position: relative;
-  user-select: none;
-}
-
-.popover-trigger,
-.sort-trigger-btn {
-  display: flex;
+/* --- Filter Trigger (替代 .popover-trigger + .sort-trigger-btn) --- */
+.filter-trigger {
+  display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  height: var(--size-md);
+  padding: 0 var(--space-3);
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
   border-bottom: 3px solid var(--color-border);
   border-radius: var(--radius-md);
   cursor: pointer;
-  justify-content: space-between;
-  transition: all var(--duration-fast) var(--ease-out);
-  color: var(--color-text);
-  white-space: nowrap;
-  height: var(--size-md);
-  min-width: 130px;
-  padding: 0 var(--space-3);
   font-size: var(--text-sm);
   font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--ease-out);
+  min-width: 0;
+  font-family: inherit;
 }
 
-.popover-trigger:hover,
-.sort-trigger-btn:hover {
-  transform: translateY(-3px);
+.filter-trigger:hover {
+  transform: translateY(-2px);
   background: var(--color-background);
-  border-color: var(--gray-300);
+  border-color: var(--color-border);
   box-shadow: var(--shadow-md);
 }
 
-.popover-trigger.has-value,
-.sort-trigger-btn.has-value {
+.filter-trigger.has-value {
   background: var(--color-info-light);
   border-color: var(--color-accent);
   border-bottom-color: var(--color-secondary);
-  color: var(--color-secondary);
 }
 
-.popover-trigger.open,
-.sort-trigger-btn.open {
+.filter-trigger.open {
   transform: translateY(1px);
   border-bottom-width: 2px;
   border-color: var(--color-accent);
   background: var(--color-background);
 }
 
-.popover-trigger .arrow,
-.sort-trigger-btn .arrow {
-  transition: transform var(--duration-fast);
-  opacity: 0.5;
+/* ft-* 内部子元素 */
+.ft-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-accent);
+  flex-shrink: 0;
 }
 
-.popover-trigger.open .arrow,
-.sort-trigger-btn.open .arrow {
+.ft-label {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ft-sep {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  font-weight: 400;
+}
+
+.ft-value {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.ft-chevron {
+  transition: transform var(--duration-fast);
+  opacity: 0.45;
+  flex-shrink: 0;
+  margin-left: var(--space-1);
+}
+
+.ft-chevron.open {
   transform: rotate(180deg);
   opacity: 1;
 }
 
-/* --- Absolute Menu --- */
+/* 激活状态下 ft-* 颜色 */
+.filter-trigger.has-value .ft-icon   { color: var(--color-secondary); }
+.filter-trigger.has-value .ft-label  { color: var(--color-secondary); }
+.filter-trigger.has-value .ft-value  { color: var(--color-secondary); font-weight: 700; }
+.filter-trigger.has-value .ft-chevron { opacity: 1; }
+
+/* --- Popover Select Container --- */
+.popover-select-container {
+  position: relative;
+  user-select: none;
+}
+
+/* --- Absolute Menu (不变) --- */
 .popover-menu {
   position: absolute;
   top: calc(100% + var(--space-3));
@@ -258,7 +274,7 @@
   border-right: 1px solid var(--color-border);
 }
 
-/* --- Compact Sort Panel --- */
+/* --- Sort Panel (不变) --- */
 .sort-panel-container {
   background: var(--color-background);
   border: 2px solid var(--color-border);
@@ -403,6 +419,7 @@
   color: var(--color-error);
   font-weight: 700;
   font-size: var(--text-sm);
+  font-family: inherit;
   transition: all var(--duration-fast);
   cursor: pointer;
   display: flex;
@@ -425,6 +442,6 @@
   }
 
   .filter-bar {
-    gap: var(--space-4);
+    gap: var(--space-2);
   }
 }
