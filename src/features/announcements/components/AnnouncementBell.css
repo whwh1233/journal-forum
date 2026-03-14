@@ -144,6 +144,53 @@
   font-size: var(--text-sm);
 }
 
+/* Tab navigation */
+.announcement-bell__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.announcement-bell__tab {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  transition: all var(--duration-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.announcement-bell__tab:hover {
+  color: var(--color-text);
+  background-color: var(--color-background-hover);
+}
+
+.announcement-bell__tab--active {
+  color: var(--color-info);
+  border-bottom-color: var(--color-info);
+}
+
+.announcement-bell__tab-badge {
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background-color: var(--color-error);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
 /* Spinning animation for loader */
 .spinning {
   animation: spin 1s linear infinite;
