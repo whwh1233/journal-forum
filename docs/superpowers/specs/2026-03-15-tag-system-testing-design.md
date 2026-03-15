@@ -27,7 +27,7 @@
 
 **Setup/Teardown 模式**（同 `post.test.js`）：
 - `beforeAll`: `sequelize.authenticate()`
-- `beforeEach`: 清理 PostTagMap → Tag → PostCategory，注册测试用户获取 token
+- `beforeEach`: 清理 PostTagMap → Tag → (测试创建的 Post) → PostCategory，注册测试用户获取 token
 - `afterAll`: `sequelize.close()`
 
 **Test Cases:**
@@ -99,6 +99,7 @@ describe('PUT /api/admin/tags/:id')
   ✓ 更新标签名称
   ✓ 更新后 normalizedName 同步变化
   ✓ 更新为已存在名称返回 400
+  ✓ 空名称返回 400
   ✓ 不存在的 id 返回 404
 
 describe('DELETE /api/admin/tags/:id')
@@ -133,14 +134,24 @@ describe('POST /api/admin/tags/merge')
   ✓ 不存在的目标标签返回 404
   ✓ 缺少参数返回 400
 
+describe('Admin Category API - Permission')
+  ✓ 未登录返回 401
+  ✓ 普通用户返回 403
+
 describe('Admin Category API')
   ✓ GET /api/admin/post-categories - 返回所有分类（含未激活）
   ✓ POST /api/admin/post-categories - 创建分类，sortOrder 自增
+  ✓ POST 缺少 name 或 slug 返回 400
   ✓ POST 重复 slug 返回 400
   ✓ PUT /api/admin/post-categories/:id - 更新分类
+  ✓ PUT /api/admin/post-categories/:id - 不存在的 id 返回 404
+  ✓ PUT /api/admin/post-categories/:id - 重复 slug 返回 400
   ✓ PUT /api/admin/post-categories/:id/toggle - 切换激活状态
+  ✓ PUT /api/admin/post-categories/:id/toggle - 不存在的 id 返回 404
   ✓ PUT /api/admin/post-categories/reorder - 重新排序
+  ✓ PUT /api/admin/post-categories/reorder - 空数组返回 400
   ✓ POST /api/admin/post-categories/:id/migrate - 迁移帖子到另一分类
+  ✓ POST /api/admin/post-categories/:id/migrate - 不存在的源/目标分类返回 404
 ```
 
 ---
@@ -162,7 +173,8 @@ describe('TagInput - Rendering')
   ✓ 达到上限时输入框禁用
 
 describe('TagInput - Autocomplete')
-  ✓ 输入文字后 300ms 触发 suggestTags
+  ✓ 输入文字后 300ms 触发 suggestTags（需 vi.useFakeTimers + vi.advanceTimersByTime）
+  ✓ onFocus 时如果输入框有文字则触发 suggestTags
   ✓ 显示建议下拉列表
   ✓ 已选标签不出现在建议中
   ✓ 官方标签排在建议列表前面
@@ -210,14 +222,21 @@ describe('AdminTagsPanel - Filtering')
 describe('AdminTagsPanel - Actions')
   ✓ 审核通过标签
   ✓ 拒绝标签
-  ✓ 编辑标签名
-  ✓ 删除标签
-  ✓ 创建官方标签
+  ✓ 编辑标签名（点击编辑按钮进入内联编辑）
+  ✓ 内联编辑 Enter 保存、Escape 取消
+  ✓ 删除标签（显示确认弹窗，确认后删除）
+  ✓ 创建官方标签（打开创建弹窗，输入名称）
 
 describe('AdminTagsPanel - Batch Operations')
   ✓ 勾选多个标签
+  ✓ 全选/取消全选
   ✓ 批量审核通过
   ✓ 批量拒绝
+
+describe('AdminTagsPanel - States')
+  ✓ 加载中显示 spinner
+  ✓ 加载失败显示错误信息
+  ✓ 空列表显示"暂无标签"
 
 describe('AdminTagsPanel - Merge')
   ✓ 打开合并弹窗
@@ -236,14 +255,15 @@ describe('AdminTagsPanel - Merge')
 **Test Cases:**
 
 ```
-describe('Tag System - User Flow')
+test.describe('Tag System - User Flow')
   ✓ 发帖时使用 TagInput 搜索并选择标签
   ✓ 发帖时创建新标签（显示为 pending）
   ✓ 帖子详情页显示标签
   ✓ 社区页面按标签筛选帖子
 
-describe('Tag System - Admin Flow')
-  beforeEach: 注册用户 → 提升为 admin（直接操作 API）
+test.describe('Tag System - Admin Flow')
+  beforeEach: 注册用户 → 通过 API 注册后直接用 Sequelize 式的
+  后端测试辅助端点提升角色（见下方 E2E Admin Setup 说明）
 
   ✓ 管理面板查看 pending 标签列表
   ✓ 审核通过 pending 标签
@@ -259,10 +279,11 @@ describe('Tag System - Admin Flow')
 
 ### Data Cleanup Order
 
-由于外键约束，清理顺序必须是：
+由于外键约束，清理顺序必须是（子表先于父表）：
 ```
-PostTagMap → Tag → PostCategory → Post（其他测试文件已清理）
+PostTagMap → Tag → (测试创建的 Post) → PostCategory
 ```
+说明：PostTagMap 依赖 Tag 和 Post，Post 依赖 PostCategory。Tag 和 PostCategory 之间无依赖关系。合并测试会创建 Post，需在 Tag 之后、PostCategory 之前清理。
 
 ### Admin User Creation
 
@@ -278,10 +299,25 @@ PostTagMap → Tag → PostCategory → Post（其他测试文件已清理）
 
 ### E2E Admin Setup
 
-E2E 中管理员操作的前置：
-1. 注册用户（通过 UI）
-2. 通过 API 直接 PUT `/api/admin/users/:id` 提升角色（或直接操作数据库）
-3. 然后通过 UI 操作管理面板
+E2E 中无法直接调用 Sequelize，需要通过 HTTP API 提升用户角色。具体方案：
+
+**方案：使用后端测试辅助端点**
+
+在 E2E 测试环境下（`NODE_ENV=test`），后端暴露一个仅限测试的端点用于设置用户角色。如果该端点不存在，则需要在实现阶段新增：
+
+```js
+// backend/routes/testHelperRoutes.js（仅 NODE_ENV=test 时加载）
+router.put('/api/test/users/:id/role', async (req, res) => {
+  const { role } = req.body;
+  await User.update({ role }, { where: { id: req.params.id } });
+  res.json({ success: true });
+});
+```
+
+E2E 流程：
+1. 通过 UI 注册用户
+2. 通过 `request.put('/api/test/users/:id/role')` 设置 `role: 'admin'`
+3. 刷新页面后通过 UI 操作管理面板
 
 ---
 
