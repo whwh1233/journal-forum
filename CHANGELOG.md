@@ -2,6 +2,51 @@
 
 投哪儿 (pubWhere) 版本更新日志
 
+### [0.1.5](https://github.com/whwh1233/journal-forum/compare/v0.1.4...v0.1.5) (2026-03-15)
+
+
+### 文档
+
+* add hot ranking testing design spec and testing standards ([b9bfd40](https://github.com/whwh1233/journal-forum/commit/b9bfd40da17b571a74e6aa8c7392a5c4dad35781))
+* add hot ranking testing implementation plan ([dd5b278](https://github.com/whwh1233/journal-forum/commit/dd5b2788ca82adb04f837c8be67bcf05e22e3ac7))
+* add notification & announcement testing system design spec ([3cf523c](https://github.com/whwh1233/journal-forum/commit/3cf523c5fa408add7b92ff6989a33a81b2df33cf))
+* add notification testing implementation plan ([251d3ee](https://github.com/whwh1233/journal-forum/commit/251d3eed0c27b935ab4b612497676a0a8f8b0271))
+* add tag system testing design spec ([42cd903](https://github.com/whwh1233/journal-forum/commit/42cd9039168d3962b5e0abe2e2164f5d4f102da9))
+* fix spec review issues in hot ranking testing design ([06beb7e](https://github.com/whwh1233/journal-forum/commit/06beb7ea626e098070d01927af0e4a047b9f2f29))
+* fix tag testing spec per review feedback ([8cf0dbc](https://github.com/whwh1233/journal-forum/commit/8cf0dbc4e875fe780815bef1762e3bedf613ab14))
+* update notification testing spec with review fixes ([b6cc355](https://github.com/whwh1233/journal-forum/commit/b6cc3555c7cbcbf402c3d87826b12d90bfac599a))
+
+
+### 修复
+
+* increase timestamp delay in notification ordering test ([e01d464](https://github.com/whwh1233/journal-forum/commit/e01d4649a129e8c00ebe291c5b1cfc897f3cd7eb))
+
+
+### 测试
+
+* add AnnouncementContext unit tests ([4314aa1](https://github.com/whwh1233/journal-forum/commit/4314aa160189fc3c95ff1a110ed3ab02605c0d60))
+* add compact toolbar and markdown mocks to PostCommentForm tests ([1048aea](https://github.com/whwh1233/journal-forum/commit/1048aea883a34445a21aab59b109eb7b63d40333))
+* add compact toolbar verification to CommentForm tests ([5041204](https://github.com/whwh1233/journal-forum/commit/5041204790fcd48b0f744d3c49e7739dcd57ae56))
+* add complete notification integration tests (39 cases) ([dabaf57](https://github.com/whwh1233/journal-forum/commit/dabaf57604f50fa9fab729d66734d6fdcef0a8b7))
+* add comprehensive MarkdownEditor unit tests ([521044d](https://github.com/whwh1233/journal-forum/commit/521044df91ff7a0b67cc3049b75604faeaea4e8a))
+* add custom renderer tests to PostDetail for links and images ([10955e2](https://github.com/whwh1233/journal-forum/commit/10955e2c309e7e0e7c3640bddd0495f66030f568))
+* add DB-level factory functions to testHelpers ([548c6be](https://github.com/whwh1233/journal-forum/commit/548c6be8f89cdee703b6771d9138f0f43c2d8de1))
+* add E2E announcement user, banner, and admin tests ([0d81de2](https://github.com/whwh1233/journal-forum/commit/0d81de297f8d32f50e5e132a97979875f8eb9299))
+* add E2E notification user flow tests with API helpers ([f9021b1](https://github.com/whwh1233/journal-forum/commit/f9021b1749a53b7fed6c61e72d01b3a7965805c8))
+* add edit mode and MarkdownContent tests to CommentItem ([80f47eb](https://github.com/whwh1233/journal-forum/commit/80f47eb3d3a2102df0afde45e5d22eaef5598647))
+* add frontend test factories and notification service tests ([81f10ac](https://github.com/whwh1233/journal-forum/commit/81f10ac9c783352ce77b793c8428bc69f7eba3f1))
+* add markdown preview rendering and XSS sanitization tests to AnnouncementForm ([82b6668](https://github.com/whwh1233/journal-forum/commit/82b6668425abdf846aaea87a779b4fda848e4f99))
+* add MarkdownContent unit tests with lightbox and error handling ([00ec767](https://github.com/whwh1233/journal-forum/commit/00ec76791e8bf94079e5e929165ca51e53b14231))
+* add NotificationContext tests with polling and optimistic updates ([73d22e1](https://github.com/whwh1233/journal-forum/commit/73d22e17649ec5780abf4459e0aa0129727f0129))
+* add NotificationItem and NotificationModal component tests ([62229a9](https://github.com/whwh1233/journal-forum/commit/62229a9202e03fec2589bcf97290d38e434bd08e))
+* **e2e:** add hot ranking E2E tests ([0cef0bf](https://github.com/whwh1233/journal-forum/commit/0cef0bfb8fdfd5ab2a4ef0c856df713371d0eab9))
+* **e2e:** add markdown E2E tests and fix auth/selector issues ([ac70f15](https://github.com/whwh1233/journal-forum/commit/ac70f15b89e5e5100fb00c3d75f40c0afb454b62))
+* expand announcement component tests with carousel, queue, and modal modes ([1050a42](https://github.com/whwh1233/journal-forum/commit/1050a4274e2b2a66ff3aa323f5323ee70d83a858))
+* expand announcement tests with sync, edge cases, stats, deletion ([e9a066f](https://github.com/whwh1233/journal-forum/commit/e9a066ffff078cf7c6b4ed81be539e007a08ed30))
+* **frontend:** add hot ranking component tests ([e755b6a](https://github.com/whwh1233/journal-forum/commit/e755b6a57f31a5371554f5fb62f004b5b34a0605))
+* **integration:** add hot ranking integration tests ([50ce9a5](https://github.com/whwh1233/journal-forum/commit/50ce9a5f4767d9ecff619eeecd9764c6e679c7b5))
+* **unit:** extend hotScore unit tests with edge cases and updatePostScores ([62bb4ac](https://github.com/whwh1233/journal-forum/commit/62bb4ac5ba1565fc78162fe8623a0961e4968e77))
+
 ### [0.1.4](https://github.com/whwh1233/journal-forum/compare/v0.1.3...v0.1.4) (2026-03-14)
 
 

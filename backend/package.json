@@ -1,6 +1,6 @@
 {
   "name": "journal-forum-backend",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Backend service for pubWhere",
   "main": "server.js",
   "scripts": {
