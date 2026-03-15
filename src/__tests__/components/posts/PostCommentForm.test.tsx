@@ -17,6 +17,16 @@ vi.mock('@/features/posts/services/postService', () => ({
   }
 }));
 
+vi.mock('react-markdown', () => ({
+  default: ({ children }: { children: string }) => <div data-testid="markdown-preview">{children}</div>,
+}));
+vi.mock('remark-gfm', () => ({ default: () => {} }));
+vi.mock('rehype-highlight', () => ({ default: () => {} }));
+vi.mock('rehype-sanitize', () => ({ default: () => {} }));
+vi.mock('@/services/uploadService', () => ({
+  uploadImage: vi.fn(),
+}));
+
 const mockUser = {
   id: 'user-123',
   name: 'Test User',
@@ -464,6 +474,32 @@ describe('PostCommentForm', () => {
 
       expect(mockAlert).toHaveBeenCalledWith('请输入评论内容');
       mockAlert.mockRestore();
+    });
+
+    it('renders compact markdown toolbar (bold, italic, image only)', () => {
+      render(
+        <BrowserRouter>
+          <PostCommentForm postId={1} onCommentAdded={mockOnCommentAdded} />
+        </BrowserRouter>
+      );
+      expect(screen.getByTitle('粗体')).toBeInTheDocument();
+      expect(screen.getByTitle('斜体')).toBeInTheDocument();
+      expect(screen.getByTitle('上传图片')).toBeInTheDocument();
+      expect(screen.queryByTitle('标题')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('代码')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('引用')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('链接')).not.toBeInTheDocument();
+    });
+
+    it('does not render view toggle in compact mode', () => {
+      render(
+        <BrowserRouter>
+          <PostCommentForm postId={1} onCommentAdded={mockOnCommentAdded} />
+        </BrowserRouter>
+      );
+      expect(screen.queryByTitle('编辑')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('分屏')).not.toBeInTheDocument();
+      expect(screen.queryByTitle('预览')).not.toBeInTheDocument();
     });
   });
 });
