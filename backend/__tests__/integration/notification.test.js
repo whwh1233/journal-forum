@@ -106,8 +106,8 @@ describe('Notification Integration Tests', () => {
 
     it('should return notifications in DESC order by createdAt', async () => {
       const n1 = await createTestNotification({ recipientId: userA.id, senderId: userB.id, type: 'like' });
-      // small delay to ensure distinct timestamps
-      await new Promise(r => setTimeout(r, 20));
+      // Sufficient delay to ensure distinct timestamps in MySQL (1-second resolution for DATETIME)
+      await new Promise(r => setTimeout(r, 1100));
       const n2 = await createTestNotification({ recipientId: userA.id, senderId: userB.id, type: 'new_follower' });
 
       const res = await request(app)
