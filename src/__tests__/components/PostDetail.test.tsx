@@ -6,11 +6,27 @@ import { Post } from '@/features/posts/types/post';
 // Mock markdown packages
 vi.mock('react-markdown', () => ({
   default: ({ children, components }: any) => {
-    // Render links with the custom component if provided
     const content = children as string;
-    // Simple render: just output the text
-    return <div data-testid="markdown-content">{content}</div>;
-  }
+    const CustomA = components?.a;
+    const CustomImg = components?.img;
+    return (
+      <div data-testid="markdown-content">
+        {content}
+        {CustomA && (
+          <CustomA href="https://external.com" data-testid="custom-link">
+            External Link
+          </CustomA>
+        )}
+        {CustomImg && (
+          <CustomImg
+            src="https://example.com/img.png"
+            alt="test image"
+            data-testid="custom-img"
+          />
+        )}
+      </div>
+    );
+  },
 }));
 vi.mock('remark-gfm', () => ({ default: () => {} }));
 vi.mock('rehype-highlight', () => ({ default: () => {} }));
@@ -375,5 +391,35 @@ describe('PostDetail', () => {
     const avatar = screen.getByAltText('Test Author');
     expect(avatar).toBeInTheDocument();
     expect(avatar).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+  });
+
+  it('renders external links with target _blank and rel noopener', () => {
+    render(
+      <PostDetail
+        post={mockPost}
+        onLike={mockOnLike}
+        onFavorite={mockOnFavorite}
+        onFollow={mockOnFollow}
+        onReport={mockOnReport}
+      />
+    );
+    const link = screen.getByTestId('custom-link');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders images with lazy loading', () => {
+    render(
+      <PostDetail
+        post={mockPost}
+        onLike={mockOnLike}
+        onFavorite={mockOnFavorite}
+        onFollow={mockOnFollow}
+        onReport={mockOnReport}
+      />
+    );
+    const img = screen.getByTestId('custom-img');
+    expect(img).toHaveAttribute('loading', 'lazy');
+    expect(img).toHaveAttribute('alt', 'test image');
   });
 });
