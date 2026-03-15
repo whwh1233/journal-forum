@@ -27,6 +27,10 @@ const mockMarkAllAsRead = vi.fn();
 const mockMarkAsRead = vi.fn();
 const mockRefreshAnnouncements = vi.fn();
 
+// Mock data for notifications
+let mockNotifUnreadCount = 0;
+const mockMarkAllNotifAsRead = vi.fn();
+
 // Mock useAnnouncement hook
 vi.mock('@/contexts/AnnouncementContext', () => ({
   useAnnouncement: () => ({
@@ -42,6 +46,27 @@ vi.mock('@/contexts/AnnouncementContext', () => ({
   }),
 }));
 
+// Mock useNotifications hook
+vi.mock('@/contexts/NotificationContext', () => ({
+  useNotifications: () => ({
+    notifications: [],
+    unreadCount: mockNotifUnreadCount,
+    loading: false,
+    refreshNotifications: vi.fn(),
+    markAsRead: vi.fn(),
+    markAllAsRead: mockMarkAllNotifAsRead,
+  }),
+}));
+
+// Mock sub-components that depend on their own contexts
+vi.mock('@/features/notifications/components/NotificationItem', () => ({
+  NotificationItem: () => null,
+}));
+
+vi.mock('@/features/notifications/components/NotificationModal', () => ({
+  NotificationModal: () => null,
+}));
+
 // Import component after mocks are set up
 import AnnouncementBell from '@/features/announcements/components/AnnouncementBell';
 
@@ -50,6 +75,7 @@ describe('AnnouncementBell', () => {
     vi.clearAllMocks();
     mockAnnouncements = [];
     mockUnreadCount = 0;
+    mockNotifUnreadCount = 0;
   });
 
   describe('渲染', () => {
@@ -127,7 +153,7 @@ describe('AnnouncementBell', () => {
       fireEvent.click(trigger!);
 
       await waitFor(() => {
-        expect(screen.getByText('公告通知')).toBeInTheDocument();
+        expect(screen.getByText('消息中心')).toBeInTheDocument();
       });
     });
   });
@@ -139,6 +165,11 @@ describe('AnnouncementBell', () => {
 
       const trigger = container.querySelector('.announcement-bell__button');
       fireEvent.click(trigger!);
+
+      // Switch to announcements tab
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('公告'));
+      });
 
       await waitFor(() => {
         expect(screen.getByText(/暂无公告/)).toBeInTheDocument();
@@ -155,6 +186,11 @@ describe('AnnouncementBell', () => {
 
       const trigger = container.querySelector('.announcement-bell__button');
       fireEvent.click(trigger!);
+
+      // Switch to announcements tab
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('公告'));
+      });
 
       await waitFor(() => {
         expect(screen.getByText('公告一')).toBeInTheDocument();
@@ -175,6 +211,11 @@ describe('AnnouncementBell', () => {
       const trigger = container.querySelector('.announcement-bell__button');
       fireEvent.click(trigger!);
 
+      // Switch to announcements tab so currentTabUnread = mockUnreadCount = 3
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('公告'));
+      });
+
       await waitFor(() => {
         expect(screen.getByText(/全部已读/)).toBeInTheDocument();
       });
@@ -190,6 +231,11 @@ describe('AnnouncementBell', () => {
 
       const trigger = container.querySelector('.announcement-bell__button');
       fireEvent.click(trigger!);
+
+      // Switch to announcements tab so currentTabUnread = mockUnreadCount = 1
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('公告'));
+      });
 
       await waitFor(() => {
         const markAllBtn = screen.getByText(/全部已读/);
@@ -216,6 +262,66 @@ describe('AnnouncementBell', () => {
       await waitFor(() => {
         expect(trigger).toHaveAttribute('aria-expanded', 'true');
       });
+    });
+  });
+
+  describe('合并未读徽章', () => {
+    it('徽章显示通知和公告未读总数', () => {
+      mockUnreadCount = 3;
+      mockNotifUnreadCount = 7;
+      const { container } = render(<AnnouncementBell />);
+      const badge = container.querySelector('.announcement-bell__badge');
+      expect(badge?.textContent).toBe('10');
+    });
+
+    it('徽章在总数超过 99 时显示 99+', () => {
+      mockUnreadCount = 50;
+      mockNotifUnreadCount = 60;
+      const { container } = render(<AnnouncementBell />);
+      const badge = container.querySelector('.announcement-bell__badge');
+      expect(badge?.textContent).toBe('99+');
+    });
+  });
+
+  describe('按 tab 区分的全部已读', () => {
+    it('在通知 tab 点击全部已读时调用通知 markAllAsRead，不调用公告 markAllAsRead', async () => {
+      mockNotifUnreadCount = 2;
+      const { container } = render(<AnnouncementBell />);
+
+      const trigger = container.querySelector('.announcement-bell__button');
+      fireEvent.click(trigger!);
+
+      // 默认在通知 tab
+      await waitFor(() => {
+        expect(screen.getByText(/全部已读/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(/全部已读/));
+
+      expect(mockMarkAllNotifAsRead).toHaveBeenCalled();
+      expect(mockMarkAllAsRead).not.toHaveBeenCalled();
+    });
+
+    it('在公告 tab 点击全部已读时调用公告 markAllAsRead，不调用通知 markAllAsRead', async () => {
+      mockUnreadCount = 2;
+      const { container } = render(<AnnouncementBell />);
+
+      const trigger = container.querySelector('.announcement-bell__button');
+      fireEvent.click(trigger!);
+
+      // 切换到公告 tab
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('公告'));
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/全部已读/)).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText(/全部已读/));
+
+      expect(mockMarkAllAsRead).toHaveBeenCalled();
+      expect(mockMarkAllNotifAsRead).not.toHaveBeenCalled();
     });
   });
 });

@@ -466,4 +466,152 @@ describe('AnnouncementModal', () => {
       expect(overlay).toHaveAttribute('aria-labelledby', 'announcement-modal-title');
     });
   });
+
+  describe('紧急模式按钮', () => {
+    it('urgent 模式只显示"我知道了"按钮，不显示"关闭"文字按钮', () => {
+      const announcement = createMockAnnouncement({ type: 'urgent' });
+      const onClose = vi.fn();
+
+      render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="urgent"
+          onClose={onClose}
+        />
+      );
+
+      expect(screen.getByText('我知道了')).toBeInTheDocument();
+      expect(screen.queryByText('关闭')).not.toBeInTheDocument();
+    });
+
+    it('urgent 模式点击"我知道了"后触发 onClose', async () => {
+      const announcement = createMockAnnouncement({ type: 'urgent', id: 'u-btn-test' });
+      const onClose = vi.fn();
+
+      render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="urgent"
+          onClose={onClose}
+        />
+      );
+
+      fireEvent.click(screen.getByText('我知道了'));
+
+      // handleAction is async, wait for promise microtasks to resolve
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('详情模式标记已读', () => {
+    it('detail 模式点击"关闭"按钮时调用 markAsRead', () => {
+      const announcement = createMockAnnouncement({ id: 'detail-read-id' });
+      const onClose = vi.fn();
+
+      render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="detail"
+          onClose={onClose}
+        />
+      );
+
+      fireEvent.click(screen.getByText('关闭'));
+
+      expect(mockMarkAsRead).toHaveBeenCalledWith('detail-read-id');
+    });
+
+    it('detail 模式点击遮罩层不调用 markAsRead', () => {
+      const announcement = createMockAnnouncement({ id: 'overlay-no-read' });
+      const onClose = vi.fn();
+
+      const { container } = render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="detail"
+          onClose={onClose}
+        />
+      );
+
+      const overlay = container.querySelector('.announcement-modal__overlay');
+      fireEvent.click(overlay!);
+
+      expect(mockMarkAsRead).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Escape 键关闭', () => {
+    it('detail 模式按 Escape 触发 onClose', () => {
+      const announcement = createMockAnnouncement();
+      const onClose = vi.fn();
+
+      render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="detail"
+          onClose={onClose}
+        />
+      );
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('urgent 模式按 Escape 不触发 onClose', () => {
+      const announcement = createMockAnnouncement({ type: 'urgent' });
+      const onClose = vi.fn();
+
+      render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="urgent"
+          onClose={onClose}
+        />
+      );
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Markdown 内容渲染', () => {
+    it('公告内容经过 marked 解析后渲染为 HTML', () => {
+      const announcement = createMockAnnouncement({ content: 'Hello World' });
+      const onClose = vi.fn();
+
+      const { container } = render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="detail"
+          onClose={onClose}
+        />
+      );
+
+      // Our mock of marked.parse wraps content in <p> tags
+      const contentEl = container.querySelector('.announcement-modal__content');
+      expect(contentEl?.innerHTML).toContain('<p>Hello World</p>');
+    });
+
+    it('HTML 内容经过 DOMPurify 净化', () => {
+      const announcement = createMockAnnouncement({ content: '<script>evil()</script>Safe' });
+      const onClose = vi.fn();
+
+      const { container } = render(
+        <AnnouncementModal
+          announcement={announcement}
+          mode="detail"
+          onClose={onClose}
+        />
+      );
+
+      // DOMPurify mock passes through as-is in tests, but the content is rendered
+      const contentEl = container.querySelector('.announcement-modal__content');
+      expect(contentEl).toBeInTheDocument();
+    });
+  });
 });

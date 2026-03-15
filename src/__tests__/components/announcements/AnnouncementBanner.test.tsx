@@ -338,4 +338,101 @@ describe('AnnouncementBanner', () => {
       expect(banner).toHaveAttribute('aria-live', 'polite');
     });
   });
+
+  describe('轮播自动前进扩展', () => {
+    it('5 秒后自动切换到下一条', async () => {
+      mockBanners = [
+        createMockBanner({ id: 'c1', title: '轮播公告1' }),
+        createMockBanner({ id: 'c2', title: '轮播公告2' }),
+      ];
+      render(<AnnouncementBanner />);
+
+      expect(screen.getByText('轮播公告1')).toBeInTheDocument();
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+
+      expect(screen.getByText('轮播公告2')).toBeInTheDocument();
+    });
+
+    it('再过 5 秒循环回第一条', async () => {
+      mockBanners = [
+        createMockBanner({ id: 'c1', title: '循环公告1' }),
+        createMockBanner({ id: 'c2', title: '循环公告2' }),
+      ];
+      render(<AnnouncementBanner />);
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(screen.getByText('循环公告2')).toBeInTheDocument();
+
+      await act(async () => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(screen.getByText('循环公告1')).toBeInTheDocument();
+    });
+  });
+
+  describe('手动导航扩展', () => {
+    it('点击下一条后点击上一条应该回到第一条', () => {
+      mockBanners = [
+        createMockBanner({ id: 'n1', title: '导航公告1' }),
+        createMockBanner({ id: 'n2', title: '导航公告2' }),
+        createMockBanner({ id: 'n3', title: '导航公告3' }),
+      ];
+      const { container } = render(<AnnouncementBanner />);
+
+      expect(screen.getByText('导航公告1')).toBeInTheDocument();
+
+      const nextBtn = container.querySelector('[aria-label="下一条"]');
+      fireEvent.click(nextBtn!);
+      expect(screen.getByText('导航公告2')).toBeInTheDocument();
+
+      const prevBtn = container.querySelector('[aria-label="上一条"]');
+      fireEvent.click(prevBtn!);
+      expect(screen.getByText('导航公告1')).toBeInTheDocument();
+    });
+
+    it('从第一条点击上一条应该循环到最后一条', () => {
+      mockBanners = [
+        createMockBanner({ id: 'w1', title: '绕行公告1' }),
+        createMockBanner({ id: 'w2', title: '绕行公告2' }),
+        createMockBanner({ id: 'w3', title: '绕行公告3' }),
+      ];
+      const { container } = render(<AnnouncementBanner />);
+
+      expect(screen.getByText('绕行公告1')).toBeInTheDocument();
+
+      const prevBtn = container.querySelector('[aria-label="上一条"]');
+      fireEvent.click(prevBtn!);
+
+      expect(screen.getByText('绕行公告3')).toBeInTheDocument();
+    });
+  });
+
+  describe('关闭后保存到 sessionStorage', () => {
+    it('关闭第二条公告时正确保存其 ID', () => {
+      mockBanners = [
+        createMockBanner({ id: 'ss-first', title: '第一条' }),
+        createMockBanner({ id: 'ss-second', title: '第二条' }),
+      ];
+      const { container } = render(<AnnouncementBanner />);
+
+      // 切换到第二条
+      const dots = container.querySelectorAll('.announcement-banner__dot');
+      fireEvent.click(dots[1]);
+      expect(screen.getByText('第二条')).toBeInTheDocument();
+
+      // 关闭第二条
+      const closeBtn = container.querySelector('.announcement-banner__close');
+      fireEvent.click(closeBtn!);
+
+      expect(sessionStorage.setItem).toHaveBeenCalledWith(
+        'dismissed-banner-ss-second',
+        'true'
+      );
+    });
+  });
 });

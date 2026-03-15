@@ -127,4 +127,54 @@ describe("AnnouncementHandler", () => {
     fireEvent.click(screen.getByTestId("modal-close"));
     await waitFor(() => { expect(screen.getByTestId("modal-title")).toHaveTextContent("U2"); });
   });
+
+  describe("紧急公告队列扩展", () => {
+    it("多个紧急公告时只弹出第一个", async () => {
+      mockAnnouncements = [
+        createMock({ id: "u1", title: "First", type: "urgent", isRead: false }),
+        createMock({ id: "u2", title: "Second", type: "urgent", isRead: false }),
+        createMock({ id: "u3", title: "Third", type: "urgent", isRead: false }),
+      ];
+      render(<AnnouncementHandler />);
+      await waitFor(() => {
+        expect(screen.getByTestId("announcement-modal")).toBeInTheDocument();
+        expect(screen.getByTestId("modal-title")).toHaveTextContent("First");
+      });
+      // Second and Third should not be visible yet
+      expect(screen.queryByText("Second")).not.toBeInTheDocument();
+      expect(screen.queryByText("Third")).not.toBeInTheDocument();
+    });
+
+    it("关闭第一个紧急公告后弹出第二个", async () => {
+      mockAnnouncements = [
+        createMock({ id: "u1", title: "First", type: "urgent", isRead: false }),
+        createMock({ id: "u2", title: "Second", type: "urgent", isRead: false }),
+      ];
+      render(<AnnouncementHandler />);
+      await waitFor(() => {
+        expect(screen.getByTestId("modal-title")).toHaveTextContent("First");
+      });
+      fireEvent.click(screen.getByTestId("modal-close"));
+      await waitFor(() => {
+        expect(screen.getByTestId("modal-title")).toHaveTextContent("Second");
+      });
+    });
+
+    it("processedUrgentIds 阻止相同紧急公告重复弹出", async () => {
+      mockAnnouncements = [
+        createMock({ id: "u1", title: "OnlyOnce", type: "urgent", isRead: false }),
+      ];
+      const { rerender } = render(<AnnouncementHandler />);
+      await waitFor(() => {
+        expect(screen.getByTestId("modal-title")).toHaveTextContent("OnlyOnce");
+      });
+      fireEvent.click(screen.getByTestId("modal-close"));
+      await waitFor(() => {
+        expect(screen.queryByTestId("announcement-modal")).not.toBeInTheDocument();
+      });
+      // Re-render with same announcements — should NOT re-popup the same urgent
+      rerender(<AnnouncementHandler />);
+      expect(screen.queryByTestId("announcement-modal")).not.toBeInTheDocument();
+    });
+  });
 });
