@@ -152,6 +152,47 @@ describe('AnnouncementForm', () => {
     expect(screen.queryByPlaceholderText('支持 Markdown 格式')).not.toBeInTheDocument();
   });
 
+  it('renders markdown content in preview mode', async () => {
+    const user = userEvent.setup();
+    render(
+      <AnnouncementForm announcement={null} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
+    await user.type(screen.getByPlaceholderText('支持 Markdown 格式'), '# Title');
+    await user.click(screen.getByText('预览'));
+    const previewEl = document.querySelector('.announcement-form__preview');
+    expect(previewEl).toBeInTheDocument();
+    expect(previewEl!.innerHTML).toContain('# Title');
+  });
+
+  it('sanitizes HTML in preview to prevent XSS', async () => {
+    const { default: DOMPurify } = await import('dompurify');
+    const sanitizeSpy = vi.spyOn(DOMPurify, 'sanitize');
+    const user = userEvent.setup();
+    render(
+      <AnnouncementForm announcement={null} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
+    await user.type(screen.getByPlaceholderText('支持 Markdown 格式'), 'test content');
+    await user.click(screen.getByText('预览'));
+    expect(sanitizeSpy).toHaveBeenCalled();
+    sanitizeSpy.mockRestore();
+  });
+
+  it('switches back from preview to edit mode', async () => {
+    const user = userEvent.setup();
+    render(
+      <AnnouncementForm announcement={null} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />
+    );
+    await user.click(screen.getByText('预览'));
+    expect(screen.queryByPlaceholderText('支持 Markdown 格式')).not.toBeInTheDocument();
+    // Find the edit button in content-tabs area
+    const editButtons = screen.getAllByText('编辑');
+    const contentEditBtn = editButtons.find(
+      (btn) => btn.closest('.announcement-form__content-tabs')
+    );
+    await user.click(contentEditBtn || editButtons[0]);
+    expect(screen.getByPlaceholderText('支持 Markdown 格式')).toBeInTheDocument();
+  });
+
   it('hides publish for non-draft', () => {
     render(<AnnouncementForm announcement={{ ...mockAnnouncement, status: 'active' as const }} onSuccess={mockOnSuccess} onCancel={mockOnCancel} />);
     expect(screen.queryByText('立即发布')).not.toBeInTheDocument();
