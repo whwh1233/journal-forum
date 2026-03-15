@@ -1,6 +1,6 @@
 ---
 name: project-conventions
-description: Enforces project conventions for the journal-forum (pubWhere) project. Use this skill whenever starting dev servers, running the app, creating frontend components, or doing any UI work. Triggers on service startup, port configuration, component creation, UI development, styling, and frontend feature work. Even if the user doesn't mention conventions, use this skill whenever you're about to start a server, change a port, or create a UI component.
+description: Enforces project conventions for the journal-forum (pubWhere) project. Use this skill whenever starting dev servers, running the app, creating frontend components, doing any UI work, or writing tests. Triggers on service startup, port configuration, component creation, UI development, styling, frontend feature work, and test writing.
 ---
 
 ## Port Configuration (Non-Negotiable)
@@ -69,3 +69,37 @@ Any UI change must be verified under **all themes** before presenting to the use
 2. Variables referenced actually exist in every theme file
 3. Contrast is readable in both light and dark themes
 4. No visual artifacts (invisible text, missing borders) in any theme
+
+## Testing Standards (Non-Negotiable)
+
+Every个功能必须覆盖完整的三层测试，缺一不可：
+
+### 测试层级
+
+| 层级 | 工具 | 目录 | 说明 |
+|------|------|------|------|
+| **后端测试** | Jest | `backend/__tests__/unit/` + `backend/__tests__/integration/` | 纯函数单元测试 + API 集成测试 |
+| **前端测试** | Vitest | `src/__tests__/` | 组件渲染、交互、状态管理测试 |
+| **E2E 测试** | Playwright | `e2e/tests/` | 用户视角的端到端全链路测试 |
+
+### 测试要求
+
+1. **后端单元测试**：所有纯函数（工具函数、计算逻辑）必须有独立单元测试
+2. **后端集成测试**：所有 API 端点必须测试请求→数据库状态变化→响应的完整链路
+3. **前端组件测试**：所有用户可交互的组件必须测试渲染、事件触发和状态更新
+4. **E2E 测试**：每个用户可见的功能模块必须有端到端测试，验证前后端联动的完整流程
+
+### 运行命令
+
+```bash
+npm test                    # 前端 Vitest
+cd backend && npm test      # 后端 Jest
+npm run test:e2e            # Playwright E2E
+```
+
+### 测试编写原则
+
+- 测试文件命名与源文件对应（如 `hotScore.js` → `hotScore.test.js`）
+- 集成测试使用真实数据库，不 mock 数据库层
+- E2E 测试模拟真实用户操作流程，不依赖内部实现细节
+- 每个测试用例只验证一个行为点
