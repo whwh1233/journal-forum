@@ -736,4 +736,459 @@ describe('Announcement API Integration Tests', () => {
       expect(res.body.data.announcements.length).toBe(0);
     });
   });
+
+  // ==================== 定时发布 & 状态同步 ====================
+
+  describe('定时发布 & 状态同步 (syncStaleStatuses)', () => {
+    it('should auto-activate a scheduled announcement with past startTime when fetching', async () => {
+      // Create a scheduled announcement whose startTime is already in the past
+      const ann = await Announcement.create({
+        title: 'Past Scheduled',
+        content: 'Should activate',
+        type: 'normal',
+        status: 'scheduled',
+        targetType: 'all',
+        startTime: new Date(Date.now() - 60000), // 1 minute ago
+        creatorId: adminId
+      });
+
+      // GET /api/announcements triggers syncStaleStatuses()
+      await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      const updated = await Announcement.findByPk(ann.id);
+      expect(updated.status).toBe('active');
+    });
+
+    it('should auto-expire an active announcement with past endTime when fetching', async () => {
+      // Create an active announcement whose endTime has already passed
+      const ann = await Announcement.create({
+        title: 'Past Active',
+        content: 'Should expire',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        endTime: new Date(Date.now() - 60000), // ended 1 minute ago
+        creatorId: adminId
+      });
+
+      // GET /api/announcements triggers syncStaleStatuses()
+      await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      const updated = await Announcement.findByPk(ann.id);
+      expect(updated.status).toBe('expired');
+    });
+
+    it('should sync multiple stale announcements in a single batch', async () => {
+      const pastTime = new Date(Date.now() - 60000);
+
+      const [sched1, sched2, active1] = await Promise.all([
+        Announcement.create({
+          title: 'Stale Scheduled 1',
+          content: 'Content',
+          type: 'normal',
+          status: 'scheduled',
+          targetType: 'all',
+          startTime: pastTime,
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'Stale Scheduled 2',
+          content: 'Content',
+          type: 'normal',
+          status: 'scheduled',
+          targetType: 'all',
+          startTime: pastTime,
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'Stale Active 1',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          endTime: pastTime,
+          creatorId: adminId
+        })
+      ]);
+
+      await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      const [u1, u2, u3] = await Promise.all([
+        Announcement.findByPk(sched1.id),
+        Announcement.findByPk(sched2.id),
+        Announcement.findByPk(active1.id)
+      ]);
+
+      expect(u1.status).toBe('active');
+      expect(u2.status).toBe('active');
+      expect(u3.status).toBe('expired');
+    });
+
+    it('should NOT affect a draft announcement with a past startTime', async () => {
+      // draft status is not touched by syncStaleStatuses — only scheduled → active
+      const ann = await Announcement.create({
+        title: 'Draft With Past Start',
+        content: 'Should stay draft',
+        type: 'normal',
+        status: 'draft',
+        targetType: 'all',
+        startTime: new Date(Date.now() - 60000),
+        creatorId: adminId
+      });
+
+      await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      const updated = await Announcement.findByPk(ann.id);
+      expect(updated.status).toBe('draft');
+    });
+  });
+
+  // ==================== 边界条件 ====================
+
+  describe('边界条件', () => {
+    it('null startTime and endTime means permanently valid', async () => {
+      await Announcement.create({
+        title: 'Permanent',
+        content: 'Always visible',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        startTime: null,
+        endTime: null,
+        creatorId: adminId
+      });
+
+      const res = await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      const found = res.body.data.announcements.find(a => a.title === 'Permanent');
+      expect(found).toBeDefined();
+    });
+
+    it('should sort announcements by priority descending', async () => {
+      await Promise.all([
+        Announcement.create({
+          title: 'Low Priority',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          priority: 1,
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'High Priority',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          priority: 10,
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'Mid Priority',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          priority: 5,
+          creatorId: adminId
+        })
+      ]);
+
+      const res = await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      const announcements = res.body.data.announcements;
+      expect(announcements.length).toBe(3);
+      // Higher priority should come first (isPinned all false, so pure priority sort)
+      expect(announcements[0].title).toBe('High Priority');
+      expect(announcements[1].title).toBe('Mid Priority');
+      expect(announcements[2].title).toBe('Low Priority');
+    });
+
+    it('should show isPinned announcements before non-pinned even with lower priority', async () => {
+      await Promise.all([
+        Announcement.create({
+          title: 'Unpinned High Priority',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          priority: 100,
+          isPinned: false,
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'Pinned Low Priority',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          priority: 1,
+          isPinned: true,
+          creatorId: adminId
+        })
+      ]);
+
+      const res = await request(app)
+        .get('/api/announcements')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      const announcements = res.body.data.announcements;
+      expect(announcements.length).toBe(2);
+      // Pinned should come first regardless of priority
+      expect(announcements[0].title).toBe('Pinned Low Priority');
+      expect(announcements[1].title).toBe('Unpinned High Priority');
+    });
+
+    it('should return empty array when page exceeds total pages', async () => {
+      await Announcement.create({
+        title: 'Only Ann',
+        content: 'Content',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        creatorId: adminId
+      });
+
+      const res = await request(app)
+        .get('/api/announcements?page=999&limit=20')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.announcements).toEqual([]);
+      expect(res.body.data.pagination.total).toBe(1);
+    });
+
+    it('should not create duplicate UserAnnouncementRead records on concurrent mark-as-read', async () => {
+      const announcement = await Announcement.create({
+        title: 'Concurrent Read Test',
+        content: 'Content',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        creatorId: adminId
+      });
+
+      // Fire 5 concurrent mark-as-read requests for the same user & announcement
+      await Promise.all(
+        Array.from({ length: 5 }, () =>
+          request(app)
+            .post(`/api/announcements/${announcement.id}/read`)
+            .set('Authorization', `Bearer ${userToken}`)
+            .send({})
+        )
+      );
+
+      const readRecords = await UserAnnouncementRead.findAll({
+        where: { userId, announcementId: announcement.id }
+      });
+
+      // Unique constraint ensures exactly one record per (userId, announcementId)
+      expect(readRecords.length).toBe(1);
+    });
+  });
+
+  // ==================== 管理员统计 ====================
+
+  describe('管理员统计', () => {
+    it('should calculate readCount and readPercentage correctly on admin detail endpoint', async () => {
+      // There are 2 users in beforeEach (userToken user + adminToken user)
+      const announcement = await Announcement.create({
+        title: 'Stats Test',
+        content: 'Content',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        creatorId: adminId
+      });
+
+      // Mark as read by the regular user only
+      await UserAnnouncementRead.create({
+        userId,
+        announcementId: announcement.id,
+        readAt: new Date()
+      });
+
+      const res = await request(app)
+        .get(`/api/admin/announcements/${announcement.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.readCount).toBe(1);
+      // 1 reader out of 2 total users = 50%
+      expect(res.body.data.readPercentage).toBe(50);
+      expect(res.body.data.targetAudienceSize).toBe(2);
+    });
+
+    it('should use correct audience base for role-targeted announcements', async () => {
+      // Only admin is role=admin; user is role=user
+      const announcement = await Announcement.create({
+        title: 'Role Stats Test',
+        content: 'Content',
+        type: 'normal',
+        status: 'active',
+        targetType: 'role',
+        targetRoles: ['admin'],
+        creatorId: adminId
+      });
+
+      // Mark as read by the admin
+      await UserAnnouncementRead.create({
+        userId: adminId,
+        announcementId: announcement.id,
+        readAt: new Date()
+      });
+
+      const res = await request(app)
+        .get(`/api/admin/announcements/${announcement.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      // targetAudienceSize should be number of admin-role users (1)
+      expect(res.body.data.targetAudienceSize).toBe(1);
+      expect(res.body.data.readCount).toBe(1);
+      expect(res.body.data.readPercentage).toBe(100);
+    });
+
+    it('should not mix stats between different announcements', async () => {
+      const [ann1, ann2] = await Promise.all([
+        Announcement.create({
+          title: 'Stats Ann 1',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          creatorId: adminId
+        }),
+        Announcement.create({
+          title: 'Stats Ann 2',
+          content: 'Content',
+          type: 'normal',
+          status: 'active',
+          targetType: 'all',
+          creatorId: adminId
+        })
+      ]);
+
+      // Only mark ann1 as read
+      await UserAnnouncementRead.create({
+        userId,
+        announcementId: ann1.id,
+        readAt: new Date()
+      });
+
+      const [res1, res2] = await Promise.all([
+        request(app)
+          .get(`/api/admin/announcements/${ann1.id}`)
+          .set('Authorization', `Bearer ${adminToken}`),
+        request(app)
+          .get(`/api/admin/announcements/${ann2.id}`)
+          .set('Authorization', `Bearer ${adminToken}`)
+      ]);
+
+      expect(res1.body.data.readCount).toBe(1);
+      expect(res2.body.data.readCount).toBe(0);
+      expect(res2.body.data.readPercentage).toBe(0);
+    });
+  });
+
+  // ==================== 删除限制 ====================
+
+  describe('删除限制', () => {
+    it('should return 400 when attempting to delete an active announcement', async () => {
+      const announcement = await Announcement.create({
+        title: 'Active Cannot Delete',
+        content: 'Content',
+        type: 'normal',
+        status: 'active',
+        targetType: 'all',
+        creatorId: adminId
+      });
+
+      const res = await request(app)
+        .delete(`/api/admin/announcements/${announcement.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(400);
+
+      // Verify it was not deleted
+      const still = await Announcement.findByPk(announcement.id);
+      expect(still).not.toBeNull();
+    });
+
+    it('should return 400 when attempting to delete a scheduled announcement', async () => {
+      const announcement = await Announcement.create({
+        title: 'Scheduled Cannot Delete',
+        content: 'Content',
+        type: 'normal',
+        status: 'scheduled',
+        targetType: 'all',
+        startTime: new Date(Date.now() + 86400000),
+        creatorId: adminId
+      });
+
+      const res = await request(app)
+        .delete(`/api/admin/announcements/${announcement.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(400);
+
+      const still = await Announcement.findByPk(announcement.id);
+      expect(still).not.toBeNull();
+    });
+
+    it('should clean up associated UserAnnouncementRead records when deleting a draft', async () => {
+      const announcement = await Announcement.create({
+        title: 'Draft With Reads',
+        content: 'Content',
+        type: 'normal',
+        status: 'draft',
+        targetType: 'all',
+        creatorId: adminId
+      });
+
+      // Manually insert a read record (e.g. admin previewed it)
+      await UserAnnouncementRead.create({
+        userId: adminId,
+        announcementId: announcement.id,
+        readAt: new Date()
+      });
+
+      const beforeDelete = await UserAnnouncementRead.findAll({
+        where: { announcementId: announcement.id }
+      });
+      expect(beforeDelete.length).toBe(1);
+
+      const res = await request(app)
+        .delete(`/api/admin/announcements/${announcement.id}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+
+      // Announcement gone
+      const deleted = await Announcement.findByPk(announcement.id);
+      expect(deleted).toBeNull();
+
+      // Associated read records should also be gone (CASCADE or manual cleanup)
+      const afterDelete = await UserAnnouncementRead.findAll({
+        where: { announcementId: announcement.id }
+      });
+      expect(afterDelete.length).toBe(0);
+    });
+  });
 });
