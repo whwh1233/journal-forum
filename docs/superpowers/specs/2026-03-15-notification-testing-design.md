@@ -21,12 +21,30 @@
 | 测试数据策略 | 工厂函数 + 每文件自建自清 | 便利性与隔离性兼顾 |
 | E2E 覆盖度 | 全面覆盖，分功能模块 | 用户通知、用户公告、横幅弹窗、管理员管理四个 spec |
 
+## Existing Test Baseline
+
+在开始前需了解已有测试：
+
+| 文件 | 状态 | 用例数 |
+|------|------|--------|
+| `backend/__tests__/integration/announcement.test.js` | 已有 | ~64 |
+| `src/__tests__/services/announcementService.test.ts` | 已有 | ~15 |
+| `src/__tests__/components/announcements/AnnouncementBell.test.tsx` | 已有 | 已有 |
+| `src/__tests__/components/announcements/AnnouncementBanner.test.tsx` | 已有 | 已有 |
+| `src/__tests__/components/announcements/AnnouncementHandler.test.tsx` | 已有 | 已有 |
+| `src/__tests__/components/announcements/AnnouncementItem.test.tsx` | 已有 | 已有 |
+| `src/__tests__/components/announcements/AnnouncementModal.test.tsx` | 已有 | 已有 |
+| `e2e/05-announcements.spec.ts` | 已有 | 已有 |
+| `backend/__tests__/integration/notification.test.js` | **不存在** | 0 |
+| `src/__tests__/contexts/*Context.test.tsx` | **不存在** | 0 |
+| `src/__tests__/components/notifications/*` | **不存在** | 0 |
+
 ## File Structure
 
 ```
 backend/__tests__/
 ├── helpers/
-│   └── testFactories.js              # 新增：后端测试工厂函数
+│   └── testHelpers.js                # 扩展：新增 DB 级工厂函数
 ├── integration/
 │   ├── announcement.test.js           # 扩充：+15-20 用例
 │   └── notification.test.js           # 新增：45-55 用例
@@ -208,18 +226,26 @@ describe('Notification API')
 - `NotificationItem.test.tsx` — 不同 type 的渲染、点击回调、已读/未读样式差异
 - `NotificationModal.test.tsx` — 详情展示、实体链接、Escape 关闭
 
-**扩充已有 announcements/ 测试：**
+**扩充已有 announcements/ 组件测试（这些文件已存在，追加用例）：**
 
-- `AnnouncementBell.test.tsx` — 补充合并未读数显示、tab 切换后 mark-all-read 作用于正确子系统
-- `AnnouncementHandler.test.tsx` — 补充多条紧急公告排队处理、dismiss 后显示下一条
+- `AnnouncementBell.test.tsx` — 补充：合并未读数（通知+公告）badge 显示、tab 切换后 mark-all-read 仅作用于当前 tab 的数据
+- `AnnouncementHandler.test.tsx` — 补充：多条紧急公告排队处理、dismiss 后显示下一条、processedUrgentIds 防重复弹出
+- `AnnouncementBanner.test.tsx` — 补充：轮播自动 5 秒切换、手动前后翻页、hover 暂停、sessionStorage dismiss 持久化
+- `AnnouncementModal.test.tsx` — 补充：urgent 模式 vs detail 模式差异、Markdown 渲染 + DOMPurify、urgent 模式下 focus trap、detail 模式 Escape 关闭
 
 ## Part 5: E2E Tests (Playwright)
 
+### Relationship with existing `e2e/05-announcements.spec.ts`
+
+已有的 `05-announcements.spec.ts` 是 demo 风格的综合流程测试。新增的 4 个 spec 文件是细粒度功能测试，与现有文件互补而非替代。
+
 ### Infrastructure
+
+复用现有 E2E 基础设施：`demo-helpers.ts`（initDemo/finishDemo/demoClick 等）、`test-data.ts`（选择器和路由常量）、`error-collector.ts`。
 
 `e2e/fixtures/notification.fixture.ts`：
 - 扩展 Playwright `test` fixture，提供已登录的 `userPage`、`adminPage`
-- 提供 API helper 直接调后端创建测试数据
+- 提供 API helper 直接调后端创建测试数据（比 UI 操作快）
 - afterAll 通过 API 清理测试数据
 
 ### 5a. `e2e/notification-user.spec.ts` — 用户通知流程（10-12 个用例）
@@ -245,11 +271,14 @@ describe('Notification API')
 - 定向推送：指定用户 ID 的公告只有目标用户可见
 - 未登录用户看不到公告 tab
 
-### 5c. `e2e/announcement-banner.spec.ts` — 横幅 + 紧急弹窗（6-8 个用例）
+### 5c. `e2e/announcement-banner.spec.ts` — 横幅 + 紧急弹窗（8-10 个用例）
 
 - 页面顶部显示 active banner
 - banner 未登录也可见
 - 点击 banner 打开详情 modal
+- banner 轮播：多条 banner 自动 5 秒切换
+- banner 手动前后翻页
+- dismiss banner 后刷新页面仍不显示（sessionStorage 持久化）
 - 紧急公告自动弹窗
 - dismiss 紧急公告后不再弹出
 - 多条紧急公告排队逐个展示
@@ -272,19 +301,19 @@ describe('Notification API')
 
 ## Test Count Summary
 
-| Layer | File | Est. Cases |
-|-------|------|-----------|
-| Backend factories | `testFactories.js` | — |
-| Backend Notification | `notification.test.js` | 45-55 |
-| Backend Announcement expansion | `announcement.test.js` | +15-20 |
-| Frontend factories | `testFactories.ts` | — |
-| Frontend Notification Service | `notificationService.test.ts` | 10-12 |
-| Frontend NotificationContext | `NotificationContext.test.tsx` | 15-20 |
-| Frontend AnnouncementContext | `AnnouncementContext.test.tsx` | 15-20 |
-| Frontend Notification components | `notifications/*.test.tsx` | 10-15 |
-| Frontend Announcement components expansion | `announcements/*.test.tsx` | +8-10 |
-| E2E User notifications | `notification-user.spec.ts` | 10-12 |
-| E2E User announcements | `announcement-user.spec.ts` | 8-10 |
-| E2E Banner + urgent | `announcement-banner.spec.ts` | 6-8 |
-| E2E Admin announcements | `announcement-admin.spec.ts` | 10-12 |
-| **Total** | | **~150-185** |
+| Layer | File | Status | Est. Cases |
+|-------|------|--------|-----------|
+| Backend factories | `testHelpers.js` 扩展 | 新增函数 | — |
+| Backend Notification | `notification.test.js` | 新建 | 45-55 |
+| Backend Announcement expansion | `announcement.test.js` | 扩充 | +15-20 |
+| Frontend factories | `testFactories.ts` | 新建 | — |
+| Frontend Notification Service | `notificationService.test.ts` | 新建 | 10-12 |
+| Frontend NotificationContext | `NotificationContext.test.tsx` | 新建 | 15-20 |
+| Frontend AnnouncementContext | `AnnouncementContext.test.tsx` | 新建 | 15-20 |
+| Frontend Notification components | `notifications/*.test.tsx` | 新建 | 10-15 |
+| Frontend Announcement components | `announcements/*.test.tsx` | 扩充 | +10-15 |
+| E2E User notifications | `notification-user.spec.ts` | 新建 | 10-12 |
+| E2E User announcements | `announcement-user.spec.ts` | 新建 | 8-10 |
+| E2E Banner + urgent | `announcement-banner.spec.ts` | 新建 | 8-10 |
+| E2E Admin announcements | `announcement-admin.spec.ts` | 新建 | 10-12 |
+| **Total** | | | **~155-195** |
