@@ -31,6 +31,16 @@ vi.mock('../../../services/commentService', () => ({
   deleteComment: vi.fn().mockResolvedValue({}),
 }));
 
+vi.mock('react-markdown', () => ({
+  default: ({ children }: { children: string }) => <div data-testid="md-render">{children}</div>,
+}));
+vi.mock('remark-gfm', () => ({ default: () => {} }));
+vi.mock('rehype-highlight', () => ({ default: () => {} }));
+vi.mock('rehype-sanitize', () => ({ default: () => {} }));
+vi.mock('@/services/uploadService', () => ({
+  uploadImage: vi.fn(),
+}));
+
 const baseComment = {
   id: '1-123-abc',
   userId: 1,
@@ -121,5 +131,35 @@ describe('CommentItem', () => {
     const edited = { ...baseComment, updatedAt: new Date().toISOString() };
     renderComponent(edited);
     expect(screen.getByText('(已编辑)')).toBeInTheDocument();
+  });
+
+  it('shows MarkdownEditor when edit button is clicked', () => {
+    renderComponent();
+    fireEvent.click(screen.getByText('编辑'));
+    // Edit mode should show a textarea with the comment content
+    expect(screen.getByDisplayValue('This is a test comment')).toBeInTheDocument();
+    expect(screen.getByText('保存')).toBeInTheDocument();
+  });
+
+  it('cancels edit and restores original content', () => {
+    renderComponent();
+    fireEvent.click(screen.getByText('编辑'));
+    // Change the content
+    const textarea = screen.getByDisplayValue('This is a test comment');
+    fireEvent.change(textarea, { target: { value: 'Changed content' } });
+    // Click cancel in the edit actions area
+    const cancelButtons = screen.getAllByText('取消');
+    const editCancelBtn = cancelButtons.find(
+      (btn) => btn.closest('.comment-edit-actions')
+    );
+    fireEvent.click(editCancelBtn || cancelButtons[0]);
+    // Should go back to display mode
+    expect(screen.getByText('This is a test comment')).toBeInTheDocument();
+    expect(screen.queryByText('保存')).not.toBeInTheDocument();
+  });
+
+  it('renders MarkdownContent for non-deleted comment display', () => {
+    const { container } = renderComponent();
+    expect(container.querySelector('.markdown-content')).toBeInTheDocument();
   });
 });
