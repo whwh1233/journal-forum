@@ -177,7 +177,7 @@ const adminGetTags = async (req, res) => {
 
     const { count, rows: tags } = await Tag.findAndCountAll({
       where,
-      include: [{ model: User, as: 'creator', attributes: ['id', 'username', 'avatar'] }],
+      include: [{ model: User, as: 'creator', attributes: ['id', 'name', 'avatar'] }],
       order: [['createdAt', 'DESC']],
       limit: parseInt(limit),
       offset

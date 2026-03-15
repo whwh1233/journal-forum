@@ -137,6 +137,12 @@ app.use('/api/uploads', uploadRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/post-categories', postCategoryRoutes);
 
+// Test helper routes (only in test environment)
+if (process.env.NODE_ENV === 'test') {
+  const testHelperRoutes = require('./routes/testHelperRoutes');
+  app.use('/api/test', testHelperRoutes);
+}
+
 // 404处理
 app.use(notFound);
 

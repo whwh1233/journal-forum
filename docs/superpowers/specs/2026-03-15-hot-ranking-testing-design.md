@@ -85,8 +85,9 @@
 | 收藏帖子 | POST /api/posts/:id/favorite | 分数增加 |
 | 取消收藏 | POST /api/posts/:id/favorite (toggle) | 分数减少 |
 | 发表评论 | POST /api/posts/:postId/comments | 分数增加 |
-| 删除评论 | DELETE /api/posts/:postId/comments/:id | 分数减少 |
-| 浏览帖子 | POST /api/posts/:id/view | allTimeScore 增加 |
+| 删除评论 | DELETE /api/posts/comments/:commentId | 分数减少 |
+| 浏览帖子 | POST /api/posts/:id/view | 仅 allTimeScore 增加，hotScore 不变 |
+| 新建帖子 | POST /api/posts | hotScore 和 allTimeScore 默认为 0 |
 
 ### Journal score updates on engagement
 
@@ -94,8 +95,9 @@
 |------|-----|------|
 | 发表期刊评论 | POST /api/comments | JournalRatingCache hotScore/allTimeScore 更新 |
 | 删除期刊评论 | DELETE /api/comments/:id | 分数调整 |
-| 收藏期刊 | POST /api/journals/:id/favorite | hotScore/allTimeScore/favoriteCount 更新 |
-| 取消收藏期刊 | DELETE /api/journals/:id/favorite | 分数和 favoriteCount 减少 |
+| 删除回复评论（非顶层） | DELETE /api/comments/:id | 分数不变（仅顶层评论触发重算） |
+| 收藏期刊 | POST /api/favorites (body: journalId) | hotScore/allTimeScore/favoriteCount 更新 |
+| 取消收藏期刊 | DELETE /api/favorites/:journalId | 分数和 favoriteCount 减少 |
 
 ### Post sorting API
 
@@ -109,8 +111,9 @@
 
 | 用例 | 请求 | 验证 |
 |------|------|------|
-| hot 排序 | GET /api/journals?sortBy=hot | 按 hot_score DESC |
-| allTime 排序 | GET /api/journals?sortBy=allTime | 按 all_time_score DESC |
+| hot 排序 | GET /api/journals?sortBy=hot | 按 hot_score DESC（使用 optionalAuth） |
+| allTime 排序 | GET /api/journals?sortBy=allTime | 按 all_time_score DESC（使用 optionalAuth） |
+| 无 RatingCache 的期刊 | GET /api/journals?sortBy=hot | 无 cache 记录的期刊排在末尾（LEFT JOIN NULL） |
 
 ### Cron job functions
 
@@ -128,17 +131,23 @@
 | 用例 | 验证 |
 |------|------|
 | 默认请求 sortBy=hot | API 调用参数正确 |
-| 点击"历史最佳" | 切换到 allTime 排序 |
+| select 切换到 allTime | 选择 allTime 选项后触发重新请求 |
 | 切换排序后列表重新渲染 | 帖子顺序变化 |
-| 排序按钮高亮状态 | 当前选中的按钮有 active 样式 |
+| select 当前值正确 | 默认选中 hot 选项 |
 
 ### SearchAndFilter hot ranking
 
 | 用例 | 验证 |
 |------|------|
-| hotSortMode 切换按钮渲染 | 按钮存在 |
+| hotSortMode 切换按钮渲染 | 按钮存在（需 mock useJournals context） |
 | 点击切换触发回调 | setHotSortMode 被调用 |
 | 当前模式按钮高亮 | active 样式正确 |
+
+### 实现注意
+
+- CommunityPage 排序使用 `<select>` 下拉框，非独立按钮
+- SearchAndFilter 的 hotSortMode/setHotSortMode 来自 `useJournals()` hook，需 mock JournalContext
+- Cron 的 `isRunning` 是模块级变量，测试间需重置模块状态
 
 ## 第 4 部分：E2E 测试（新建 hot-ranking.spec.ts）
 
@@ -157,7 +166,7 @@
 | 层级 | 用例数 |
 |------|--------|
 | 后端单元测试 | ~20 |
-| 后端集成测试 | ~20 |
+| 后端集成测试 | ~24 |
 | 前端组件测试 | ~7 |
 | E2E 测试 | ~5 |
-| **总计** | **~52** |
+| **总计** | **~56** |
