@@ -1,4 +1,8 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+
+const PRE_HASHED_PASSWORD = bcrypt.hashSync('TestPass123!', 10);
 
 // 生成测试用JWT token
 const generateTestToken = (userId, role = 'user') => {
@@ -61,6 +65,55 @@ const createTestComment = (overrides = {}) => ({
   ...overrides,
 });
 
+// 在数据库中直接创建测试用户
+const createTestUserInDB = async (overrides = {}) => {
+  const { User } = require('../../models');
+  const suffix = uuidv4().slice(0, 8);
+  return User.create({
+    name: `TestUser-${suffix}`,
+    email: `test-${suffix}@example.com`,
+    password: PRE_HASHED_PASSWORD,
+    role: 'user',
+    ...overrides
+  });
+};
+
+// 在数据库中直接创建测试通知
+const createTestNotification = async (overrides = {}) => {
+  const { Notification } = require('../../models');
+  return Notification.create({
+    type: 'comment_reply',
+    content: {},
+    isRead: false,
+    ...overrides
+  });
+};
+
+// 在数据库中直接创建测试公告
+const createTestAnnouncement = async (overrides = {}) => {
+  const { Announcement } = require('../../models');
+  const suffix = uuidv4().slice(0, 8);
+  return Announcement.create({
+    title: `Test Announcement ${suffix}`,
+    content: 'Test announcement content.',
+    type: 'normal',
+    status: 'active',
+    ...overrides
+  });
+};
+
+// 级联清理测试数据，按 FK 顺序: Notifications → UserAnnouncementRead → Announcements → Users
+const cleanupTestData = async (userIds = []) => {
+  if (!userIds.length) return;
+  const { Notification, UserAnnouncementRead, Announcement, User } = require('../../models');
+  const { Op } = require('sequelize');
+
+  await Notification.destroy({ where: { recipientId: { [Op.in]: userIds } } });
+  await UserAnnouncementRead.destroy({ where: { userId: { [Op.in]: userIds } } });
+  await Announcement.destroy({ where: { creatorId: { [Op.in]: userIds } } });
+  await User.destroy({ where: { id: { [Op.in]: userIds } } });
+};
+
 module.exports = {
   generateTestToken,
   generateAdminToken,
@@ -71,4 +124,8 @@ module.exports = {
   createTestUser,
   createTestJournal,
   createTestComment,
+  createTestUserInDB,
+  createTestNotification,
+  createTestAnnouncement,
+  cleanupTestData,
 };
